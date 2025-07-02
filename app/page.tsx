@@ -7,21 +7,12 @@ const videoData = Array.from({ length: 10 }, (_, i) => ({
   badges: ["React", "Beginner", "Frontend"],
 }));
 
-// await fetch("https://api.example.com/videos")
-//   .then((response) => response.json())
-//   .then((data) => {
-//     videoData = data.map((video) => ({
-//       title: video.title,
-//       thumbnailUrl: video.thumbnailUrl,
-//       badges: video.badges || [],
-//     }));
-//   })
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
+    <div className="min-h-screen py-10 px-4">
       <h1 className="text-4xl font-bold text-center mb-10">Welcome to My App</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-2 gap-6 max-w-7xl mx-auto">
         {videoData.map((video, index) => (
           <VideoCard
             key={index}
@@ -31,6 +22,7 @@ export default function Home() {
           />
         ))}
       </div>
+      {/* <MediaPlayerPage/> */}
     </div>
   );
 }

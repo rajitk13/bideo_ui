@@ -1,5 +1,3 @@
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface VideoCardProps {
@@ -10,29 +8,31 @@ interface VideoCardProps {
 
 export function VideoCard({ title, thumbnailUrl, badges = [] }: VideoCardProps) {
   return (
-    <Card className="w-full max-w-sm overflow-hidden rounded-2xl shadow-md">
-      <CardHeader className="p-0">
-        <div className="aspect-video w-full overflow-hidden">
-          <img
-            src={thumbnailUrl}
-            alt={title}
-            className="h-full w-full object-cover"
-          />
-        </div>
-        <CardTitle className="p-4 text-lg">{title}</CardTitle>
-      </CardHeader>
+    <div className="relative w-120 h-80 overflow-hidden border border-gray-200 shadow-sm">
+      {/* Thumbnail as full background */}
+      <img
+        src={thumbnailUrl}
+        alt={title}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
 
-      <CardContent className="px-4 pb-2 flex flex-wrap gap-2">
-        {badges.map((badge, idx) => (
-          <Badge key={idx} variant="secondary">{badge}</Badge>
-        ))}
-      </CardContent>
-
-      <CardFooter className="px-4 pb-4">
-        <Button className="w-full" >
-          Open Video
-        </Button>
-      </CardFooter>
-    </Card>
+      {/* Text & badges at bottom */}
+      <div className="absolute bottom-0 left-0 w-full bg-black/60 text-white text-xs p-2">
+        <div className="truncate">{title}</div>
+        {badges?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {badges.map((badge, idx) => (
+              <Badge
+                key={idx}
+                variant="secondary"
+                className="bg-white/70 text-black text-[10px] px-1 py-0.5"
+              >
+                {badge}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
