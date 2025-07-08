@@ -8,63 +8,98 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/store/auth-context";
 
 export function Navbar() {
-  const { theme, setTheme } = useTheme();
-  const { isAuthenticated, logout } = useAuth();
-
-  const isDark = theme === "dark";
+  const { setTheme } = useTheme();
+  const { isAuthenticated, logout, user } = useAuth();
 
   return (
-    <header className="w-full border-b bg-background px-4 py-2">
+    <header className="w-full border-b bg-background px-4 py-3">
       <div className="container mx-auto flex items-center justify-between">
         {/* Left Section - Brand */}
-        <div className="text-xl font-bold tracking-tight">MyOrg</div>
+        <Link href="/" className="group flex flex-col leading-tight">
+          <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
+            bideo
+          </span>
+          <span className="text-sm tracking-widest text-muted-foreground font-light group-hover:tracking-[0.2em] transition-all duration-300">
+            ビデオ
+          </span>
+        </Link>
 
-        {/* Center Section - Navigation */}
+        {/* Center - Navigation */}
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Videos</NavigationMenuTrigger>
               <NavigationMenuContent className="p-4">
-                <NavigationMenuLink>All Videos</NavigationMenuLink>
+                <NavigationMenuLink asChild>
+                  <Link href="/videos">All Videos</Link>
+                </NavigationMenuLink>
               </NavigationMenuContent>
             </NavigationMenuItem>
-            {/* Add more NavigationMenuItems here */}
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Right Section - Controls */}
+        {/* Right - Theme + Auth */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center space-x-2">
-            <Label htmlFor="theme-toggle" className="text-sm">
-              {isDark ? "Dark" : "Light"}
-            </Label>
-            <Switch
-              id="theme-toggle"
-              checked={isDark}
-              onCheckedChange={(checked) => {
-                setTheme(checked ? "dark" : "light");
-              }}
-            />
-          </div>
           {!isAuthenticated ? (
             <Link href="/auth/login">
               <Button variant="outline">Sign In</Button>
             </Link>
           ) : (
-            <Link href="/auth/login">
-              <Button variant="outline" onClick={logout}>
-                Log Out
-              </Button>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="cursor-pointer">
+                  <AvatarImage
+                    src={user?.thumbnail_url || ""}
+                    alt={user?.name || "User"}
+                  />
+                  <AvatarFallback>
+                    {user?.name?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>Log Out</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
