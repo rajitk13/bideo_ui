@@ -20,23 +20,30 @@ import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/store/auth-context";
+import { motion } from "framer-motion";
 
 export function Navbar() {
   const { setTheme } = useTheme();
   const { isAuthenticated, logout, user } = useAuth();
 
   return (
-    <header className="w-full border-b bg-background px-4 py-3">
+    <header className="w-full border-b px-4 py-3 sticky top-0 z-50 backdrop-blur-sm bg-background/80">
       <div className="container mx-auto flex items-center justify-between">
         {/* Left Section - Brand */}
-        <Link href="/" className="group flex flex-col leading-tight">
-          <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
-            bideo
-          </span>
-          <span className="text-sm tracking-widest text-muted-foreground font-light group-hover:tracking-[0.2em] transition-all duration-300">
-            ビデオ
-          </span>
-        </Link>
+        <motion.div
+          className="cursor-pointer"
+          whileHover={{ scale: 1.09 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
+          <Link href="/" className="group flex flex-col leading-tight">
+            <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
+              bideo
+            </span>
+            <span className="text-sm tracking-widest text-muted-foreground font-light group-hover:tracking-[0.2em] transition-all duration-300">
+              ビデオ
+            </span>
+          </Link>
+        </motion.div>
 
         {/* Center - Navigation */}
         <NavigationMenu>

@@ -10,6 +10,13 @@ export interface LoginResponse {
   refreshToken?: string;
 }
 
+export interface createUserPayload {
+  email: string;
+  password: string;
+  user_name: string;
+  thumbnail_url: string;
+}
+
 export const loginUser = async (
   payload: LoginPayload
 ): Promise<LoginResponse> => {
@@ -33,4 +40,24 @@ export const loginUser = async (
   }
 
   return result;
+};
+
+export const createUser = async (
+  payload: createUserPayload
+): Promise<string> => {
+  const formData = new FormData();
+  formData.append("email", payload.email);
+  formData.append("password", payload.password);
+  formData.append("thumbnail_url", payload.thumbnail_url);
+  formData.append("user_name", payload.user_name);
+
+  const res = await fetch("http://localhost:8085/app/createUser", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Login failed with status ${res.status}: ${text}`);
+  } else return res.statusText;
 };

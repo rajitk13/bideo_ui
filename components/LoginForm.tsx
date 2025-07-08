@@ -25,6 +25,11 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { loginUser } from "../utility/getRequests";
 import { toast } from "sonner";
+import { redirect, RedirectType } from "next/navigation";
+import { useAuth } from "@/store/auth-context";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import { MESSAGES } from "@/constants/messages";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -34,6 +39,17 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
+  const { login } = useAuth();
+  const searchParams = useSearchParams();
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const success = searchParams.get("success");
+    if (success === "account-created") {
+      setMessage(MESSAGES.ACCOUNT_CREATION_SUCCESS);
+    }
+  }, [searchParams]);
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -46,22 +62,34 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    let loggedIn = false;
     try {
-      await loginUser(data);
-
-      toast.success("Logged in successfully! 👋");
+      await loginUser(data).then((res) => {
+        if (!res || !res.idToken) {
+          throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
+        }
+        login(res.idToken);
+        toast.success(MESSAGES.LOGIN_SUCCESS);
+        loggedIn = true;
+      });
     } catch (err) {
       console.error("Login failed", err);
-      toast.error("Login failed. Please check your credentials.");
+      toast.error(MESSAGES.LOGIN_FAILED);
     } finally {
       setIsLoading(false);
+    }
+
+    if (loggedIn) {
+      redirect("/", RedirectType.replace);
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Login to your account</CardTitle>
+        <CardTitle>
+          {message ? `${message}` : "Login to your account"}
+        </CardTitle>
         <CardDescription>
           Enter your email below to login to your account
         </CardDescription>
