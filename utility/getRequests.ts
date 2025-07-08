@@ -17,6 +17,15 @@ export interface createUserPayload {
   thumbnail_url: string;
 }
 
+export interface VideoPageProps {
+    id: string;
+}
+
+export interface VideoResponse {
+  videoUrl: string;
+  videoId: number;
+}
+
 export const loginUser = async (
   payload: LoginPayload
 ): Promise<LoginResponse> => {
@@ -60,4 +69,20 @@ export const createUser = async (
     const text = await res.text();
     throw new Error(`Login failed with status ${res.status}: ${text}`);
   } else return res.statusText;
+};
+
+export const getVideoData = async (
+  payload: VideoPageProps
+): Promise<string> => {
+  const res = await fetch(`http://localhost:8080/video/view/${payload.id}`, {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to Load Video ${res.status}: ${text}`);
+  }
+  const data: VideoResponse = await res.json();
+  console.log("Video Data:", data);
+  return data.videoUrl;
 };
