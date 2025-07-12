@@ -3,15 +3,13 @@
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
-import { Moon, Sun, Plus } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 
 import {
@@ -91,10 +89,10 @@ export function Navbar() {
                 <Avatar className="cursor-pointer">
                   <AvatarImage
                     src={user?.thumbnail_url || ""}
-                    alt={user?.name || "User"}
+                    alt={user?.user_name || "User"}
                   />
                   <AvatarFallback>
-                    {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                    {user?.user_name?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>

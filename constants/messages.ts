@@ -6,4 +6,7 @@ export const MESSAGES = {
   ACCOUNT_CREATION_SUCCESS: "Account created successfully!",
   LOGIN_FAILED_GENERIC: "Login failed. Please check your credentials.",
   LOGIN_SUCCESS: "Logged in successfully! 👋",
+  ALREADY_LOGGED_IN: "You are already logged in.",
+  PROFILE_UPDATED: "Updated ✅",
+  PROFILE_UPDATE_FAILED: "Please try again!"
 };

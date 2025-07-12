@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { loginUser } from "../utility/getRequests";
+import { loginUser, verifyToken } from "../utility/getRequests";
 import { toast } from "sonner";
 import { redirect, RedirectType } from "next/navigation";
 import { useAuth } from "@/store/auth-context";
@@ -39,11 +39,15 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
 
   useEffect(() => {
+    if (isAuthenticated) {
+      toast.error(MESSAGES.ALREADY_LOGGED_IN);
+      redirect("/", RedirectType.replace);
+    }
     const success = searchParams.get("success");
     if (success === "account-created") {
       setMessage(MESSAGES.ACCOUNT_CREATION_SUCCESS);
@@ -64,14 +68,27 @@ export function LoginForm() {
     setIsLoading(true);
     let loggedIn = false;
     try {
-      await loginUser(data).then((res) => {
-        if (!res || !res.idToken) {
-          throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
-        }
-        login(res.idToken);
-        toast.success(MESSAGES.LOGIN_SUCCESS);
-        loggedIn = true;
-      });
+      await loginUser(data)
+        .then((res) => {
+          if (!res || !res.idToken) {
+            throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
+          }
+          return res.idToken;
+        })
+        .then(async (token) => {
+          await verifyToken(token)
+            .then((uid) => {
+              if (!uid || !uid.id) {
+                throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
+              }
+              return uid;
+            })
+            .then((uid) => {
+              login(token, uid.id);
+              toast.success(MESSAGES.LOGIN_SUCCESS);
+              loggedIn = true;
+            });
+        });
     } catch (err) {
       console.error("Login failed", err);
       toast.error(MESSAGES.LOGIN_FAILED);
