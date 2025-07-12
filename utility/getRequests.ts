@@ -21,9 +21,20 @@ export interface VideoPageProps {
     id: string;
 }
 
+export interface VideoUploader {
+  userId: string;
+  user_name: string;
+  user_email: string;
+  thumbnail_url: string | null;
+}
+
 export interface VideoResponse {
-  videoUrl: string;
   videoId: number;
+  video_title: string;
+  video_uploadDate: string;
+  video_views: number;
+  m3u8Url: string;
+  video_uploader: VideoUploader;
 }
 
 export const loginUser = async (
@@ -33,7 +44,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch("http://localhost:8085/app/login", {
+  const res = await fetch('http://localhost:8080/app/login', {
     method: "POST",
     body: formData,
   });
@@ -60,7 +71,7 @@ export const createUser = async (
   formData.append("thumbnail_url", payload.thumbnail_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch("http://localhost:8085/app/createUser", {
+  const res = await fetch('http://localhost:8080/app/createUser', {
     method: "POST",
     body: formData,
   });
@@ -84,5 +95,5 @@ export const getVideoData = async (
   }
   const data: VideoResponse = await res.json();
   console.log("Video Data:", data);
-  return data.videoUrl;
+  return data.m3u8Url;
 };
