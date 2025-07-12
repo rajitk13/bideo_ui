@@ -25,6 +25,15 @@ export interface User {
   thumbnail_url: string;
 }
 
+export interface UploadVideo {
+  videoTitle: string;
+  file: File;
+  userId: string;
+}
+
+const myHeaders = new Headers();
+myHeaders.append("Authorization", `Bearer ${Cookies.get("token")}`);
+
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
   const res = await fetch("http://localhost:8085/app/verifyToken", {
     method: "POST",
@@ -123,10 +132,22 @@ export const updateUser = async (data: User) => {
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 
-  const myHeaders = new Headers();
-  myHeaders.append("Authorization", `Bearer ${Cookies.get("token")}`);
-
   await fetch(`http://localhost:8085/user/update`, {
+    method: "POST",
+    body: formData,
+    headers: myHeaders,
+  }).catch((err) => {
+    console.error(err);
+  });
+};
+
+export const uploadVideo = async (values: UploadVideo) => {
+  const formData = new FormData();
+  formData.append("videoTitle", values.videoTitle);
+  formData.append("file", values.file);
+  if (values.userId) formData.append("userId", values.userId);
+
+  await fetch("http://localhost:8085/video/upload", {
     method: "POST",
     body: formData,
     headers: myHeaders,

@@ -30,7 +30,8 @@ import { AVATARS } from "@/constants/avatars";
 import { MESSAGES } from "@/constants/messages";
 import { updateUser } from "@/utility/getRequests";
 import { toast } from "sonner";
-import { redirect, RedirectType } from "next/navigation";
+import { redirect } from "next/navigation";
+import Cookies from "js-cookie";
 
 // Schema
 export interface User {
@@ -51,6 +52,15 @@ type ProfileFormData = z.infer<typeof schema>;
 
 export default function EditProfile() {
   const { user, setUserInfo, fetchUser } = useAuth();
+  useEffect(() => {
+    if (Cookies.get("uid"))
+      setTimeout(() => {
+        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
+      }, 500); // Or requestAnimationFrame
+
+    redirect("/auth/login");
+  }, []);
+
   const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<ProfileFormData>({
@@ -79,15 +89,18 @@ export default function EditProfile() {
   }, [user]);
 
   const onSubmit = async (data: ProfileFormData) => {
+    let userUpdated = false;
     try {
       await updateUser(data);
       setUserInfo(data);
       toast.success(MESSAGES.PROFILE_UPDATED);
-      redirect("profile", RedirectType.replace);
+      userUpdated = true;
     } catch (err) {
       console.error(err);
       toast.error(MESSAGES.PROFILE_UPDATE_FAILED);
     }
+
+    if (userUpdated) redirect("/profile");
   };
 
   if (isLoading) return <LoaderOverlay />;

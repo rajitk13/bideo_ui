@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserInfo(res);
       } catch (err) {
         console.error("Failed to fetch user:", err);
-        logout(); // optional: auto logout if fetching user fails
       }
     }
   };

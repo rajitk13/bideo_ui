@@ -13,9 +13,24 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/store/auth-context";
 import Link from "next/link";
+import { toast } from "sonner";
+import { MESSAGES } from "@/constants/messages";
+import { redirect } from "next/navigation";
+import Cookies from "js-cookie";
+
+import { useEffect } from "react";
 
 export default function ViewProfile() {
   const { user } = useAuth();
+
+  useEffect(() => {
+    if (!Cookies.get("uid"))
+      setTimeout(() => {
+        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
+      }, 500); // Or requestAnimationFrame
+
+    redirect("/auth/login");
+  }, []);
 
   return (
     <Card>
