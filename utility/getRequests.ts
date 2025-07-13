@@ -155,3 +155,22 @@ export const uploadVideo = async (values: UploadVideo) => {
     console.error(err);
   });
 };
+
+export const fetchVideos = async (page: number) => {
+  try {
+    const res = await fetch(
+      `http://localhost:8085/video/all?page=${page}&size=10`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+      }
+    );
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("Error loading videos", err);
+  }
+};
