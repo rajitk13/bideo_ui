@@ -31,7 +31,6 @@ import { MESSAGES } from "@/constants/messages";
 import { updateUser } from "@/utility/getRequests";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
-import Cookies from "js-cookie";
 
 // Schema
 export interface User {
@@ -52,14 +51,6 @@ type ProfileFormData = z.infer<typeof schema>;
 
 export default function EditProfile() {
   const { user, setUserInfo, fetchUser } = useAuth();
-  useEffect(() => {
-    if (Cookies.get("uid"))
-      setTimeout(() => {
-        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
-      }, 500); // Or requestAnimationFrame
-
-    redirect("/auth/login");
-  }, []);
 
   const [isLoading, setIsLoading] = useState(true);
 

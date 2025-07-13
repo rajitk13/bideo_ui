@@ -39,18 +39,18 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      toast.error(MESSAGES.ALREADY_LOGGED_IN);
-      redirect("/", RedirectType.replace);
-    }
-    const success = searchParams.get("success");
-    if (success === "account-created") {
+    const param = searchParams.get("status");
+    if (param === "account-created") {
       setMessage(MESSAGES.ACCOUNT_CREATION_SUCCESS);
+    } else if (param === "user-not-logged-in") {
+      setTimeout(() => {
+        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
+      }, 500);
     }
   }, [searchParams]);
 

@@ -4,7 +4,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useEffect } from "react";
-import Cookies from "js-cookie";
 
 import {
   Form,
@@ -19,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
 import { MESSAGES } from "@/constants/messages";
-import { redirect } from "next/navigation";
 import { uploadVideo } from "@/utility/getRequests";
 
 const formSchema = z.object({
@@ -31,17 +29,7 @@ const formSchema = z.object({
 });
 
 export default function UploadPage() {
-  const { user, isAuthenticated } = useAuth();
-
-  useEffect(() => {
-    if (!Cookies.get("uid")) {
-      setTimeout(() => {
-        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
-      }, 500); // Or requestAnimationFrame
-
-      redirect("/auth/login");
-    }
-  }, [isAuthenticated]);
+  const { user } = useAuth();
 
   const form = useForm({
     resolver: zodResolver(formSchema),

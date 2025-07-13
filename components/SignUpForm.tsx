@@ -55,7 +55,7 @@ export function SignUpForm() {
     await createUser(values)
       .then(() => {
         toast.success(MESSAGES.ACCOUNT_CREATED);
-        redirect("/auth/login?success=account-created", RedirectType.replace);
+        redirect("/auth/login?status=account-created", RedirectType.replace);
       })
       .catch(() => {
         toast.error(MESSAGES.ACCOUNT_CREATION_FAILED);
