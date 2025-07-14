@@ -29,11 +29,12 @@ export interface VideoUploader {
 }
 
 export interface VideoResponse {
-  videoId: number;
+  videoId: string;
   video_title: string;
   video_uploadDate: string;
   video_views: number;
   m3u8Url: string;
+  video_duration: string;
   video_uploader: VideoUploader;
 }
 
@@ -44,7 +45,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch('http://localhost:8080/app/login', {
+  const res = await fetch('http://localhost:8085/app/login', {
     method: "POST",
     body: formData,
   });
@@ -71,7 +72,7 @@ export const createUser = async (
   formData.append("thumbnail_url", payload.thumbnail_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch('http://localhost:8080/app/createUser', {
+  const res = await fetch('http://localhost:8085/app/createUser', {
     method: "POST",
     body: formData,
   });
@@ -84,8 +85,8 @@ export const createUser = async (
 
 export const getVideoData = async (
   payload: VideoPageProps
-): Promise<string> => {
-  const res = await fetch(`http://localhost:8080/video/view/${payload.id}`, {
+): Promise<VideoResponse> => {
+  const res = await fetch(`http://localhost:8085/video/view/${payload.id}`, {
     cache: 'no-store',
   });
 
@@ -95,5 +96,13 @@ export const getVideoData = async (
   }
   const data: VideoResponse = await res.json();
   console.log("Video Data:", data);
-  return data.m3u8Url;
+  return {
+    videoId: payload.id,
+    video_title: data.video_title,
+    video_uploadDate: data.video_uploadDate,
+    video_views: data.video_views,
+    m3u8Url: data.m3u8Url,
+    video_duration: data.video_duration,
+    video_uploader: data.video_uploader
+  };
 };
