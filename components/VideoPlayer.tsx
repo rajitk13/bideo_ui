@@ -43,7 +43,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   }, [src]);
 
   return (
-    <div className="relative w-full rounded-xl overflow-hidden bg-gradient-to-br from-[#3b82f6] via-[#8b5cf6] to-[#ec4899] shadow-[0_0_80px_rgba(139,92,246,0.4)] transition-all duration-300">
+    <div className="relative w-full rounded-xl overflow-hidden">
       <video
       ref={videoRef}
       controls

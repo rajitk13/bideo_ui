@@ -15,7 +15,7 @@ export interface createUserPayload {
   email: string;
   password: string;
   user_name: string;
-  thumbnail_url: string;
+  avatar_url: string;
 }
 
 export interface VideoPageProps {
@@ -26,7 +26,7 @@ export interface VideoUploader {
   userId: string;
   user_name: string;
   user_email: string;
-  thumbnail_url: string | null;
+  avatar_url: string | null;
 }
 
 export interface VideoResponse {
@@ -43,7 +43,7 @@ export interface User {
   userId: string;
   user_email: string;
   user_name: string;
-  thumbnail_url: string;
+  avatar_url: string;
 }
 
 export interface UploadVideo {
@@ -110,7 +110,7 @@ export const createUser = async (
   const formData = new FormData();
   formData.append("email", payload.email);
   formData.append("password", payload.password);
-  formData.append("thumbnail_url", payload.thumbnail_url);
+  formData.append("avatar_url", payload.avatar_url);
   formData.append("user_name", payload.user_name);
 
   const res = await fetch('http://localhost:8085/app/createUser', {
@@ -146,6 +146,7 @@ export const getVideoData = async (
     video_duration: data.video_duration,
     video_uploader: data.video_uploader
   };
+};
 
 export const getUser = async (uid: string): Promise<User> => {
   const res = await fetch(`http://localhost:8085/user/getUser/${uid}`, {
@@ -172,7 +173,7 @@ export const getUser = async (uid: string): Promise<User> => {
 export const updateUser = async (data: User) => {
   const formData = new FormData();
   formData.append("user_email", data.user_email);
-  formData.append("thumbnail_url", data.thumbnail_url);
+  formData.append("avatar_url", data.avatar_url);
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 

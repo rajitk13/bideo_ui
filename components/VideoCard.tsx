@@ -12,11 +12,13 @@ type VideoCardProps = {
     video_uploadDate: string;
     video_views: number;
     m3u8Url: string;
+    video_duration: string;
+    thumbnail_url: string;
     video_uploader: {
       userId: string;
       user_name: string;
       user_email: string;
-      thumbnail_url: string;
+      avatar_url: string;
     };
   };
 };
@@ -42,9 +44,10 @@ export default function VideoCard({ video }: VideoCardProps) {
             muted
             playsInline
             preload="metadata"
+            poster={video.thumbnail_url}
           />
           <span className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
-            13:14
+            {video.video_duration}
           </span>
         </div>
 
@@ -52,7 +55,7 @@ export default function VideoCard({ video }: VideoCardProps) {
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8 mt-1">
             <AvatarImage
-              src={video.video_uploader?.thumbnail_url || ""}
+              src={video.video_uploader?.avatar_url || ""}
               alt={video.video_uploader.user_name || "User"}
             />
             <AvatarFallback>

@@ -21,7 +21,7 @@ export default function ViewProfile() {
     <Card>
       <CardHeader className="flex flex-col items-center text-center">
         <Avatar className="h-20 w-20 mb-4">
-          <AvatarImage src={user?.thumbnail_url || ""} />
+          <AvatarImage src={user?.avatar_url || ""} />
           <AvatarFallback>
             {user?.user_name?.[0]?.toUpperCase() || "U"}
           </AvatarFallback>

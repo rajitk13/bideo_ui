@@ -88,7 +88,7 @@ export function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Avatar className="cursor-pointer">
                   <AvatarImage
-                    src={user?.thumbnail_url || ""}
+                    src={user?.avatar_url || ""}
                     alt={user?.user_name || "User"}
                   />
                   <AvatarFallback>

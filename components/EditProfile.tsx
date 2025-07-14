@@ -37,14 +37,14 @@ export interface User {
   userId: string;
   user_email: string;
   user_name: string;
-  thumbnail_url: string;
+  avatar_url: string;
 }
 
 const schema = z.object({
   userId: z.string(),
   user_name: z.string().min(1, "Name is required"),
   user_email: z.string().email("Invalid email address"),
-  thumbnail_url: z.string().url(),
+  avatar_url: z.string().url(),
 });
 
 type ProfileFormData = z.infer<typeof schema>;
@@ -60,7 +60,7 @@ export default function EditProfile() {
       userId: "",
       user_name: "",
       user_email: "",
-      thumbnail_url: AVATARS[0].src,
+      avatar_url: AVATARS[0].src,
     },
   });
 
@@ -71,7 +71,7 @@ export default function EditProfile() {
         userId: user.userId,
         user_name: user.user_name,
         user_email: user.user_email,
-        thumbnail_url: user.thumbnail_url || AVATARS[0].src,
+        avatar_url: user.avatar_url || AVATARS[0].src,
       });
       setIsLoading(false);
     } else {
@@ -126,7 +126,7 @@ export default function EditProfile() {
             {/* Avatar */}
             <FormField
               control={form.control}
-              name="thumbnail_url"
+              name="avatar_url"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Choose your avatar</FormLabel>

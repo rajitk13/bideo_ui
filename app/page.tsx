@@ -10,7 +10,7 @@ type UserDTO = {
   userId: string;
   user_name: string;
   user_email: string;
-  thumbnail_url: string;
+  avatar_url: string;
 };
 
 type Video = {
@@ -20,6 +20,8 @@ type Video = {
   video_views: number;
   m3u8Url: string;
   video_uploader: UserDTO;
+  video_duration: string;
+  thumbnail_url: string;
 };
 
 export default function ExplorePage() {

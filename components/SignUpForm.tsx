@@ -36,7 +36,7 @@ const formSchema = z.object({
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
   user_name: z.string().min(2, { message: "username is too short" }),
-  thumbnail_url: z.string().url({ message: "Invalid avatar URL" }),
+  avatar_url: z.string().url({ message: "Invalid avatar URL" }),
 });
 
 
@@ -47,7 +47,7 @@ export function SignUpForm() {
       email: "",
       password: "",
       user_name: "",
-      thumbnail_url: AVATARS[0].src,
+      avatar_url: AVATARS[0].src,
     },
   });
 
@@ -76,7 +76,7 @@ export function SignUpForm() {
             {/* Avatar Selection */}
             <FormField
               control={form.control}
-              name="thumbnail_url"
+              name="avatar_url"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Choose your avatar</FormLabel>

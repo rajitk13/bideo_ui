@@ -13,7 +13,7 @@ interface VideoUploader {
   userId: string;
   user_name: string;
   user_email: string;
-  thumbnail_url?: string | null;
+  avatar_url?: string | null;
 }
 
 interface VideoResponse {
@@ -82,9 +82,9 @@ export default function ViewVideo({ id }: { id: any }) {
         <div className="p-4 space-y-4">
           <h2 className="text-xl font-semibold">{video_title}</h2>
           <div className="flex items-center gap-3">
-            {video_uploader.thumbnail_url ? (
+            {video_uploader.avatar_url ? (
               <img
-                src={video_uploader.thumbnail_url}
+                src={video_uploader.avatar_url}
                 alt="Uploader"
                 className="w-12 h-12 rounded-full object-cover"
               />
