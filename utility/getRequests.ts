@@ -18,6 +18,27 @@ export interface createUserPayload {
   thumbnail_url: string;
 }
 
+export interface VideoPageProps {
+    id: string;
+}
+
+export interface VideoUploader {
+  userId: string;
+  user_name: string;
+  user_email: string;
+  thumbnail_url: string | null;
+}
+
+export interface VideoResponse {
+  videoId: string;
+  video_title: string;
+  video_uploadDate: string;
+  video_views: number;
+  m3u8Url: string;
+  video_duration: string;
+  video_uploader: VideoUploader;
+}
+
 export interface User {
   userId: string;
   user_email: string;
@@ -59,7 +80,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch("http://localhost:8085/app/login", {
+  const res = await fetch('http://localhost:8085/app/login', {
     method: "POST",
     body: formData,
   });
@@ -92,7 +113,7 @@ export const createUser = async (
   formData.append("thumbnail_url", payload.thumbnail_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch("http://localhost:8085/app/createUser", {
+  const res = await fetch('http://localhost:8085/app/createUser', {
     method: "POST",
     body: formData,
   });
@@ -102,6 +123,29 @@ export const createUser = async (
     throw new Error(`Login failed with status ${res.status}: ${text}`);
   } else return res.statusText;
 };
+
+export const getVideoData = async (
+  payload: VideoPageProps
+): Promise<VideoResponse> => {
+  const res = await fetch(`http://localhost:8085/video/view/${payload.id}`, {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to Load Video ${res.status}: ${text}`);
+  }
+  const data: VideoResponse = await res.json();
+  console.log("Video Data:", data);
+  return {
+    videoId: payload.id,
+    video_title: data.video_title,
+    video_uploadDate: data.video_uploadDate,
+    video_views: data.video_views,
+    m3u8Url: data.m3u8Url,
+    video_duration: data.video_duration,
+    video_uploader: data.video_uploader
+  };
 
 export const getUser = async (uid: string): Promise<User> => {
   const res = await fetch(`http://localhost:8085/user/getUser/${uid}`, {
