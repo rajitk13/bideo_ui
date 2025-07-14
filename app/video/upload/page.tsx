@@ -1,10 +1,10 @@
-import EditProfile from "@/components/EditProfile";
+import UploadPage from "@/components/UploadPage";
 
 export default function Page() {
   return (
     <div className="flex min-h-[65vh] w-full items-center justify-center">
       <div className="w-full max-w-sm">
-        <EditProfile />
+        <UploadPage />
       </div>
     </div>
   );

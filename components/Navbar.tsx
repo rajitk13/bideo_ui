@@ -1,26 +1,28 @@
 "use client";
 
+import Link from "next/link";
+import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
+import { Moon, Sun } from "lucide-react";
+
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
-import Link from "next/link";
+
 import { useAuth } from "@/store/auth-context";
-import { motion } from "framer-motion";
 
 export function Navbar() {
   const { setTheme } = useTheme();
@@ -29,7 +31,7 @@ export function Navbar() {
   return (
     <header className="w-full border-b px-4 py-3 sticky top-0 z-50 backdrop-blur-sm bg-background/80">
       <div className="container mx-auto flex items-center justify-between">
-        {/* Left Section - Brand */}
+        {/* === Left: Brand Logo === */}
         <motion.div
           className="cursor-pointer"
           whileHover={{ scale: 1.09 }}
@@ -45,22 +47,38 @@ export function Navbar() {
           </Link>
         </motion.div>
 
-        {/* Center - Navigation */}
+        {/* === Center: Navigation === */}
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Videos</NavigationMenuTrigger>
-              <NavigationMenuContent className="p-4">
-                <NavigationMenuLink asChild>
-                  <Link href="/videos">All Videos</Link>
-                </NavigationMenuLink>
-              </NavigationMenuContent>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/"
+                  className="text-sm font-medium px-4 py-2 hover:underline"
+                >
+                  Home
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
+
+            {isAuthenticated && (
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/video/upload"
+                    className="text-sm font-medium px-4 py-2 hover:underline"
+                  >
+                    Upload Video
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            )}
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Right - Theme + Auth */}
+        {/* === Right: Auth, Upload, Theme === */}
         <div className="flex items-center gap-4">
+          {/* Auth Section */}
           {!isAuthenticated ? (
             <Link href="/auth/login">
               <Button variant="outline">Sign In</Button>
@@ -71,10 +89,10 @@ export function Navbar() {
                 <Avatar className="cursor-pointer">
                   <AvatarImage
                     src={user?.thumbnail_url || ""}
-                    alt={user?.name || "User"}
+                    alt={user?.user_name || "User"}
                   />
                   <AvatarFallback>
-                    {user?.name?.[0]?.toUpperCase() || "U"}
+                    {user?.user_name?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
@@ -87,12 +105,12 @@ export function Navbar() {
             </DropdownMenu>
           )}
 
+          {/* Theme Toggle */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label="Toggle theme">
                 <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
                 <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-                <span className="sr-only">Toggle theme</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
