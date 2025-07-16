@@ -4,10 +4,12 @@ import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-} from "@/components/ui/resizable"
-import VideoPlayer from '@/components/VideoPlayer';
+} from "@/components/ui/resizable";
+import VideoPlayer from "@/components/VideoPlayer";
 import { getVideoData } from "@/utility/getRequests";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface VideoUploader {
   userId: string;
@@ -27,43 +29,54 @@ interface VideoResponse {
 }
 
 export default function ViewVideo({ id }: { id: any }) {
-  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(null);
+  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchVideo() {
       try {
-        const data = await getVideoData({ id }); 
-        setVideoResponse(data);
+        const data = await getVideoData({ id });
+        if (isMounted) setVideoResponse(data);
       } catch (err: any) {
-        setError(err.message || "Failed to load video.");
+        if (isMounted) setError(err.message || "Failed to load video.");
       }
     }
 
     fetchVideo();
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (error) {
-    return <div className="text-red-600 p-1">{error}</div>;
+    return <div className="text-red-600 p-4">Error: {error}</div>;
   }
 
-  if (!videoResponse) {
-    return (
-      <div className="p-4 animate-pulse">
-        <div className="h-64 bg-gray-300 rounded-lg mb-4"></div>
-        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-        <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+  const skeletonPlayer = (
+    <div className="h-full w-full p-4 space-y-4">
+      <Skeleton className="aspect-video w-full rounded-lg" />
+    </div>
+  );
+
+  const skeletonDetails = (
+    <div className="p-4 space-y-4">
+      <Skeleton className="w-3/4 h-6 rounded-md" />
+      <div className="flex items-center gap-3">
+        <Skeleton className="w-12 h-12 rounded-full" />
+        <div className="space-y-2">
+          <Skeleton className="w-40 h-4 rounded-md" />
+          <Skeleton className="w-24 h-4 rounded-md" />
+        </div>
       </div>
-    );
-  }
+      <Skeleton className="w-1/2 h-4 rounded-md" />
+    </div>
+  );
 
-  const {
-    video_title,
-    video_views,
-    video_uploadDate,
-    m3u8Url,
-    video_uploader,
-  } = videoResponse;
+  const video = videoResponse;
 
   return (
     <ResizablePanelGroup
@@ -71,46 +84,60 @@ export default function ViewVideo({ id }: { id: any }) {
       className="h-full w-full rounded-lg border"
     >
       <ResizablePanel defaultSize={70} minSize={35} maxSize={85}>
-        <div className="h-full w-full p-4">
-          <VideoPlayer src={m3u8Url} />
-        </div>
+        {video ? (
+          <div className="h-full w-full p-4">
+            <VideoPlayer src={video.m3u8Url} />
+          </div>
+        ) : (
+          skeletonPlayer
+        )}
       </ResizablePanel>
 
       <ResizableHandle withHandle />
 
       <ResizablePanel defaultSize={30}>
-        <div className="p-4 space-y-4">
-          <h2 className="text-xl font-semibold">{video_title}</h2>
-          <div className="flex items-center gap-3">
-            {video_uploader.avatar_url ? (
-              <img
-                src={video_uploader.avatar_url}
-                alt="Uploader"
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
-                {video_uploader.user_name.charAt(0).toUpperCase()}
+        {video ? (
+          <div className="p-4 space-y-4">
+            <h2 className="text-xl font-semibold">{video.video_title}</h2>
+            <div className="flex items-center gap-3">
+              {video.video_uploader.avatar_url ? (
+                <Image
+                  src={video.video_uploader.avatar_url}
+                  alt="Uploader"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
+                  {video.video_uploader.user_name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p className="font-medium">{video.video_uploader.user_name}</p>
+                <span className="text-sm text-muted-foreground">
+                  {new Date(video.video_uploadDate)
+                    .toLocaleString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
+                    .replace(",", "")
+                    .replace(/ /g, "-")
+                    .replace(/-(\d{2}):/, " $1:")}
+                </span>
               </div>
-            )}
-            <div>
-              <p className="font-medium">{video_uploader.user_name}</p>
-              <span className="text-sm text-muted-foreground">
-                {new Date(video_uploadDate).toLocaleString('en-GB', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false,
-                }).replace(',', '').replace(/ /g, '-').replace(/-(\d{2}):/, ' $1:')}
-              </span>
             </div>
+            <p className="text-sm text-muted-foreground">
+              Views: {video.video_views}
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Views: {video_views}
-          </p>
-        </div>
+        ) : (
+          skeletonDetails
+        )}
       </ResizablePanel>
     </ResizablePanelGroup>
   );

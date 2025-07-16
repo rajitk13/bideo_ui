@@ -4,6 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 import {
   Form,
@@ -112,7 +113,14 @@ export default function UploadPage() {
                 className="w-full"
                 disabled={form.formState.isSubmitting}
               >
-                Upload Video
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                    Uploading...
+                  </>
+                ) : (
+                  "Upload Video"
+                )}
               </Button>
             </form>
           </Form>

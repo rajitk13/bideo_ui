@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import Hls from 'hls.js';
-import Plyr from 'plyr';
-import 'plyr/dist/plyr.css';
+import { useEffect, useRef } from "react";
+import Hls from "hls.js";
+import Plyr from "plyr";
+import "plyr/dist/plyr.css";
 
 interface VideoPlayerProps {
   src: string;
@@ -28,7 +28,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         };
         player = new Plyr(video);
       });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
       video.src = src;
       video.onloadedmetadata = () => {
         video.currentTime = 0;
@@ -45,13 +45,13 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   return (
     <div className="relative w-full rounded-xl overflow-hidden">
       <video
-      ref={videoRef}
-      controls
-      className="w-full h-auto max-h-full object-contain rounded-xl shadow-lg transition-all duration-300"
-      preload="metadata"
-      poster=""
-      playsInline
-    />
+        ref={videoRef}
+        controls
+        className="w-full h-auto max-h-full object-contain rounded-xl shadow-lg transition-all duration-300"
+        preload="metadata"
+        poster=""
+        playsInline
+      />
     </div>
   );
 }
