@@ -21,6 +21,7 @@ type Video = {
   video_uploader: UserDTO;
   video_duration: string;
   thumbnail_url: string;
+  videoStatus: string;
 };
 
 export default function ExplorePage() {
@@ -38,8 +39,11 @@ export default function ExplorePage() {
       if (res.content.length < 10) setHasMore(false);
       setVideos((prev) => {
         const allVideos = [...prev, ...res.content];
+        const filteredVideos = allVideos.filter(
+          (video) => video.videoStatus === "COMPLETED"
+        );
         const uniqueMap = new Map<number, Video>();
-        allVideos.forEach((video) => uniqueMap.set(video.videoId, video));
+        filteredVideos.forEach((video) => uniqueMap.set(video.videoId, video));
         return Array.from(uniqueMap.values());
       });
     } catch (error) {

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MoreVertical } from "lucide-react";
+import { Share2 } from "lucide-react";
+import { toast } from "sonner";
 
 type VideoCardProps = {
   video: {
@@ -33,22 +34,35 @@ export default function VideoCard({ video }: VideoCardProps) {
       ? `${(video.video_views / 100000).toFixed(1)} lakh views`
       : `${video.video_views.toLocaleString()} views`;
 
+  const handleShare = async () => {
+    const videoUrl = `${window.location.origin}/video/${video.videoId}/view`;
+    try {
+      await navigator.clipboard.writeText(videoUrl);
+      toast.success("Link copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy link.");
+      console.error(err);
+    }
+  };
+
   return (
-    <Link href={`/video/${video.videoId}/view`}>
-      <div className="w-full max-w-sm cursor-pointer space-y-2">
+    <>
+      <div className="w-full max-w-sm space-y-2">
         {/* Thumbnail with duration badge */}
-        <div className="relative rounded-xl overflow-hidden aspect-video bg-black">
-          <video
-            src={video.m3u8Url}
-            className="w-full h-full object-cover"
-            muted
-            playsInline
-            preload="metadata"
-            poster={video.thumbnail_url}
-          />
-          <span className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
-            {video.video_duration}
-          </span>
+        <div className="relative rounded-xl overflow-hidden aspect-video cursor-pointer bg-black">
+          <Link href={`/video/${video.videoId}/view`}>
+            <video
+              src={video.m3u8Url}
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              preload="metadata"
+              poster={video.thumbnail_url}
+            />
+            <span className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+              {video.video_duration}
+            </span>
+          </Link>
         </div>
 
         {/* Uploader info */}
@@ -75,9 +89,14 @@ export default function VideoCard({ video }: VideoCardProps) {
             </p>
           </div>
 
-          <MoreVertical className="text-muted-foreground w-4 h-4 mt-1" />
+          <button
+            onClick={handleShare}
+            className="text-muted-foreground hover:text-primary"
+            >
+            <Share2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
-    </Link>
+    </>
   );
 }

@@ -50,6 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const res = await getUser(uid);
         setUserInfo(res);
       } catch (err) {
+        logout();
         console.error("Failed to fetch user:", err);
       }
     }

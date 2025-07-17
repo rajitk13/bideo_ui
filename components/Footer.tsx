@@ -1,4 +1,19 @@
 import Link from "next/link";
+import { Github } from "lucide-react";
+
+const creators = [
+  {
+    name: "Ayushmaan Aggarwal",
+    linkedin: "https://www.linkedin.com/in/ayushmaan9/",
+    github: "https://github.com/Mist-AA",
+  },
+
+  {
+    name: "Rajit Kuthiala",
+    linkedin: "https://linkedin.com/in/rajitkuthiala",
+    github: "https://github.com/rajitk13",
+  }
+];
 
 export function Footer() {
   return (
@@ -15,35 +30,33 @@ export function Footer() {
           <p>
             Bideo is a modern platform built to share, explore, and enjoy videos
             from around the world. Crafted with passion by a small team of
-            developers who love video and tech.
+            2 developers who love tech.
           </p>
         </div>
 
         {/* Creator Info */}
         <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Creators
-          </h3>
-          <ul className="space-y-1">
-            <li>
-              <Link
-                href="https://github.com/rajitkuthiala"
-                target="_blank"
-                className="hover:underline"
-              >
-                Rajit Kuthiala
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="https://linkedin.com/in/rajitkuthiala"
-                target="_blank"
-                className="hover:underline"
-              >
-                LinkedIn
-              </Link>
-            </li>
-          </ul>
+          <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Creators</h3>
+          <div className="flex gap-6 flex-wrap">
+            {creators.map((creator) => (
+              <div key={creator.name} className="flex flex-col items-center gap-1">
+                <Link
+                  href={creator.linkedin}
+                  target="_blank"
+                  className="hover:underline text-sm text-muted-foreground"
+                >
+                  {creator.name}
+                </Link>
+                <Link
+                  href={creator.github}
+                  target="_blank"
+                  className="text-muted-foreground hover:text-black"
+                >
+                  <Github className="w-4 h-4" />
+                </Link>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Quick Links */}
@@ -55,11 +68,6 @@ export function Footer() {
             <li>
               <Link href="/" className="hover:underline">
                 Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/videos" className="hover:underline">
-                All Videos
               </Link>
             </li>
             <li>
