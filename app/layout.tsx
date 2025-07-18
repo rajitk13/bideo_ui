@@ -20,6 +20,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "ビデオ (bideo)",
   description: "A video sharing platform",
+  icons: {
+    icon: "/favicon.ico"
+  },
 };
 
 export default function RootLayout({
