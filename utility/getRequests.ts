@@ -56,7 +56,7 @@ const myHeaders = new Headers();
 myHeaders.append("Authorization", `Bearer ${Cookies.get("token")}`);
 
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
-  const res = await fetch("http://localhost:8085/app/verifyToken", {
+  const res = await fetch("http://localhost:8080/app/verifyToken", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch('http://localhost:8085/app/login', {
+  const res = await fetch('http://localhost:8080/app/login', {
     method: "POST",
     body: formData,
   });
@@ -113,7 +113,7 @@ export const createUser = async (
   formData.append("avatar_url", payload.avatar_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch('http://localhost:8085/app/createUser', {
+  const res = await fetch('http://localhost:8080/app/createUser', {
     method: "POST",
     body: formData,
   });
@@ -127,7 +127,7 @@ export const createUser = async (
 export const getVideoData = async (
   payload: VideoPageProps
 ): Promise<VideoResponse> => {
-  const res = await fetch(`http://localhost:8085/video/view/${payload.id}`, {
+  const res = await fetch(`http://localhost:8080/video/view/${payload.id}`, {
     cache: 'no-store',
   });
 
@@ -149,7 +149,7 @@ export const getVideoData = async (
 };
 
 export const getUser = async (uid: string): Promise<User> => {
-  const res = await fetch(`http://localhost:8085/user/getUser/${uid}`, {
+  const res = await fetch(`http://localhost:8080/user/getUser/${uid}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${Cookies.get("token") || ""}`,
@@ -177,7 +177,7 @@ export const updateUser = async (data: User) => {
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 
-  await fetch(`http://localhost:8085/user/update`, {
+  await fetch(`http://localhost:8080/user/update`, {
     method: "POST",
     body: formData,
     headers: myHeaders,
@@ -192,7 +192,7 @@ export const uploadVideo = async (values: UploadVideo) => {
   formData.append("file", values.file);
   if (values.userId) formData.append("userId", values.userId);
 
-  await fetch("http://localhost:8085/video/upload", {
+  await fetch("http://localhost:8080/video/upload", {
     method: "POST",
     body: formData,
     headers: myHeaders,
@@ -204,7 +204,7 @@ export const uploadVideo = async (values: UploadVideo) => {
 export const fetchVideos = async (page: number) => {
   try {
     const res = await fetch(
-      `http://localhost:8085/video/all?page=${page}&size=10`,
+      `http://localhost:8080/video/all?page=${page}&size=10`,
       {
         method: "GET",
         headers: {
