@@ -56,7 +56,7 @@ const myHeaders = new Headers();
 myHeaders.append("Authorization", `Bearer ${Cookies.get("token")}`);
 
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
-  const res = await fetch("https://bideo.tech/app/verifyToken", {
+  const res = await fetch("https://bideo.tech/api/app/verifyToken", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch('https://bideo.tech/app/login', {
+  const res = await fetch('https://bideo.tech/api/app/login', {
     method: "POST",
     body: formData,
   });
@@ -113,7 +113,7 @@ export const createUser = async (
   formData.append("avatar_url", payload.avatar_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch('https://bideo.tech/app/createUser', {
+  const res = await fetch('https://bideo.tech/api/app/createUser', {
     method: "POST",
     body: formData,
   });
@@ -127,7 +127,7 @@ export const createUser = async (
 export const getVideoData = async (
   payload: VideoPageProps
 ): Promise<VideoResponse> => {
-  const res = await fetch(`https://bideo.tech/vid/view/${payload.id}`, {
+  const res = await fetch(`https://bideo.tech/api/vid/view/${payload.id}`, {
     cache: 'no-store',
   });
 
@@ -149,7 +149,7 @@ export const getVideoData = async (
 };
 
 export const getUser = async (uid: string): Promise<User> => {
-  const res = await fetch(`https://bideo.tech/user/getUser/${uid}`, {
+  const res = await fetch(`https://bideo.tech/api/user/getUser/${uid}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${Cookies.get("token") || ""}`,
@@ -177,7 +177,7 @@ export const updateUser = async (data: User) => {
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 
-  await fetch(`https://bideo.tech/user/update`, {
+  await fetch(`https://bideo.tech/api/user/update`, {
     method: "POST",
     body: formData,
     headers: myHeaders,
@@ -192,7 +192,7 @@ export const uploadVideo = async (values: UploadVideo) => {
   formData.append("file", values.file);
   if (values.userId) formData.append("userId", values.userId);
 
-  await fetch("https://bideo.tech/vid/upload", {
+  await fetch("https://bideo.tech/api/vid/upload", {
     method: "POST",
     body: formData,
     headers: myHeaders,
@@ -204,7 +204,7 @@ export const uploadVideo = async (values: UploadVideo) => {
 export const fetchVideos = async (page: number) => {
   try {
     const res = await fetch(
-      `https://bideo.tech/vid/all?page=${page}&size=10`,
+      `https://bideo.tech/api/vid/all?page=${page}&size=10`,
       {
         method: "GET",
         headers: {
