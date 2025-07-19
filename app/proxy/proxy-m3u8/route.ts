@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     // Replace relative segment URLs with proxy URLs
     const rewrittenText = text.replace(/^(?!#)(.+\.ts)/gm, (line) => {
       const segmentUrl = basePath + line.trim();
-      return `/api/proxy-m3u8-segment?url=${encodeURIComponent(segmentUrl)}`;
+      return `/proxy/proxy-m3u8-segment?url=${encodeURIComponent(segmentUrl)}`;
     });
 
     return new NextResponse(rewrittenText, {

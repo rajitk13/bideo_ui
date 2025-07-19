@@ -20,7 +20,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
     if (Hls.isSupported()) {
       hls = new Hls();
-      const PROXIED_SRC = `/api/proxy-m3u8?url=${encodeURIComponent(src)}`;
+      const PROXIED_SRC = `/proxy/proxy-m3u8?url=${encodeURIComponent(src)}`;
 
       hls.loadSource(PROXIED_SRC);
 
