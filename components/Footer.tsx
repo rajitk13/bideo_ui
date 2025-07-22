@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Github } from "lucide-react";
+import { Github, Linkedin } from "lucide-react";
 
 const creators = [
   {
@@ -35,25 +35,35 @@ export function Footer() {
         </div>
 
         {/* Creator Info */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold text-foreground mb-2 text-center">Creators</h3>
-          <div className="flex gap-6 flex-wrap">
+        <div className="flex flex-col gap-4">
+          <h3 className="text-xl font-bold text-foreground mb-2">Creators</h3>
+          <div className="flex flex-col gap-3">
             {creators.map((creator) => (
-              <div key={creator.name} className="flex flex-col items-center gap-1">
-                <Link
-                  href={creator.linkedin}
-                  target="_blank"
-                  className="hover:underline text-sm text-muted-foreground"
-                >
+              <div
+                key={creator.name}
+                className="flex items-center justify-between gap-4"
+              >
+                <span className="text-base font-medium text-foreground">
                   {creator.name}
-                </Link>
-                <Link
-                  href={creator.github}
-                  target="_blank"
-                  className="text-muted-foreground hover:text-black"
-                >
-                  <Github className="w-4 h-4" />
-                </Link>
+                </span>
+                <div className="flex gap-3">
+                  <Link
+                    href={creator.linkedin}
+                    target="_blank"
+                    aria-label={`${creator.name} on LinkedIn`}
+                    className="text-muted-foreground hover:text-blue-600 transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5" />
+                  </Link>
+                  <Link
+                    href={creator.github}
+                    target="_blank"
+                    aria-label={`${creator.name} on GitHub`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Github className="w-5 h-5" />
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
@@ -73,6 +83,16 @@ export function Footer() {
             <li>
               <Link href="/video/upload" className="hover:underline">
                 Upload
+              </Link>
+            </li>
+            <li>
+              <Link href="/contribute" className="hover:underline">
+                Contribute
+              </Link>
+            </li>
+            <li>
+              <Link href="/tech-stack" className="hover:underline">
+                Tech Stack
               </Link>
             </li>
           </ul>

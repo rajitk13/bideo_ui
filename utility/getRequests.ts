@@ -52,9 +52,6 @@ export interface UploadVideo {
   userId: string;
 }
 
-const myHeaders = new Headers();
-myHeaders.append("Authorization", `Bearer ${Cookies.get("token")}`);
-
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
   const res = await fetch("https://bideo.tech/api/app/verifyToken", {
     method: "POST",
@@ -83,6 +80,7 @@ export const loginUser = async (
   const res = await fetch('https://bideo.tech/api/app/login', {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -116,6 +114,7 @@ export const createUser = async (
   const res = await fetch('https://bideo.tech/api/app/createUser', {
     method: "POST",
     body: formData,
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -153,13 +152,6 @@ export const getUser = async (uid: string): Promise<User> => {
     method: "GET",
     headers: {
       Authorization: `Bearer ${Cookies.get("token") || ""}`,
-      "Content-Type": "application/json",
-      // cross orgin header allow
-      "Access-Control-Allow-Origin": "*",
-      refererPolicy: "no-referrer",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Credentials": "true",
     },
   });
   if (!res.ok) {
@@ -180,7 +172,9 @@ export const updateUser = async (data: User) => {
   await fetch(`https://bideo.tech/api/user/update`, {
     method: "POST",
     body: formData,
-    headers: myHeaders,
+    headers: {
+      Authorization: `Bearer ${Cookies.get("token")}`,
+    }
   }).catch((err) => {
     console.error(err);
   });
@@ -195,7 +189,9 @@ export const uploadVideo = async (values: UploadVideo) => {
   await fetch("https://bideo.tech/api/vid/upload", {
     method: "POST",
     body: formData,
-    headers: myHeaders,
+    headers: {
+      Authorization: `Bearer ${Cookies.get("token")}`,
+    }
   }).catch((err) => {
     console.error(err);
   });

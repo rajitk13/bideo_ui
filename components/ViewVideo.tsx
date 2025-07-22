@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import VideoPlayer from "@/components/VideoPlayer";
 import { getVideoData } from "@/utility/getRequests";
 import { useEffect, useState } from "react";
@@ -29,9 +24,7 @@ interface VideoResponse {
 }
 
 export default function ViewVideo({ id }: { id: any }) {
-  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(
-    null
-  );
+  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,6 +40,7 @@ export default function ViewVideo({ id }: { id: any }) {
     }
 
     fetchVideo();
+
     return () => {
       isMounted = false;
     };
@@ -79,66 +73,65 @@ export default function ViewVideo({ id }: { id: any }) {
   const video = videoResponse;
 
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="h-full w-full rounded-lg border"
-    >
-      <ResizablePanel defaultSize={70} minSize={35} maxSize={85}>
-        {video ? (
-          <div className="h-full w-full p-4">
+    <div className="h-full w-full">
+      <div className="flex flex-col md:flex-row h-full w-full border rounded-lg overflow-hidden">
+        {/* Left (Video) */}
+        <div className="w-full md:w-2/3 lg:w-3/4 p-2 md:p-4">
+          {video ? (
             <VideoPlayer src={video.m3u8Url} />
-          </div>
-        ) : (
-          skeletonPlayer
-        )}
-      </ResizablePanel>
+          ) : (
+            skeletonPlayer
+          )}
+        </div>
 
-      <ResizableHandle withHandle />
-
-      <ResizablePanel defaultSize={30}>
-        {video ? (
-          <div className="p-4 space-y-4">
-            <h2 className="text-xl font-semibold">{video.video_title}</h2>
-            <div className="flex items-center gap-3">
-              {video.video_uploader.avatar_url ? (
-                <Image
-                  src={video.video_uploader.avatar_url}
-                  alt="Uploader"
-                  width={48}
-                  height={48}
-                  className="rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
-                  {video.video_uploader.user_name.charAt(0).toUpperCase()}
+        {/* Right (Details) */}
+        <div className="w-full md:w-1/3 lg:w-1/4 border-t md:border-t-0 md:border-l p-4 space-y-4">
+          {video ? (
+            <>
+              <h2 className="text-lg md:text-xl font-semibold">{video.video_title}</h2>
+              <div className="flex items-center gap-3">
+                {video.video_uploader.avatar_url ? (
+                  <Image
+                    src={video.video_uploader.avatar_url}
+                    alt="Uploader"
+                    width={48}
+                    height={48}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
+                    {video.video_uploader.user_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium text-sm md:text-base">
+                    {video.video_uploader.user_name}
+                  </p>
+                  <span className="text-xs text-muted-foreground block mt-1">
+                    {new Date(video.video_uploadDate)
+                      .toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })
+                      .replace(",", "")
+                      .replace(/ /g, "-")
+                      .replace(/-(\d{2}):/, " $1:")}
+                  </span>
                 </div>
-              )}
-              <div>
-                <p className="font-medium">{video.video_uploader.user_name}</p>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(video.video_uploadDate)
-                    .toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })
-                    .replace(",", "")
-                    .replace(/ /g, "-")
-                    .replace(/-(\d{2}):/, " $1:")}
-                </span>
               </div>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Views: {video.video_views}
-            </p>
-          </div>
-        ) : (
-          skeletonDetails
-        )}
-      </ResizablePanel>
-    </ResizablePanelGroup>
+              <p className="text-sm text-muted-foreground">
+                Views: {video.video_views}
+              </p>
+            </>
+          ) : (
+            skeletonDetails
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

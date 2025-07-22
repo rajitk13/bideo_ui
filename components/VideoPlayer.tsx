@@ -20,7 +20,11 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
     if (Hls.isSupported()) {
       hls = new Hls();
-      hls.loadSource(src);
+      const PROXIED_SRC = `/proxy/proxy-m3u8?url=${encodeURIComponent(src)}`;
+
+      hls.loadSource(PROXIED_SRC);
+
+      // hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.onloadedmetadata = () => {
@@ -51,6 +55,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         preload="metadata"
         poster=""
         playsInline
+        crossOrigin="anonymous"
       />
     </div>
   );
