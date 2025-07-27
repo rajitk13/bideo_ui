@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import VideoCard from "@/components/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fetchVideos } from "@/utility/getRequests";
+import { toast } from "sonner";
 
 type UserDTO = {
   userId: string;
@@ -47,6 +48,9 @@ export default function ExplorePage() {
         return Array.from(uniqueMap.values());
       });
     } catch (error) {
+      setTimeout(() => {
+        toast.error("Error: " + error);
+      }, 100);
       console.error("Error fetching videos:", error);
     } finally {
       setIsLoading(false);

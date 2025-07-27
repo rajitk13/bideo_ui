@@ -39,7 +39,6 @@ const formSchema = z.object({
   avatar_url: z.string().url({ message: "Invalid avatar URL" }),
 });
 
-
 export function SignUpForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,14 +51,15 @@ export function SignUpForm() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createUser(values)
-      .then(() => {
-        toast.success(MESSAGES.ACCOUNT_CREATED);
+    try {
+      await createUser(values);
+      toast.success(MESSAGES.ACCOUNT_CREATED);
+      setTimeout(() => {
         redirect("/auth/login?status=account-created", RedirectType.replace);
-      })
-      .catch(() => {
-        toast.error(MESSAGES.ACCOUNT_CREATION_FAILED);
-      });
+      }, 500);
+    } catch (err) {
+      toast.error(MESSAGES.ACCOUNT_CREATION_FAILED + `: ${err}`);
+    }
   };
 
   return (

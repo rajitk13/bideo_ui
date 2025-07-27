@@ -114,7 +114,6 @@ export const createUser = async (
   const res = await fetch('https://bideo.tech/api/app/createUser', {
     method: "POST",
     body: formData,
-    credentials: "include",
   });
 
   if (!res.ok) {
