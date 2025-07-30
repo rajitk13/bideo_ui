@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/store/auth-context";
 import { Toaster } from "@/components/ui/sonner";
+import { ReactQueryProvider } from "@/components/react-query-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   title: "ビデオ (bideo)",
   description: "A video sharing platform",
   icons: {
-    icon: "/favicon.ico"
+    icon: "/favicon.ico",
   },
 };
 
@@ -36,12 +37,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider>
-          <AuthProvider>
-            <Navbar />
-            {children}
-          </AuthProvider>
-          <Toaster />
-          <Footer />
+          <ReactQueryProvider>
+            <AuthProvider>
+              <Navbar />
+              {children}
+            </AuthProvider>
+            <Toaster />
+            <Footer />
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>

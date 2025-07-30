@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { fetchVideos } from "@/utility/getRequests";
 import VideoCard from "@/components/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { fetchVideos } from "@/utility/getRequests";
 import { toast } from "sonner";
+import { InfiniteData } from "@tanstack/react-query";
 
 type UserDTO = {
   userId: string;
@@ -22,64 +24,76 @@ type Video = {
   video_uploader: UserDTO;
   video_duration: string;
   thumbnail_url: string;
-  videoStatus: string;
+  videoStatus: "PENDING" | "PROCESSING" | "COMPLETED" | string;
+};
+
+type PaginatedVideoResponse = {
+  content: Video[];
+  number: number;
+  last: boolean;
 };
 
 export default function ExplorePage() {
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [page, setPage] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  const loadVideos = useCallback(async () => {
-    if (!hasMore || isLoading) return;
-    setIsLoading(true);
-    try {
-      const res = await fetchVideos(page);
-      if (res.content.length < 10) setHasMore(false);
-      setVideos((prev) => {
-        const allVideos = [...prev, ...res.content];
-        const filteredVideos = allVideos.filter(
-          (video) => video.videoStatus === "COMPLETED"
-        );
-        const uniqueMap = new Map<number, Video>();
-        filteredVideos.forEach((video) => uniqueMap.set(video.videoId, video));
-        return Array.from(uniqueMap.values());
-      });
-    } catch (error) {
-      setTimeout(() => {
-        toast.error("Error: " + error);
-      }, 100);
-      console.error("Error fetching videos:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [page, hasMore, isLoading]);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useInfiniteQuery<
+    PaginatedVideoResponse,
+    Error,
+    InfiniteData<PaginatedVideoResponse>,
+    ["videos"],
+    number
+  >({
+    queryKey: ["videos"],
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) => fetchVideos(pageParam),
+    getNextPageParam: (lastPage) =>
+      lastPage.last ? undefined : lastPage.number + 1,
+    staleTime: 60 * 1000,
+    retry: 1,
+  });
+  // Preserve order and deduplicate
+  const videoMap = new Set<number>();
+  const videoList: Video[] = [];
 
+  data?.pages.forEach((page) => {
+    page.content.forEach((video) => {
+      if (video.videoStatus === "COMPLETED" && !videoMap.has(video.videoId)) {
+        videoList.push(video);
+        videoMap.add(video.videoId);
+      }
+    });
+  });
+
+  // Toast on error
   useEffect(() => {
-    loadVideos();
-  }, []);
+    if (error) toast.error("Error loading videos.");
+  }, [error]);
 
-  // Infinite scroll observer
+  // Infinite scroll logic
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => {
-        const firstEntry = entries[0];
-        if (firstEntry.isIntersecting && hasMore && !isLoading) {
-          setPage((prev) => prev + 1);
+      ([entry]) => {
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
         }
       },
       { threshold: 1 }
     );
 
-    const currentRef = observerRef.current;
-    if (currentRef) observer.observe(currentRef);
+    const el = observerRef.current;
+    if (el) observer.observe(el);
 
     return () => {
-      if (currentRef) observer.unobserve(currentRef);
+      if (el) observer.unobserve(el);
     };
-  }, [hasMore, isLoading]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="w-full flex justify-center">
@@ -87,19 +101,15 @@ export default function ExplorePage() {
         <h1 className="text-2xl font-bold px-2">Explore Videos</h1>
 
         <div className="grid gap-y-10 gap-x-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {videos.length === 0 && isLoading
-            ? // Skeletons for first load
-              Array.from({ length: 8 }).map((_, i) => (
+          {isLoading && videoList.length === 0
+            ? Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} className="w-full aspect-video rounded-xl" />
               ))
-            : // Render videos
-              videos.map((video) => (
+            : videoList.map((video) => (
                 <VideoCard key={video.videoId} video={video} />
               ))}
 
-          {/* Skeletons for infinite scroll */}
-          {videos.length > 0 &&
-            isLoading &&
+          {isFetchingNextPage &&
             Array.from({ length: 4 }).map((_, i) => (
               <Skeleton
                 key={`loading-${i}`}
@@ -110,7 +120,7 @@ export default function ExplorePage() {
 
         <div ref={observerRef} className="h-1" />
 
-        {!hasMore && videos.length > 0 && (
+        {!hasNextPage && videoList.length > 0 && (
           <p className="text-center text-muted-foreground py-6">
             You’ve reached the end.
           </p>
