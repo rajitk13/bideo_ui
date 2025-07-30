@@ -1,4 +1,5 @@
 import Cookies from "js-cookie";
+import { api_instance } from "@/global";
 
 export interface LoginPayload {
   email: string;
@@ -19,7 +20,7 @@ export interface createUserPayload {
 }
 
 export interface VideoPageProps {
-    id: string;
+  id: string;
 }
 
 export interface VideoUploader {
@@ -53,7 +54,7 @@ export interface UploadVideo {
 }
 
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
-  const res = await fetch("https://bideo.tech/api/app/verifyToken", {
+  const res = await fetch(`${api_instance}/app/verifyToken`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -77,7 +78,7 @@ export const loginUser = async (
   formData.append("email", payload.email);
   formData.append("password", payload.password);
 
-  const res = await fetch('https://bideo.tech/api/app/login', {
+  const res = await fetch(`${api_instance}/app/login`, {
     method: "POST",
     body: formData,
     credentials: "include",
@@ -87,6 +88,8 @@ export const loginUser = async (
     const text = await res.text();
     throw new Error(`Login failed with status ${res.status}: ${text}`);
   }
+  Cookies.remove("token");
+  Cookies.remove("uid");
 
   const result: LoginResponse = await res.json();
   const uid = await verifyToken(result.idToken || "");
@@ -111,7 +114,7 @@ export const createUser = async (
   formData.append("avatar_url", payload.avatar_url);
   formData.append("user_name", payload.user_name);
 
-  const res = await fetch('https://bideo.tech/api/app/createUser', {
+  const res = await fetch(`${api_instance}/app/createUser`, {
     method: "POST",
     body: formData,
   });
@@ -125,8 +128,8 @@ export const createUser = async (
 export const getVideoData = async (
   payload: VideoPageProps
 ): Promise<VideoResponse> => {
-  const res = await fetch(`https://bideo.tech/api/vid/view/${payload.id}`, {
-    cache: 'no-store',
+  const res = await fetch(`${api_instance}/vid/view/${payload.id}`, {
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -142,12 +145,12 @@ export const getVideoData = async (
     video_views: data.video_views,
     m3u8Url: data.m3u8Url,
     video_duration: data.video_duration,
-    video_uploader: data.video_uploader
+    video_uploader: data.video_uploader,
   };
 };
 
 export const getUser = async (uid: string): Promise<User> => {
-  const res = await fetch(`https://bideo.tech/api/user/getUser/${uid}`, {
+  const res = await fetch(`${api_instance}/user/getUser/${uid}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${Cookies.get("token") || ""}`,
@@ -168,12 +171,12 @@ export const updateUser = async (data: User) => {
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 
-  await fetch(`https://bideo.tech/api/user/update`, {
+  await fetch(`${api_instance}/user/update`, {
     method: "POST",
     body: formData,
     headers: {
       Authorization: `Bearer ${Cookies.get("token")}`,
-    }
+    },
   }).catch((err) => {
     console.error(err);
   });
@@ -185,12 +188,12 @@ export const uploadVideo = async (values: UploadVideo) => {
   formData.append("file", values.file);
   if (values.userId) formData.append("userId", values.userId);
 
-  await fetch("https://bideo.tech/api/vid/upload", {
+  await fetch("${api_instance}/vid/upload", {
     method: "POST",
     body: formData,
     headers: {
       Authorization: `Bearer ${Cookies.get("token")}`,
-    }
+    },
   }).catch((err) => {
     console.error(err);
   });
@@ -198,16 +201,13 @@ export const uploadVideo = async (values: UploadVideo) => {
 
 export const fetchVideos = async (page: number) => {
   try {
-    const res = await fetch(
-      `https://bideo.tech/api/vid/all?page=${page}&size=10`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${Cookies.get("token")}`,
-        },
-      }
-    );
+    const res = await fetch(`${api_instance}/vid/all?page=${page}&size=10`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Cookies.get("token")}`,
+      },
+    });
     const data = await res.json();
     return data;
   } catch (err) {

@@ -39,7 +39,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { login } = useAuth();
+  const { login, logout } = useAuth();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
 
@@ -48,6 +48,7 @@ export function LoginForm() {
     if (param === "account-created") {
       setMessage(MESSAGES.ACCOUNT_CREATION_SUCCESS);
     } else if (param === "user-not-logged-in") {
+      logout();
       setTimeout(() => {
         toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
       }, 500);
