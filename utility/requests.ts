@@ -1,4 +1,3 @@
-import Cookies from "js-cookie";
 import { api_instance } from "@/global";
 
 export interface LoginPayload {
@@ -56,10 +55,8 @@ export interface UploadVideo {
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
   const res = await fetch(`${api_instance}/app/verifyToken`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: idToken, // Send token as plain string
+    headers: { "Content-Type": "application/json" },
+    body: idToken,
   });
 
   if (!res.ok) {
@@ -67,8 +64,7 @@ export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
     throw new Error(`Token verification failed: ${error}`);
   }
 
-  const data = await res.json();
-  return data; // { id: 'uid123' }
+  return res.json(); // { id: 'uid123' }
 };
 
 export const loginUser = async (
@@ -81,27 +77,32 @@ export const loginUser = async (
   const res = await fetch(`${api_instance}/app/login`, {
     method: "POST",
     body: formData,
-    credentials: "include",
   });
 
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Login failed with status ${res.status}: ${text}`);
   }
-  Cookies.remove("token");
-  Cookies.remove("uid");
 
   const result: LoginResponse = await res.json();
   const uid = await verifyToken(result.idToken || "");
-  if (result.idToken) {
-    Cookies.set("token", result.idToken, { expires: 7 }); // 7 days
-    Cookies.set("uid", uid.id, { expires: 7 }); // 7 days
-  }
+
+  // Send token + uid to backend to store in cookies
+  await fetch("/api/auth/setSession", {
+    method: "POST",
+    body: JSON.stringify({
+      token: result.idToken,
+      uid: uid.id,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
   return {
     idToken: result.idToken,
     refreshToken: result.refreshToken,
-    uid: uid.id, // Return the verified UID
+    uid: uid.id,
   };
 };
 
@@ -121,8 +122,10 @@ export const createUser = async (
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Login failed with status ${res.status}: ${text}`);
-  } else return res.statusText;
+    throw new Error(`User creation failed: ${res.status} - ${text}`);
+  }
+
+  return res.statusText;
 };
 
 export const getVideoData = async (
@@ -134,83 +137,81 @@ export const getVideoData = async (
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Failed to Load Video ${res.status}: ${text}`);
-  }
-  const data: VideoResponse = await res.json();
-  console.log("Video Data:", data);
-  return {
-    videoId: payload.id,
-    video_title: data.video_title,
-    video_uploadDate: data.video_uploadDate,
-    video_views: data.video_views,
-    m3u8Url: data.m3u8Url,
-    video_duration: data.video_duration,
-    video_uploader: data.video_uploader,
-  };
-};
-
-export const getUser = async (uid: string): Promise<User> => {
-  const res = await fetch(`${api_instance}/user/getUser/${uid}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${Cookies.get("token") || ""}`,
-    },
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Get user failed with status ${res.status}: ${text}`);
+    throw new Error(`Failed to Load Video: ${res.status} - ${text}`);
   }
 
   return res.json();
 };
 
-export const updateUser = async (data: User) => {
+export const getUser = async (uid: string, token: string): Promise<User> => {
+  const res = await fetch(`${api_instance}/user/getUser/${uid}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Get user failed: ${res.status} - ${text}`);
+  }
+
+  return res.json();
+};
+
+export const updateUser = async (data: User, token: string): Promise<void> => {
   const formData = new FormData();
   formData.append("user_email", data.user_email);
   formData.append("avatar_url", data.avatar_url);
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
 
-  await fetch(`${api_instance}/user/update`, {
+  const res = await fetch(`${api_instance}/user/update`, {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${Cookies.get("token")}`,
+      Authorization: `Bearer ${token}`,
     },
-  }).catch((err) => {
-    console.error(err);
   });
+
+  if (!res.ok) {
+    throw new Error(`Update user failed: ${res.status}`);
+  }
 };
 
-export const uploadVideo = async (values: UploadVideo) => {
+export const uploadVideo = async (
+  values: UploadVideo,
+  token: string
+): Promise<void> => {
   const formData = new FormData();
   formData.append("videoTitle", values.videoTitle);
   formData.append("file", values.file);
-  if (values.userId) formData.append("userId", values.userId);
+  formData.append("userId", values.userId);
 
-  await fetch("${api_instance}/vid/upload", {
+  const res = await fetch(`${api_instance}/vid/upload`, {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${Cookies.get("token")}`,
+      Authorization: `Bearer ${token}`,
     },
-  }).catch((err) => {
-    console.error(err);
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Video upload failed: ${res.status} - ${text}`);
+  }
 };
 
-export const fetchVideos = async (page: number) => {
-  try {
-    const res = await fetch(`${api_instance}/vid/all?page=${page}&size=10`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${Cookies.get("token")}`,
-      },
-    });
-    const data = await res.json();
-    return data;
-  } catch (err) {
-    console.error("Error loading videos", err);
+export const fetchVideos = async (page: number, token: string) => {
+  const res = await fetch(`${api_instance}/vid/all?page=${page}&size=12`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Fetch videos failed: ${res.status}`);
   }
+
+  return res.json();
 };

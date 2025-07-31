@@ -1,8 +1,7 @@
 import { Suspense } from "react";
-import { LoginForm } from "@/components/LoginForm";
+import { LoginForm } from "@/components/user/LoginForm";
 
 export default function Page() {
-
   return (
     <div className="flex min-h-[80vh] w-full items-center justify-center">
       <div className="w-full max-w-sm">

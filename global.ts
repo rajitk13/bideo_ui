@@ -1,1 +1,1 @@
-export const api_instance = "https://bideo.tech/api";
+export const api_instance = "http://localhost:8085/api";

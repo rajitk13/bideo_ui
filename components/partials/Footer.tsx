@@ -12,7 +12,7 @@ const creators = [
     name: "Rajit Kuthiala",
     linkedin: "https://linkedin.com/in/rajitkuthiala",
     github: "https://github.com/rajitk13",
-  }
+  },
 ];
 
 export function Footer() {
@@ -29,8 +29,8 @@ export function Footer() {
           </h3>
           <p>
             Bideo is a modern platform built to share, explore, and enjoy videos
-            from around the world. Crafted with passion by a small team of
-            2 developers who love tech.
+            from around the world. Crafted with passion by a small team of 2
+            developers who love tech.
           </p>
         </div>
 

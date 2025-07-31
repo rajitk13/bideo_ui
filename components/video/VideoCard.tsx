@@ -92,7 +92,7 @@ export default function VideoCard({ video }: VideoCardProps) {
           <button
             onClick={handleShare}
             className="text-muted-foreground hover:text-primary"
-            >
+          >
             <Share2 className="w-4 h-4" />
           </button>
         </div>

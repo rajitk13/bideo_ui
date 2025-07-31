@@ -1,9 +1,8 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { redirect, RedirectType } from "next/navigation";
-import { getUser } from "@/utility/getRequests";
+import { getUser } from "@/utility/requests";
 import { toast } from "sonner";
-import Cookies from "js-cookie";
 
 export interface User {
   userId: string;
@@ -15,12 +14,12 @@ export interface User {
 interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
-  login: (token: string, uid: string) => void;
-  logout: () => void;
+  login: (token: string, uid: string) => Promise<void>;
+  logout: () => Promise<void>;
   user?: User;
   setUserInfo: (data: User) => void;
   uid: string | null;
-  fetchUser: () => void;
+  fetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,42 +29,57 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [uid, setUid] = useState<string | null>(null);
   const [user, setUser] = useState<User | undefined>(undefined);
 
-  // Restore token and uid from localStorage on initial mount
   useEffect(() => {
-    const storedToken = Cookies.get("token");
-    const storedUid = Cookies.get("uid");
-
-    if (storedToken) setToken(storedToken);
-    if (storedUid) setUid(storedUid);
+    const loadSession = async () => {
+      try {
+        const res = await fetch("/api/auth/session");
+        const { token, uid } = await res.json();
+        setToken(token);
+        setUid(uid);
+      } catch (err) {
+        console.error("Session load failed:", err);
+      }
+    };
+    loadSession();
   }, []);
 
-  // Fetch user once token and uid are ready
+  // Fetch user once both token and uid are available
   useEffect(() => {
-    fetchUser();
-  }, [uid]);
+    if (token && uid && !user) {
+      fetchUser();
+    }
+  }, [token, uid]);
 
   const fetchUser = async () => {
-    if (uid && !user) {
+    if (uid && token && !user) {
       try {
-        const res = await getUser(uid);
-        setUserInfo(res);
+        const user = await getUser(uid, token);
+        setUserInfo(user);
       } catch (err) {
-        logout();
         console.error("Failed to fetch user:", err);
+        await logout();
       }
     }
   };
 
-  const login = (token: string, uid: string) => {
-    Cookies.set("token", token, { expires: 7 });
-    Cookies.set("uid", uid, { expires: 7 });
-    setUid(uid);
+  const login = async (token: string, uid: string) => {
+    await fetch("/api/auth/setSession", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token, uid }),
+    });
+
     setToken(token);
+    setUid(uid);
   };
 
-  const logout = () => {
-    Cookies.remove("token");
-    Cookies.remove("uid");
+  const logout = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
     setToken(null);
     setUid(null);
     setUser(undefined);

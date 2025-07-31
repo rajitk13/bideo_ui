@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { loginUser, verifyToken } from "../utility/getRequests";
+import { loginUser, verifyToken } from "../../utility/requests";
 import { toast } from "sonner";
 import { redirect, RedirectType } from "next/navigation";
 import { useAuth } from "@/store/auth-context";
@@ -39,7 +39,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
-  const { login, logout } = useAuth();
+  const { login } = useAuth();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
 
@@ -48,7 +48,6 @@ export function LoginForm() {
     if (param === "account-created") {
       setMessage(MESSAGES.ACCOUNT_CREATION_SUCCESS);
     } else if (param === "user-not-logged-in") {
-      logout();
       setTimeout(() => {
         toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
       }, 500);

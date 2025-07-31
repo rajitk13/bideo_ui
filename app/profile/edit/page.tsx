@@ -1,4 +1,4 @@
-import EditProfile from "@/components/EditProfile";
+import EditProfile from "@/components/user/EditProfile";
 
 export default function Page() {
   return (

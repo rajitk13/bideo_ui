@@ -1,6 +1,6 @@
 "use client";
 
-import ViewVideo from "@/components/ViewVideo";
+import ViewVideo from "@/components/video/ViewVideo";
 import { useParams } from "next/navigation";
 
 export default function Page() {

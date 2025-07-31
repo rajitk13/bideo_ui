@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { fetchVideos } from "@/utility/getRequests";
-import VideoCard from "@/components/VideoCard";
+import { fetchVideos } from "@/utility/requests";
+import VideoCard from "@/components/video/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { InfiniteData } from "@tanstack/react-query";
@@ -97,10 +97,10 @@ export default function ExplorePage() {
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-7xl px-4 py-4 space-y-6">
+      <div className="w-full max-w-[80%] px-4 py-4 space-y-6">
         <h1 className="text-2xl font-bold px-2">Explore Videos</h1>
 
-        <div className="grid gap-y-10 gap-x-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-y-10 gap-x-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {isLoading && videoList.length === 0
             ? Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} className="w-full aspect-video rounded-xl" />

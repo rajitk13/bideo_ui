@@ -7,7 +7,6 @@ export function LoaderOverlay({ className }: { className?: string }) {
         "fixed inset-0 z-50 flex items-center justify-cente backdrop-blur-sm",
         className
       )}
-    >
-    </div>
+    ></div>
   );
 }

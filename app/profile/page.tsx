@@ -1,4 +1,4 @@
-import ViewProfile from "@/components/ViewProfile";
+import ViewProfile from "@/components/user/ViewProfile";
 
 export default function Page() {
   return (

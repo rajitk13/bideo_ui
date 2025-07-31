@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { LoaderOverlay } from "./Loader";
+import { LoaderOverlay } from "../Loader";
 
 import {
   Card,
@@ -28,7 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
 import { AVATARS } from "@/constants/avatars";
 import { MESSAGES } from "@/constants/messages";
-import { updateUser } from "@/utility/getRequests";
+import { updateUser } from "@/utility/requests";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
 
@@ -50,7 +50,7 @@ const schema = z.object({
 type ProfileFormData = z.infer<typeof schema>;
 
 export default function EditProfile() {
-  const { user, setUserInfo, fetchUser } = useAuth();
+  const { user, setUserInfo, fetchUser, token } = useAuth();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -82,7 +82,11 @@ export default function EditProfile() {
   const onSubmit = async (data: ProfileFormData) => {
     let userUpdated = false;
     try {
-      await updateUser(data);
+      if (!token) {
+        toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
+        return;
+      }
+      await updateUser(data, token);
       setUserInfo(data);
       toast.success(MESSAGES.PROFILE_UPDATED);
       userUpdated = true;

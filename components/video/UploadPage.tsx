@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
 import { MESSAGES } from "@/constants/messages";
-import { uploadVideo } from "@/utility/getRequests";
+import { uploadVideo } from "@/utility/requests";
 
 const formSchema = z.object({
   videoTitle: z.string().min(1, "Title is required"),
@@ -30,7 +30,7 @@ const formSchema = z.object({
 });
 
 export default function UploadPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -45,7 +45,11 @@ export default function UploadPage() {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log(values);
-    await uploadVideo(values)
+    if (!token) {
+      toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
+      return;
+    }
+    await uploadVideo(values, token)
       .then(() => {
         toast.success(MESSAGES.FILE_UPLOADED);
       })

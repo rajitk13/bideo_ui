@@ -24,7 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import clsx from "clsx";
-import { createUser } from "../utility/getRequests";
+import { createUser } from "../../utility/requests";
 import { toast } from "sonner";
 import { redirect, RedirectType } from "next/navigation";
 import { MESSAGES } from "@/constants/messages";

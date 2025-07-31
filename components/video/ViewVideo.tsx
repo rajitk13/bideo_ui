@@ -1,7 +1,7 @@
 "use client";
 
-import VideoPlayer from "@/components/VideoPlayer";
-import { getVideoData } from "@/utility/getRequests";
+import VideoPlayer from "@/components/player/VideoPlayer";
+import { getVideoData } from "@/utility/requests";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,9 @@ interface VideoResponse {
 }
 
 export default function ViewVideo({ id }: { id: any }) {
-  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(null);
+  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -77,18 +79,16 @@ export default function ViewVideo({ id }: { id: any }) {
       <div className="flex flex-col md:flex-row h-full w-full border rounded-lg overflow-hidden">
         {/* Left (Video) */}
         <div className="w-full md:w-2/3 lg:w-3/4 p-2 md:p-4">
-          {video ? (
-            <VideoPlayer src={video.m3u8Url} />
-          ) : (
-            skeletonPlayer
-          )}
+          {video ? <VideoPlayer src={video.m3u8Url} /> : skeletonPlayer}
         </div>
 
         {/* Right (Details) */}
         <div className="w-full md:w-1/3 lg:w-1/4 border-t md:border-t-0 md:border-l p-4 space-y-4">
           {video ? (
             <>
-              <h2 className="text-lg md:text-xl font-semibold">{video.video_title}</h2>
+              <h2 className="text-lg md:text-xl font-semibold">
+                {video.video_title}
+              </h2>
               <div className="flex items-center gap-3">
                 {video.video_uploader.avatar_url ? (
                   <Image

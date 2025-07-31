@@ -1,4 +1,4 @@
-import UploadPage from "@/components/UploadPage";
+import UploadPage from "@/components/video/UploadPage";
 
 export default function Page() {
   return (
