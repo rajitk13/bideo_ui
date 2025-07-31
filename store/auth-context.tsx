@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const res = await fetch("/api/auth/session");
+        const res = await fetch("/ui/auth/session");
         const { token, uid } = await res.json();
         setToken(token);
         setUid(uid);
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const login = async (token: string, uid: string) => {
-    await fetch("/api/auth/setSession", {
+    await fetch("/ui/auth/setSession", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
-    await fetch("/api/auth/logout", {
+    await fetch("/ui/auth/logout", {
       method: "POST",
     });
 

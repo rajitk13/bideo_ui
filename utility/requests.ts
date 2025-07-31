@@ -87,8 +87,7 @@ export const loginUser = async (
   const result: LoginResponse = await res.json();
   const uid = await verifyToken(result.idToken || "");
 
-  // Send token + uid to backend to store in cookies
-  await fetch("/api/auth/setSession", {
+  await fetch("/ui/auth/setSession", {
     method: "POST",
     body: JSON.stringify({
       token: result.idToken,
@@ -201,11 +200,10 @@ export const uploadVideo = async (
   }
 };
 
-export const fetchVideos = async (page: number, token: string) => {
+export const fetchVideos = async (page: number) => {
   const res = await fetch(`${api_instance}/vid/all?page=${page}&size=12`, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
   });
 

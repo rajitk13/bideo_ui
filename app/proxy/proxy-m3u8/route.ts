@@ -1,5 +1,3 @@
-// app/api/proxy-m3u8/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
