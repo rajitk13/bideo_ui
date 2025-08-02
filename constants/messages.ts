@@ -12,4 +12,6 @@ export const MESSAGES = {
   USER_NOT_AUTHENTICATED: "Please login",
   FILE_UPLOADED: "Video Uploaded , it will take some time to reflect",
   FILE_UPLOAD_FAILED: "Video Upload Failed",
+  EXPLORE_VIDEO_ERROR: "Error loading videos.",
+  END_OF_VIDEO_LIST: " You’ve reached the end.",
 };

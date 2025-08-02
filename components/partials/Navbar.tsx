@@ -50,7 +50,7 @@ export function Navbar() {
         {/* === Center: Navigation === */}
         <NavigationMenu>
           <NavigationMenuList>
-            <NavigationMenuItem>
+            <NavigationMenuItem className="hidden lg:block">
               <NavigationMenuLink asChild>
                 <Link
                   href="/"

@@ -200,6 +200,21 @@ export const uploadVideo = async (
   }
 };
 
+export const sendResetPasswordEmail = async (email: string): Promise<void> => {
+  const formData = new FormData();
+  formData.append("email", email);
+
+  const res = await fetch(`${api_instance}/app/reset`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`User Password could not be reset : ${text}`);
+  }
+};
+
 export const fetchVideos = async (page: number) => {
   const res = await fetch(`${api_instance}/vid/all?page=${page}&size=12`, {
     headers: {

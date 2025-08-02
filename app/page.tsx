@@ -7,6 +7,7 @@ import VideoCard from "@/components/video/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { InfiniteData } from "@tanstack/react-query";
+import { MESSAGES } from "@/constants/messages";
 
 type UserDTO = {
   userId: string;
@@ -73,7 +74,7 @@ export default function ExplorePage() {
 
   // Toast on error
   useEffect(() => {
-    if (error) toast.error("Error loading videos.");
+    if (error) toast.error(MESSAGES.EXPLORE_VIDEO_ERROR);
   }, [error]);
 
   // Infinite scroll logic
@@ -97,10 +98,10 @@ export default function ExplorePage() {
 
   return (
     <div className="w-full flex justify-center">
-      <div className="w-full max-w-[80%] px-4 py-4 space-y-6">
+      <div className="w-full lg:max-w-[80%] sm:max-w-full px-4 py-4 space-y-6">
         <h1 className="text-2xl font-bold px-2">Explore Videos</h1>
 
-        <div className="grid gap-y-10 gap-x-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid gap-y-10 gap-x-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-around sm:w-full">
           {isLoading && videoList.length === 0
             ? Array.from({ length: 8 }).map((_, i) => (
                 <Skeleton key={i} className="w-full aspect-video rounded-xl" />
@@ -122,7 +123,7 @@ export default function ExplorePage() {
 
         {!hasNextPage && videoList.length > 0 && (
           <p className="text-center text-muted-foreground py-6">
-            You’ve reached the end.
+            {MESSAGES.END_OF_VIDEO_LIST}
           </p>
         )}
       </div>
