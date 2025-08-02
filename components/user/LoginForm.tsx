@@ -25,7 +25,6 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { loginUser, verifyToken } from "../../utility/requests";
 import { toast } from "sonner";
-import { redirect, RedirectType } from "next/navigation";
 import { useAuth } from "@/store/auth-context";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
@@ -97,7 +96,7 @@ export function LoginForm() {
     }
 
     if (loggedIn) {
-      redirect("/", RedirectType.replace);
+        window.location.replace("/");
     }
   };
 
