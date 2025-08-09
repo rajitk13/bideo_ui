@@ -100,6 +100,9 @@ export function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/my-videos">My Videos</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout}>Log Out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

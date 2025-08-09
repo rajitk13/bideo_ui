@@ -229,3 +229,21 @@ export const fetchVideos = async (page: number) => {
 
   return res.json();
 };
+
+export async function fetchUserVideos(
+  page: number,
+  userId: string,
+  token: string
+) {
+  const res = await fetch(
+    `${api_instance}/vid/user/${userId}?page=${page}&size=10`,
+    {
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) throw new Error("Failed to fetch user videos");
+  return res.json();
+}
