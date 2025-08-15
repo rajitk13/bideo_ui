@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://bideo.tech/
+
+# Sitemaps
+Sitemap: https://bideo.tech/sitemap.xml
