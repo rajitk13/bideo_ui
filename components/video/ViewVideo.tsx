@@ -23,7 +23,7 @@ interface VideoResponse {
   video_uploader: VideoUploader;
 }
 
-export default function ViewVideo({ id }: { id: any }) {
+export default function ViewVideo({ id }: { id: string }) {
   const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(
     null
   );
@@ -42,7 +42,6 @@ export default function ViewVideo({ id }: { id: any }) {
     }
 
     fetchVideo();
-
     return () => {
       isMounted = false;
     };
@@ -76,14 +75,14 @@ export default function ViewVideo({ id }: { id: any }) {
 
   return (
     <div className="h-full w-full">
-      <div className="flex flex-col md:flex-row h-full w-full border rounded-lg overflow-hidden">
-        {/* Left (Video) */}
-        <div className="w-full md:w-2/3 lg:w-3/4 p-2 md:p-4">
+      <div className="flex flex-col lg:flex-row h-full w-full border rounded-lg overflow-hidden">
+        {/* Left (Video Player) */}
+        <div className="flex-1 flex justify-center items-center bg-black">
           {video ? <VideoPlayer src={video.m3u8Url} /> : skeletonPlayer}
         </div>
 
-        {/* Right (Details) */}
-        <div className="w-full md:w-1/3 lg:w-1/4 border-t md:border-t-0 md:border-l p-4 space-y-4">
+        {/* Right (Video Details) */}
+        <div className="border-t md:border-t-0 md:border-l p-4 space-y-4">
           {video ? (
             <>
               <h2 className="text-lg md:text-xl font-semibold">
