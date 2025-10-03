@@ -14,4 +14,6 @@ export const MESSAGES = {
   FILE_UPLOAD_FAILED: "Video Upload Failed",
   EXPLORE_VIDEO_ERROR: "Error loading videos.",
   END_OF_VIDEO_LIST: " You’ve reached the end.",
+  DELETED_SUCCESS: "Video has been deleted, Refresh!",
+  DELETED_ERROR: "Facing issue deleting video.",
 };

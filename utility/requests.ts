@@ -247,3 +247,19 @@ export async function fetchUserVideos(
   if (!res.ok) throw new Error("Failed to fetch user videos");
   return res.json();
 }
+
+export async function deleteVideo(
+  userId: string,
+  videoId: number,
+  token: string
+) {
+  const res = await fetch(`${api_instance}/vid/user/${userId}/${videoId}`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch user videos");
+  return res.text();
+}

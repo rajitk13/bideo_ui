@@ -4,7 +4,8 @@ import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 import LaunchUI from "../../logos/launch-ui";
-import { Button, type ButtonProps } from "../../ui/button";
+import { Button, buttonVariants } from "../../ui/button";
+import { VariantProps } from "class-variance-authority";
 import {
   Navbar as NavbarComponent,
   NavbarLeft,
@@ -12,6 +13,7 @@ import {
 } from "../../ui/navbar";
 import Navigation from "../../ui/navigation";
 import { Sheet, SheetContent, SheetTrigger } from "../../ui/sheet";
+type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 
 interface NavbarLink {
   text: string;
@@ -21,7 +23,7 @@ interface NavbarLink {
 interface NavbarActionProps {
   text: string;
   href: string;
-  variant?: ButtonProps["variant"];
+  variant?: ButtonVariant;
   icon?: ReactNode;
   iconRight?: ReactNode;
   isButton?: boolean;
@@ -48,7 +50,11 @@ export default function Navbar({
     { text: "Documentation", href: "https://www.launchuicomponents.com/" },
   ],
   actions = [
-    { text: "Sign in", href: "https://www.launchuicomponents.com/", isButton: false },
+    {
+      text: "Sign in",
+      href: "https://www.launchuicomponents.com/",
+      isButton: false,
+    },
     {
       text: "Get Started",
       href: "https://www.launchuicomponents.com/",
@@ -97,7 +103,7 @@ export default function Navbar({
                 >
                   {action.text}
                 </a>
-              ),
+              )
             )}
             <Sheet>
               <SheetTrigger asChild>

@@ -24,9 +24,7 @@ interface VideoResponse {
 }
 
 export default function ViewVideo({ id }: { id: string }) {
-  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(
-    null
-  );
+  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -75,20 +73,17 @@ export default function ViewVideo({ id }: { id: string }) {
 
   return (
     <div className="w-full h-full">
-      <div className="w-full max-w-[75%] mx-auto rounded-lg">
+      <div className="w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto rounded-lg">
+        {/* Video Player */}
         <div className="aspect-video w-full">
-          {video ? (
-            <VideoPlayer src={video.m3u8Url} />
-          ) : (
-            skeletonPlayer
-          )}
+          {video ? <VideoPlayer src={video.m3u8Url} /> : skeletonPlayer}
         </div>
 
         {/* Video Details */}
         <div className="p-4 border-t space-y-4">
           {video ? (
             <>
-              <h2 className="text-lg md:text-xl font-semibold">
+              <h2 className="text-base sm:text-lg md:text-xl font-semibold break-words">
                 {video.video_title}
               </h2>
               <div className="flex items-center gap-3">
@@ -110,23 +105,21 @@ export default function ViewVideo({ id }: { id: string }) {
                     {video.video_uploader.user_name}
                   </p>
                   <span className="text-xs text-muted-foreground block mt-1">
-                    {new Date(video.video_uploadDate)
-                      .toLocaleString("en-GB", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })
-                      .replace(",", "")
-                      .replace(/ /g, "-")
-                      .replace(/-(\d{2}):/, " $1:")}
+                    {new Date(video.video_uploadDate).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    {new Date(video.video_uploadDate).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })}
                   </span>
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Views: {video.video_views}
+                {video.video_views.toLocaleString()} views
               </p>
             </>
           ) : (
