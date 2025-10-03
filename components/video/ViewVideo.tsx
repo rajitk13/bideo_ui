@@ -74,15 +74,18 @@ export default function ViewVideo({ id }: { id: string }) {
   const video = videoResponse;
 
   return (
-    <div className="h-full w-full">
-      <div className="flex flex-col lg:flex-row h-full w-full border rounded-lg overflow-hidden">
-        {/* Left (Video Player) */}
-        <div className="flex-1 flex justify-center items-center bg-black">
-          {video ? <VideoPlayer src={video.m3u8Url} /> : skeletonPlayer}
+    <div className="w-full h-full">
+      <div className="w-full max-w-[75%] mx-auto rounded-lg">
+        <div className="aspect-video w-full">
+          {video ? (
+            <VideoPlayer src={video.m3u8Url} />
+          ) : (
+            skeletonPlayer
+          )}
         </div>
 
-        {/* Right (Video Details) */}
-        <div className="border-t md:border-t-0 md:border-l p-4 space-y-4">
+        {/* Video Details */}
+        <div className="p-4 border-t space-y-4">
           {video ? (
             <>
               <h2 className="text-lg md:text-xl font-semibold">

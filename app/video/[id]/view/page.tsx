@@ -16,7 +16,7 @@ export default function Page() {
   }
 
   return (
-    <div className="w-screen h-screen overflow-hidden">
+    <div className="mt-10">
       <ViewVideo id={id} />
     </div>
   );
