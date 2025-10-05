@@ -23,9 +23,6 @@ export function Footer() {
         <div className="max-w-md">
           <h3 className="text-lg font-semibold text-foreground mb-2">
             About | bideo{" "}
-            <span className="ml-1 text-muted-foreground text-sm font-normal">
-              (ビデオ)
-            </span>
           </h3>
           <p>
             Bideo is a modern platform built to share, explore, and enjoy videos
@@ -100,7 +97,7 @@ export function Footer() {
       </div>
 
       <div className="border-t text-center py-4 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Bideo (ビデオ) MIT License
+        © {new Date().getFullYear()} bideo | MIT License
       </div>
     </footer>
   );

@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ビデオ (bideo)",
+  title: "bideo",
   description: "A video sharing platform",
   icons: {
     icon: "/favicon.ico",

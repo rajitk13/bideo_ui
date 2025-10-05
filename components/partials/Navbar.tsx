@@ -41,9 +41,6 @@ export function Navbar() {
             <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
               bideo
             </span>
-            <span className="text-sm tracking-widest text-muted-foreground font-light group-hover:tracking-[0.2em] transition-all duration-300">
-              ビデオ
-            </span>
           </Link>
         </motion.div>
 
