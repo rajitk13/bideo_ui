@@ -155,7 +155,7 @@ export default function MyVideos() {
   });
 
   return (
-    <div className="w-full flex justify-center min-h-screen py-4 px-2 sm:px-4">
+    <div className="w-full flex justify-center py-6 px-2 sm:px-4">
       <div className="w-full lg:max-w-[95%]">
         <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 tracking-tight">
           My Uploaded Videos

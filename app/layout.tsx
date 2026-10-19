@@ -34,16 +34,23 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col relative`}
       >
         <ThemeProvider>
           <ReactQueryProvider>
             <AuthProvider>
+              {/* Global Ambient Glow (consistent across entire site) */}
+              <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden select-none">
+                <div className="absolute -top-40 -left-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-blue-500/10 dark:bg-blue-500/15 rounded-full blur-3xl" />
+                <div className="absolute top-1/3 -right-40 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-purple-500/10 dark:bg-purple-500/15 rounded-full blur-3xl" />
+                <div className="absolute -bottom-40 left-1/3 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-pink-500/5 dark:bg-pink-500/10 rounded-full blur-3xl" />
+              </div>
+
               <Navbar />
-              {children}
+              <main className="flex-1 flex flex-col">{children}</main>
+              <Footer />
             </AuthProvider>
             <Toaster />
-            <Footer />
           </ReactQueryProvider>
         </ThemeProvider>
       </body>

@@ -17,7 +17,7 @@ const creators = [
 
 export function Footer() {
   return (
-    <footer className="w-full border-t mt-10 bg-background text-muted-foreground">
+    <footer className="w-full border-t mt-auto bg-background/80 backdrop-blur-sm text-muted-foreground">
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
         {/* About / Brand Info */}
         <div className="max-w-md">
