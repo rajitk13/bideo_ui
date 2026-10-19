@@ -5,7 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Share2, Play, Eye, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { useState, useRef } from "react";
+import { useRef } from "react";
 
 type VideoCardProps = {
   video: {
@@ -26,7 +26,6 @@ type VideoCardProps = {
 };
 
 export default function VideoCard({ video }: VideoCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const timeAgo = formatDistanceToNow(new Date(video.video_uploadDate), {
@@ -54,7 +53,6 @@ export default function VideoCard({ video }: VideoCardProps) {
   };
 
   const handleMouseEnter = () => {
-    setIsHovered(true);
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {});
@@ -62,7 +60,6 @@ export default function VideoCard({ video }: VideoCardProps) {
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
