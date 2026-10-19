@@ -9,15 +9,11 @@ export default function Page() {
 
   if (!id) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center text-muted-foreground">
-        Loading video...
+      <div className="flex-1 flex items-center justify-center text-muted-foreground py-16">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
-  return (
-    <div className="mt-10">
-      <ViewVideo id={id} />
-    </div>
-  );
+  return <ViewVideo id={id} />;
 }

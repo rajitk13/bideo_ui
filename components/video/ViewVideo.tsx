@@ -1,41 +1,63 @@
 "use client";
 
 import VideoPlayer from "@/components/player/VideoPlayer";
-import { getVideoData } from "@/utility/requests";
-import { useEffect, useState } from "react";
+import { getVideoData, fetchVideos, VideoResponse } from "@/utility/requests";
+import { useEffect, useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import {
+  Eye,
+  Clock,
+  Share2,
+  Play,
+  Sparkles,
+  Film,
+  AlertCircle,
+  ArrowLeft,
+  Check,
+} from "lucide-react";
 
-interface VideoUploader {
-  userId: string;
-  user_name: string;
-  user_email: string;
-  avatar_url?: string | null;
-}
-
-interface VideoResponse {
-  videoId: string;
+type RecommendedVideo = {
+  videoId: number;
   video_title: string;
   video_uploadDate: string;
   video_views: number;
   m3u8Url: string;
   video_duration: string;
-  video_uploader: VideoUploader;
-}
+  thumbnail_url: string;
+  videoStatus: string;
+  video_uploader: {
+    userId: string;
+    user_name: string;
+    avatar_url?: string | null;
+  };
+};
 
 export default function ViewVideo({ id }: { id: string }) {
-  const [videoResponse, setVideoResponse] = useState<VideoResponse | null>(null);
+  const [video, setVideo] = useState<VideoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
+  // Fetch current video details
   useEffect(() => {
     let isMounted = true;
-
     async function fetchVideo() {
       try {
+        setError(null);
         const data = await getVideoData({ id });
-        if (isMounted) setVideoResponse(data);
-      } catch (err: any) {
-        if (isMounted) setError(err.message || "Failed to load video.");
+        if (isMounted) setVideo(data);
+      } catch (err: unknown) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Failed to load video.";
+        if (isMounted) setError(errorMsg);
       }
     }
 
@@ -45,86 +67,299 @@ export default function ViewVideo({ id }: { id: string }) {
     };
   }, [id]);
 
+  // Fetch recommended videos for sidebar
+  const { data: recsData, isLoading: recsLoading } = useQuery<{
+    content: RecommendedVideo[];
+  }>({
+    queryKey: ["recommendedVideos"],
+    queryFn: () => fetchVideos(0),
+    staleTime: 60 * 1000,
+  });
+
+  const recommendations = useMemo(() => {
+    if (!recsData?.content) return [];
+    return recsData.content
+      .filter(
+        (v) =>
+          v.videoId.toString() !== id &&
+          (v.videoStatus === "COMPLETED" || !v.videoStatus)
+      )
+      .slice(0, 8);
+  }, [recsData, id]);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      toast.success("Link copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to copy link");
+    }
+  };
+
+  // Error state
   if (error) {
-    return <div className="text-red-600 p-4">Error: {error}</div>;
+    return (
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+        <Card className="border border-border/50 shadow-xl bg-card/85 backdrop-blur-md rounded-2xl max-w-md w-full text-center p-6 space-y-4">
+          <div className="w-12 h-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+            <AlertCircle className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-xl font-bold tracking-tight">
+              Unable to load video
+            </h2>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+          <Link href="/" className="block pt-2">
+            <Button variant="outline" className="w-full">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Explore
+            </Button>
+          </Link>
+        </Card>
+      </div>
+    );
   }
 
-  const skeletonPlayer = (
-    <div className="h-full w-full p-4 space-y-4">
-      <Skeleton className="aspect-video w-full rounded-lg" />
-    </div>
-  );
+  const formattedViews = video
+    ? video.video_views > 100000
+      ? `${(video.video_views / 100000).toFixed(1)}L`
+      : video.video_views > 1000
+      ? `${(video.video_views / 1000).toFixed(1)}K`
+      : video.video_views.toLocaleString()
+    : "0";
 
-  const skeletonDetails = (
-    <div className="p-4 space-y-4">
-      <Skeleton className="w-3/4 h-6 rounded-md" />
-      <div className="flex items-center gap-3">
-        <Skeleton className="w-12 h-12 rounded-full" />
-        <div className="space-y-2">
-          <Skeleton className="w-40 h-4 rounded-md" />
-          <Skeleton className="w-24 h-4 rounded-md" />
-        </div>
-      </div>
-      <Skeleton className="w-1/2 h-4 rounded-md" />
-    </div>
-  );
+  const timeAgo = video?.video_uploadDate
+    ? formatDistanceToNow(new Date(video.video_uploadDate), { addSuffix: true })
+    : "";
 
-  const video = videoResponse;
+  const formattedDate = video?.video_uploadDate
+    ? new Date(video.video_uploadDate).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 
   return (
-    <div className="w-full h-full">
-      <div className="w-full max-w-full md:max-w-4xl lg:max-w-5xl mx-auto rounded-lg">
-        {/* Video Player */}
-        <div className="aspect-video w-full">
-          {video ? <VideoPlayer src={video.m3u8Url} /> : skeletonPlayer}
-        </div>
+    <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        {/* === Left: Main Player & Video Details (Col 8) === */}
+        <div className="lg:col-span-8 space-y-5">
+          {/* Theater Video Player */}
+          <div className="relative rounded-2xl overflow-hidden bg-black aspect-video ring-1 ring-border/50 shadow-2xl shadow-black/30">
+            {video ? (
+              <VideoPlayer src={video.m3u8Url} />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-black/60">
+                <Skeleton className="w-full h-full rounded-2xl" />
+              </div>
+            )}
+          </div>
 
-        {/* Video Details */}
-        <div className="p-4 border-t space-y-4">
+          {/* Video Metadata Header */}
           {video ? (
-            <>
-              <h2 className="text-base sm:text-lg md:text-xl font-semibold break-words">
+            <div className="space-y-4">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground leading-snug">
                 {video.video_title}
-              </h2>
-              <div className="flex items-center gap-3">
-                {video.video_uploader.avatar_url ? (
-                  <Image
-                    src={video.video_uploader.avatar_url}
-                    alt="Uploader"
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
-                    {video.video_uploader.user_name.charAt(0).toUpperCase()}
+              </h1>
+
+              {/* Creator & Action Bar */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/40">
+                {/* Creator Profile */}
+                <div className="flex items-center gap-3">
+                  <Link href={`/profile/${video.video_uploader.userId}`}>
+                    <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
+                      <AvatarImage
+                        src={video.video_uploader.avatar_url || ""}
+                        alt={video.video_uploader.user_name}
+                      />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                        {video.video_uploader.user_name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Link>
+
+                  <div>
+                    <Link
+                      href={`/profile/${video.video_uploader.userId}`}
+                      className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block"
+                    >
+                      {video.video_uploader.user_name}
+                    </Link>
+                    <span className="text-xs text-muted-foreground">
+                      Channel Creator
+                    </span>
                   </div>
-                )}
-                <div>
-                  <p className="font-medium text-sm md:text-base">
-                    {video.video_uploader.user_name}
-                  </p>
-                  <span className="text-xs text-muted-foreground block mt-1">
-                    {new Date(video.video_uploadDate).toLocaleDateString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}{" "}
-                    {new Date(video.video_uploadDate).toLocaleTimeString("en-GB", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })}
-                  </span>
+                </div>
+
+                {/* Right Actions: Views, Date, Share */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground">
+                    <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+                    <span>{formattedViews} views</span>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground bg-muted/40 border border-border/30">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{timeAgo}</span>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleShare}
+                    className="h-8 rounded-full px-3 text-xs gap-1.5 hover:bg-primary/10 hover:text-primary transition-colors"
+                  >
+                    {copied ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    ) : (
+                      <Share2 className="w-3.5 h-3.5" />
+                    )}
+                    {copied ? "Copied" : "Share"}
+                  </Button>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {video.video_views.toLocaleString()} views
-              </p>
-            </>
+
+              {/* Video Details Card */}
+              <Card className="border border-border/40 bg-card/75 backdrop-blur-sm rounded-xl p-4 sm:p-5">
+                <CardContent className="p-0 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs font-medium bg-primary/10 text-primary border border-primary/20"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      HLS Adaptive Stream
+                    </Badge>
+                    <Badge variant="outline" className="text-xs font-medium">
+                      HD Quality
+                    </Badge>
+                    {video.video_duration && (
+                      <Badge variant="outline" className="text-xs font-medium">
+                        Duration: {video.video_duration}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Uploaded on{" "}
+                    <span className="font-medium text-foreground">
+                      {formattedDate}
+                    </span>{" "}
+                    • Encoded with adaptive streaming for ultra-low latency and
+                    dynamic resolution scaling.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
-            skeletonDetails
+            <div className="space-y-4 pt-2">
+              <Skeleton className="w-3/4 h-8 rounded-lg" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-11 h-11 rounded-full" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="w-32 h-4" />
+                    <Skeleton className="w-20 h-3" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="w-20 h-8 rounded-full" />
+                  <Skeleton className="w-20 h-8 rounded-full" />
+                </div>
+              </div>
+              <Skeleton className="w-full h-24 rounded-xl" />
+            </div>
           )}
+        </div>
+
+        {/* === Right: Up Next / Recommended Videos (Col 4) === */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+            <Film className="w-4 h-4 text-primary" />
+            <h2 className="text-base font-bold tracking-tight text-foreground">
+              Up Next
+            </h2>
+          </div>
+
+          <div className="space-y-3">
+            {recsLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex gap-3">
+                  <Skeleton className="w-36 h-20 rounded-lg shrink-0" />
+                  <div className="space-y-2 flex-1 py-1">
+                    <Skeleton className="w-full h-4" />
+                    <Skeleton className="w-2/3 h-3" />
+                    <Skeleton className="w-1/2 h-3" />
+                  </div>
+                </div>
+              ))
+            ) : recommendations.length > 0 ? (
+              recommendations.map((item) => {
+                const itemTimeAgo = formatDistanceToNow(
+                  new Date(item.video_uploadDate),
+                  { addSuffix: true }
+                );
+                const itemViews =
+                  item.video_views > 1000
+                    ? `${(item.video_views / 1000).toFixed(1)}K`
+                    : item.video_views.toString();
+
+                return (
+                  <Link
+                    key={item.videoId}
+                    href={`/video/${item.videoId}/view`}
+                    className="group flex gap-3 p-1.5 rounded-xl hover:bg-muted/40 transition-colors"
+                  >
+                    {/* Compact Thumbnail */}
+                    <div className="relative w-36 h-20 rounded-lg overflow-hidden bg-black/10 shrink-0 group-hover:ring-1 group-hover:ring-primary/30 transition-all">
+                      <Image
+                        src={item.thumbnail_url}
+                        alt={item.video_title}
+                        fill
+                        sizes="144px"
+                        unoptimized
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {/* Play overlay on hover */}
+                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Play className="w-4 h-4 text-white fill-white" />
+                      </div>
+                      {/* Duration */}
+                      {item.video_duration && (
+                        <span className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-medium px-1.5 py-0.2 rounded">
+                          {item.video_duration}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Metadata */}
+                    <div className="min-w-0 flex-1 py-0.5">
+                      <h3 className="text-xs sm:text-sm font-semibold line-clamp-2 leading-snug group-hover:text-primary transition-colors text-foreground">
+                        {item.video_title}
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground mt-1 truncate">
+                        {item.video_uploader.user_name}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                        <span>{itemViews} views</span>
+                        <span>•</span>
+                        <span>{itemTimeAgo}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="p-6 text-center text-muted-foreground text-xs border border-dashed rounded-xl">
+                No more videos available.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
