@@ -101,7 +101,7 @@ export default function EditProfile() {
   if (isLoading) return <LoaderOverlay />;
 
   return (
-    <Card>
+    <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl">
       <CardHeader>
         <CardTitle>Edit Profile</CardTitle>
         <CardDescription>Update your personal information.</CardDescription>
@@ -135,20 +135,20 @@ export default function EditProfile() {
                 <FormItem>
                   <FormLabel>Choose your avatar</FormLabel>
                   <FormControl>
-                    <div className="flex gap-4 flex-wrap">
+                    <div className="flex gap-3 flex-wrap">
                       {AVATARS.map((avatar) => (
                         <button
                           type="button"
                           key={avatar.src}
                           onClick={() => field.onChange(avatar.src)}
                           className={clsx(
-                            "border-2 rounded-full p-1 transition-all",
+                            "rounded-full p-0.5 transition-all duration-200",
                             field.value === avatar.src
-                              ? "border-blue-500"
-                              : "border-transparent"
+                              ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110"
+                              : "ring-1 ring-muted-foreground/10 hover:ring-muted-foreground/30 opacity-60 hover:opacity-100"
                           )}
                         >
-                          <Avatar>
+                          <Avatar className="h-10 w-10">
                             <AvatarImage src={avatar.src} alt={avatar.label} />
                             <AvatarFallback>{avatar.fallback}</AvatarFallback>
                           </Avatar>
@@ -181,7 +181,10 @@ export default function EditProfile() {
               )}
             />
 
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300"
+            >
               Save Changes
             </Button>
           </form>

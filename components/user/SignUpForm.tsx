@@ -3,6 +3,7 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 import { redirect, RedirectType } from "next/navigation";
 import { MESSAGES } from "@/constants/messages";
 import { AVATARS } from "@/constants/avatars"; // Adjust the import path as necessary
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -40,6 +42,8 @@ const formSchema = z.object({
 });
 
 export function SignUpForm() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,24 +67,31 @@ export function SignUpForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create your account</CardTitle>
-        <CardDescription>
-          Enter your details below to create a new account
+    <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-purple-500/5 bg-card/85 backdrop-blur-md rounded-2xl">
+      <CardHeader className="space-y-1 pb-2">
+        {/* Decorative gradient bar */}
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 mb-4" />
+
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          Create your account
+        </CardTitle>
+        <CardDescription className="text-muted-foreground/80">
+          Join bideo and start sharing videos
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {/* Avatar Selection */}
             <FormField
               control={form.control}
               name="avatar_url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Choose your avatar</FormLabel>
-                  <div className="flex gap-4">
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Choose your avatar
+                  </FormLabel>
+                  <div className="flex gap-3 flex-wrap">
                     {AVATARS.map((avatar) => (
                       <button
                         type="button"
@@ -89,15 +100,17 @@ export function SignUpForm() {
                           field.onChange(avatar.src);
                         }}
                         className={clsx(
-                          "border-2 rounded-full p-1 transition-all",
+                          "rounded-full p-0.5 transition-all duration-200",
                           field.value === avatar.src
-                            ? "border-blue-500"
-                            : "border-transparent"
+                            ? "ring-2 ring-primary ring-offset-2 ring-offset-background scale-110"
+                            : "ring-1 ring-muted-foreground/10 hover:ring-muted-foreground/30 opacity-60 hover:opacity-100"
                         )}
                       >
-                        <Avatar>
+                        <Avatar className="h-10 w-10">
                           <AvatarImage src={avatar.src} alt={avatar.label} />
-                          <AvatarFallback>{avatar.fallback}</AvatarFallback>
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs">
+                            {avatar.fallback}
+                          </AvatarFallback>
                         </Avatar>
                       </button>
                     ))}
@@ -113,9 +126,18 @@ export function SignUpForm() {
               name="user_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Username
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="jdoe" {...field} />
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        placeholder="johndoe"
+                        className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,9 +150,18 @@ export function SignUpForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Email
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="m@example.com" {...field} />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        placeholder="you@example.com"
+                        className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,9 +174,32 @@ export function SignUpForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Password
+                  </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="pl-10 pr-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                        tabIndex={-1}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -155,18 +209,41 @@ export function SignUpForm() {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full"
+              className="w-full h-11 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white shadow-lg shadow-pink-500/20 dark:shadow-pink-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/30"
               disabled={form.formState.isSubmitting}
             >
-              Sign Up
+              {form.formState.isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating account...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
+                  Create Account
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </span>
+              )}
             </Button>
           </form>
         </Form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-muted-foreground/10" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-card px-3 text-muted-foreground/60">or</span>
+          </div>
+        </div>
+
+        <div className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link href="/auth/login" className="underline underline-offset-4">
-            Log in
+          <Link
+            href="/auth/login"
+            className="font-semibold text-primary hover:text-primary/80 transition-colors"
+          >
+            Sign in
           </Link>
         </div>
       </CardContent>

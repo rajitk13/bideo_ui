@@ -18,7 +18,7 @@ export default function ViewProfile() {
   const { user } = useAuth();
 
   return (
-    <Card>
+    <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl">
       <CardHeader className="flex flex-col items-center text-center">
         <Avatar className="h-20 w-20 mb-4">
           <AvatarImage src={user?.avatar_url || ""} />
@@ -51,7 +51,9 @@ export default function ViewProfile() {
 
           <div className="flex flex-col gap-3">
             <Link href="/profile/edit">
-              <Button className="w-full">Edit Profile</Button>
+              <Button className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300">
+                Edit Profile
+              </Button>
             </Link>
           </div>
         </form>

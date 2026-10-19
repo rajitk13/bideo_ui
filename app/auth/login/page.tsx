@@ -3,12 +3,14 @@ import { LoginForm } from "@/components/user/LoginForm";
 
 export default function Page() {
   return (
-    <div className="flex min-h-[80vh] w-full items-center justify-center">
-      <div className="w-full max-w-sm">
-        <Suspense fallback={<div>Loading login form...</div>}>
-          <LoginForm />
-        </Suspense>
-      </div>
-    </div>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[360px]">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

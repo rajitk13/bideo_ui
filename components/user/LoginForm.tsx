@@ -29,6 +29,7 @@ import { useAuth } from "@/store/auth-context";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { MESSAGES } from "@/constants/messages";
+import { Eye, EyeOff, Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -41,6 +42,7 @@ export function LoginForm() {
   const { login } = useAuth();
   const searchParams = useSearchParams();
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const param = searchParams.get("status");
@@ -101,30 +103,43 @@ export function LoginForm() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          {message ? `${message}` : "Login to your account"}
+    <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-purple-500/5 bg-card/85 backdrop-blur-md rounded-2xl">
+      <CardHeader className="space-y-1 pb-2">
+        {/* Decorative gradient bar */}
+        <div className="h-1 w-16 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-4" />
+
+        <CardTitle className="text-2xl font-bold tracking-tight">
+          {message ? (
+            <span className="text-green-500">{message}</span>
+          ) : (
+            "Welcome back"
+          )}
         </CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
+        <CardDescription className="text-muted-foreground/80">
+          Enter your credentials to access your account
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Email
+                  </FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="m@example.com"
-                      {...field}
-                      disabled={isLoading}
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        placeholder="you@example.com"
+                        className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,32 +150,79 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <div className="flex items-center">
-                    <FormLabel>Password</FormLabel>
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Password
+                    </FormLabel>
                     <Link
                       href="/auth/reset"
-                      className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                      className="text-xs text-primary/70 hover:text-primary transition-colors"
                     >
-                      Forgot your password?
+                      Forgot password?
                     </Link>
                   </div>
                   <FormControl>
-                    <Input type="password" {...field} disabled={isLoading} />
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="pl-10 pr-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                        tabIndex={-1}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+            <Button
+              type="submit"
+              className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/30"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <LogIn className="h-4 w-4" />
+                  Sign In
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </span>
+              )}
             </Button>
-            <div className="mt-4 text-center text-sm">
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-muted-foreground/10" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-card px-3 text-muted-foreground/60">or</span>
+              </div>
+            </div>
+            <div className="text-center text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/signup"
-                className="underline underline-offset-4"
+                className="font-semibold text-primary hover:text-primary/80 transition-colors"
               >
-                Sign up
+                Create one
               </Link>
             </div>
           </form>
