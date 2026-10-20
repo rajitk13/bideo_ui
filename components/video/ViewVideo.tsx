@@ -294,13 +294,14 @@ export default function ViewVideo({ id, slug }: ViewVideoProps) {
                   {video.tags && video.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {video.tags.map((tag) => (
-                        <span
+                        <Link
                           key={tag}
-                          className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-foreground transition-colors"
+                          href={`/?tag=${encodeURIComponent(tag)}`}
+                          className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors cursor-pointer"
                         >
                           <Tag className="w-2.5 h-2.5" />
-                          {tag}
-                        </span>
+                          #{tag}
+                        </Link>
                       ))}
                     </div>
                   )}

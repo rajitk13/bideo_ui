@@ -6,12 +6,42 @@ pipeline {
             steps {
                 sh '''
                     set -eux
-                    echo "🧪 Running Frontend Unit Tests..."
+                    echo "🧪 Preparing environment for Frontend Unit Tests..."
 
+                    # 1. Search for existing node/npm installations in PATH or common paths
+                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin; do
+                        if [ -x "$node_dir/npm" ]; then
+                            export PATH="$node_dir:$PATH"
+                            break
+                        fi
+                    done
+
+                    # 2. If node/npm is still not found, download portable standalone Node.js
+                    if ! command -v npm >/dev/null 2>&1; then
+                        echo "📦 Node/npm not found. Downloading standalone Node.js..."
+                        ARCH=$(uname -m)
+                        case "$ARCH" in
+                            x86_64) NODE_ARCH="x64" ;;
+                            aarch64|arm64) NODE_ARCH="arm64" ;;
+                            *) NODE_ARCH="x64" ;;
+                        esac
+                        NODE_VER="v20.18.0"
+                        if [ ! -x "/tmp/node-standalone/bin/npm" ]; then
+                            mkdir -p /tmp/node-standalone
+                            curl -fsSL "https://nodejs.org/dist/${NODE_VER}/node-${NODE_VER}-linux-${NODE_ARCH}.tar.gz" | tar -xz -C /tmp/node-standalone --strip-components=1
+                        fi
+                        export PATH="/tmp/node-standalone/bin:$PATH"
+                    fi
+
+                    node -v
+                    npm -v
+
+                    # 3. Ensure dependencies are installed
                     if [ ! -d "node_modules" ]; then
                         npm ci || npm install
                     fi
 
+                    # 4. Run unit tests in CI mode
                     npm test -- --ci --maxWorkers=2
                 '''
             }

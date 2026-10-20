@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchVideos, searchVideos } from "@/utility/requests";
 import VideoCard from "@/components/video/VideoCard";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { InfiniteData } from "@tanstack/react-query";
 import { MESSAGES } from "@/constants/messages";
-import { Search, X, Film } from "lucide-react";
+import { Search, X, Film, Tag } from "lucide-react";
 import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
 
 const CATEGORIES: { label: string; value: string }[] = [
@@ -26,13 +27,49 @@ const CATEGORIES: { label: string; value: string }[] = [
   { label: "Other", value: "OTHER" },
 ];
 
-export default function ExplorePage() {
+function ExploreContent() {
+  const searchParams = useSearchParams();
   const observerRef = useRef<HTMLDivElement | null>(null);
-  const [searchInput, setSearchInput] = useState("");
-  const [activeQuery, setActiveQuery] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string>("ALL");
 
-  const isFiltered = activeQuery.trim().length > 0 || activeCategory !== "ALL";
+  const initialQuery = searchParams.get("query") || "";
+  const initialCategory = searchParams.get("category") || "ALL";
+  const initialTag = searchParams.get("tag") || "";
+
+  const [searchInput, setSearchInput] = useState(initialQuery);
+  const [activeQuery, setActiveQuery] = useState(initialQuery);
+  const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
+  const [activeTag, setActiveTag] = useState<string>(initialTag);
+
+  // Sync state if URL searchParams change (e.g. clicking tag on watch page)
+  useEffect(() => {
+    const q = searchParams.get("query") || "";
+    const cat = searchParams.get("category") || "ALL";
+    const t = searchParams.get("tag") || "";
+
+    if (q !== activeQuery) {
+      setSearchInput(q);
+      setActiveQuery(q);
+    }
+    if (cat !== activeCategory) {
+      setActiveCategory(cat);
+    }
+    if (t !== activeTag) {
+      setActiveTag(t);
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Debounce search input for live results as user types (350ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setActiveQuery(searchInput.trim());
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const isFiltered =
+    activeQuery.trim().length > 0 ||
+    activeCategory !== "ALL" ||
+    activeTag.trim().length > 0;
 
   const {
     data,
@@ -45,17 +82,17 @@ export default function ExplorePage() {
     PaginatedVideoResponse,
     Error,
     InfiniteData<PaginatedVideoResponse>,
-    ["videos", string, string],
+    ["videos", string, string, string],
     number
   >({
-    queryKey: ["videos", activeQuery, activeCategory],
+    queryKey: ["videos", activeQuery, activeCategory, activeTag],
     initialPageParam: 0,
     queryFn: ({ pageParam }) => {
       if (isFiltered) {
         return searchVideos(
           activeQuery,
           activeCategory === "ALL" ? undefined : activeCategory,
-          undefined,
+          activeTag || undefined,
           pageParam,
           12
         );
@@ -116,6 +153,7 @@ export default function ExplorePage() {
   const handleClearSearch = () => {
     setSearchInput("");
     setActiveQuery("");
+    setActiveTag("");
   };
 
   const handleCategorySelect = (categoryValue: string) => {
@@ -191,40 +229,73 @@ export default function ExplorePage() {
           })}
         </div>
 
-        {/* Search indicator if filtering */}
+        {/* Active Filter Chips Bar */}
         {isFiltered && (
-          <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
-            <span>
-              Showing results for{" "}
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t border-border/40">
+            <div className="flex flex-wrap items-center gap-2">
+              <span>Showing results for:</span>
               {activeQuery && (
-                <span className="font-semibold text-foreground">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
                   &ldquo;{activeQuery}&rdquo;
+                  <button
+                    onClick={() => {
+                      setSearchInput("");
+                      setActiveQuery("");
+                    }}
+                    className="hover:text-foreground"
+                    title="Remove query filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </span>
               )}
-              {activeQuery && activeCategory !== "ALL" && " in "}
+
               {activeCategory !== "ALL" && (
-                <span className="font-semibold text-foreground">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium border border-primary/20">
                   {CATEGORIES.find((c) => c.value === activeCategory)?.label}
+                  <button
+                    onClick={() => setActiveCategory("ALL")}
+                    className="hover:text-foreground"
+                    title="Remove category filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </span>
               )}
-            </span>
+
+              {activeTag && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium border border-blue-500/20">
+                  <Tag className="w-2.5 h-2.5" />
+                  #{activeTag}
+                  <button
+                    onClick={() => setActiveTag("")}
+                    className="hover:text-foreground"
+                    title="Remove tag filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
                 handleClearSearch();
                 setActiveCategory("ALL");
+                setActiveTag("");
               }}
-              className="h-7 text-xs text-primary hover:text-primary"
+              className="h-7 text-xs text-muted-foreground hover:text-foreground"
             >
-              Reset filters
+              Reset all filters
             </Button>
           </div>
         )}
 
-        {/* === Video Cards Grid === */}
-        <div className="grid gap-y-10 gap-x-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 justify-around sm:w-full">
-          {isLoading && videoList.length === 0
+        {/* Video Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {isLoading
             ? Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="space-y-3">
                   <Skeleton className="w-full aspect-video rounded-xl" />
@@ -268,7 +339,7 @@ export default function ExplorePage() {
               </h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 {isFiltered
-                  ? "We couldn't find any videos matching your search or filter. Try different keywords."
+                  ? "We couldn't find any videos matching your search or filters. Try searching with broader terms or check other categories."
                   : "No public videos are available at the moment. Be the first to upload one!"}
               </p>
             </div>
@@ -279,6 +350,7 @@ export default function ExplorePage() {
                 onClick={() => {
                   handleClearSearch();
                   setActiveCategory("ALL");
+                  setActiveTag("");
                 }}
               >
                 Clear Search & Filters
@@ -296,5 +368,36 @@ export default function ExplorePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full flex justify-center py-6">
+          <div className="w-full lg:max-w-[85%] px-4 space-y-6">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-11 w-full max-w-md rounded-full" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="w-full aspect-video rounded-xl" />
+                  <div className="flex gap-3">
+                    <Skeleton className="w-9 h-9 rounded-full shrink-0" />
+                    <div className="space-y-1.5 flex-1">
+                      <Skeleton className="w-full h-4" />
+                      <Skeleton className="w-2/3 h-3" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <ExploreContent />
+    </Suspense>
   );
 }
