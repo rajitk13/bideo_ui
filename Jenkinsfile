@@ -14,6 +14,8 @@ pipeline {
 
     environment {
         CI = 'true'
+        DOCKER_BUILDKIT = '1'
+        COMPOSE_DOCKER_CLI_BUILD = '1'
     }
 
     stages {
@@ -89,65 +91,117 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy Frontend') {
             steps {
                 sh '''
                     set -eux
-                    echo "🚀 Preparing deployment to /home/rajit/Bideo_proj..."
-
-                    # Install Maven if not available (required by backend dependencies in script.sh)
-                    if ! command -v mvn >/dev/null 2>&1; then
-                        echo "📦 Installing Maven..."
-                        apt-get update -qq && apt-get install -y -qq maven || {
-                            curl -fsSL https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xz -C /opt/
-                            export PATH="/opt/apache-maven-3.9.9/bin:$PATH"
-                        }
-                    fi
+                    echo "🚀 =========================================="
+                    echo "🚀  DEPLOYING ONLY FRONTEND (bideo_ui)       "
+                    echo "🚀 =========================================="
 
                     # Ensure git safe directories
                     git config --global --add safe.directory /home/rajit/Bideo_proj || true
-                    git config --global --add safe.directory /home/rajit/Bideo_proj/bideo_api || true
                     git config --global --add safe.directory /home/rajit/Bideo_proj/bideo_ui || true
                     git config --global --add safe.directory '*' || true
 
-                    # Resolve Git commit SHA reliably from the current Jenkins workspace
+                    # Resolve Git commit SHA and build number
                     COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "${GIT_COMMIT:-}")
                     if [ -z "$COMMIT_SHA" ] || [ "$COMMIT_SHA" = "HEAD" ]; then
                         COMMIT_SHA=$(git -C /home/rajit/Bideo_proj/bideo_ui rev-parse --short HEAD 2>/dev/null || echo "dev")
                     fi
                     BUILD_NUM="${BUILD_NUMBER:-}"
 
-                    echo "📌 Target Deployment Commit: ${COMMIT_SHA}"
+                    echo "📌 Target Frontend Commit: ${COMMIT_SHA}"
                     echo "🔢 Jenkins Build Number: #${BUILD_NUM}"
 
-                    cd /home/rajit/Bideo_proj
-
-                    # Clean leftover untracked build files in bideo_ui so git pull never encounters merge conflicts
+                    # 1. Update /home/rajit/Bideo_proj/bideo_ui repository only
                     if [ -d "/home/rajit/Bideo_proj/bideo_ui" ]; then
-                        echo "🧹 Cleaning untracked files in /home/rajit/Bideo_proj/bideo_ui before pull..."
-                        (cd /home/rajit/Bideo_proj/bideo_ui && rm -f build-info.json .env.production.local && git checkout -- . 2>/dev/null && git clean -fd 2>/dev/null || true)
+                        echo "📥 Updating bideo_ui on target server..."
+                        cd /home/rajit/Bideo_proj/bideo_ui
+                        git fetch origin main
+                        git reset --hard origin/main
+                        git clean -fd
+
+                        # Write production env file directly into bideo_ui
+                        cat <<ENV_EOF > .env.production.local
+NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}
+NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}
+ENV_EOF
+                    else
+                        echo "⚠️ /home/rajit/Bideo_proj/bideo_ui not found, skipping repo pull"
                     fi
 
-                    # Update /home/rajit/Bideo_proj/.env for docker-compose environment interpolation
-                    touch /home/rajit/Bideo_proj/.env
-                    sed -i '/^NEXT_PUBLIC_GIT_COMMIT_SHA=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
-                    sed -i '/^NEXT_PUBLIC_BUILD_NUMBER=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
-                    sed -i '/^GIT_COMMIT=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
-                    sed -i '/^BUILD_NUMBER=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
+                    # 2. Update /home/rajit/Bideo_proj/.env for docker-compose interpolation
+                    cd /home/rajit/Bideo_proj
+                    touch .env
+                    sed -i '/^NEXT_PUBLIC_GIT_COMMIT_SHA=/d' .env 2>/dev/null || true
+                    sed -i '/^NEXT_PUBLIC_BUILD_NUMBER=/d' .env 2>/dev/null || true
+                    sed -i '/^GIT_COMMIT=/d' .env 2>/dev/null || true
+                    sed -i '/^BUILD_NUMBER=/d' .env 2>/dev/null || true
 
-                    echo "NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}" >> /home/rajit/Bideo_proj/.env
-                    echo "NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}" >> /home/rajit/Bideo_proj/.env
-                    echo "GIT_COMMIT=${COMMIT_SHA}" >> /home/rajit/Bideo_proj/.env
-                    echo "BUILD_NUMBER=${BUILD_NUM}" >> /home/rajit/Bideo_proj/.env
+                    echo "NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}" >> .env
+                    echo "NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}" >> .env
+                    echo "GIT_COMMIT=${COMMIT_SHA}" >> .env
+                    echo "BUILD_NUMBER=${BUILD_NUM}" >> .env
 
-                    # Pass Jenkins automated build metadata to deployment script
-                    export BUILD_NUMBER="${BUILD_NUM}"
-                    export GIT_COMMIT="${COMMIT_SHA}"
-                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}"
                     export NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}"
+                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}"
+                    export GIT_COMMIT="${COMMIT_SHA}"
+                    export BUILD_NUMBER="${BUILD_NUM}"
 
-                    chmod +x script.sh
-                    ./script.sh
+                    # 3. Detect docker compose command
+                    COMPOSE_CMD=""
+                    if docker compose version >/dev/null 2>&1; then
+                        COMPOSE_CMD="docker compose"
+                    elif command -v docker-compose >/dev/null 2>&1; then
+                        COMPOSE_CMD="docker-compose"
+                    fi
+
+                    if [ -n "$COMPOSE_CMD" ]; then
+                        # Identify the frontend service in docker-compose.yml
+                        AVAILABLE_SERVICES=$($COMPOSE_CMD config --services 2>/dev/null || echo "")
+                        echo "📋 Available docker-compose services: ${AVAILABLE_SERVICES}"
+
+                        UI_SERVICE="frontend"
+                        if echo "$AVAILABLE_SERVICES" | grep -qw "frontend"; then
+                            UI_SERVICE="frontend"
+                        elif echo "$AVAILABLE_SERVICES" | grep -qw "bideo_ui"; then
+                            UI_SERVICE="bideo_ui"
+                        elif echo "$AVAILABLE_SERVICES" | grep -qw "ui"; then
+                            UI_SERVICE="ui"
+                        fi
+
+                        echo "🏗️ Rebuilding ONLY the frontend service (${UI_SERVICE})..."
+                        $COMPOSE_CMD build \
+                            --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
+                            --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
+                            "${UI_SERVICE}"
+
+                        # Remove any stuck previous container to prevent 'removal in progress' daemon lock
+                        echo "🧹 Clearing previous container state for ${UI_SERVICE}..."
+                        docker stop bideo_ui 2>/dev/null || true
+                        docker rm -f bideo_ui 2>/dev/null || true
+                        docker stop "${UI_SERVICE}" 2>/dev/null || true
+                        docker rm -f "${UI_SERVICE}" 2>/dev/null || true
+
+                        echo "🔄 Recreating ONLY ${UI_SERVICE} container (backend remains completely untouched)..."
+                        $COMPOSE_CMD up -d --no-deps "${UI_SERVICE}"
+                    else
+                        echo "⚠️ Docker compose not found. Building and restarting via Docker CLI..."
+                        docker build \
+                            --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
+                            --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
+                            -t bideo_ui:latest ./bideo_ui
+                        docker stop bideo_ui 2>/dev/null || true
+                        docker rm -f bideo_ui 2>/dev/null || true
+                        docker run -d --name bideo_ui -p 3000:3000 --restart always bideo_ui:latest
+                    fi
+
+                    # Clean dangling images
+                    echo "🧹 Pruning unused images..."
+                    docker image prune -f || true
+
+                    echo "✅ Frontend deployment complete!"
                 '''
             }
         }
@@ -156,9 +210,8 @@ pipeline {
             steps {
                 sh '''
                     set +e
-                    echo "🩺 Running post-deployment health check..."
+                    echo "🩺 Running post-deployment frontend health check..."
 
-                    # Allow containers up to 30 seconds to initialize
                     SUCCESS=0
                     for i in $(seq 1 10); do
                         echo "Attempt $i/10: Checking frontend HTTP status..."
@@ -172,7 +225,7 @@ pipeline {
                     done
 
                     if [ "$SUCCESS" -eq 0 ]; then
-                        echo "⚠️ Health check timed out or returned non-200. Container status:"
+                        echo "⚠️ Frontend smoke check timed out. Dumping container status:"
                         docker ps --filter "name=bideo" || true
                     fi
                 '''
@@ -182,11 +235,17 @@ pipeline {
 
     post {
         success {
-            echo "🎉 Deployment successful! Build #${env.BUILD_NUMBER} is now live."
+            echo "================================================================"
+            echo "🎉 FRONTEND DEPLOYMENT SUCCESSFUL!"
+            echo "🚀 Build #${env.BUILD_NUMBER} is now live."
+            echo "================================================================"
         }
 
         failure {
-            echo "❌ Deployment failed on Build #${env.BUILD_NUMBER}. Please check the console output above."
+            echo "================================================================"
+            echo "❌ FRONTEND DEPLOYMENT FAILED on Build #${env.BUILD_NUMBER}!"
+            echo "⚠️ Please inspect the console output above."
+            echo "================================================================"
         }
     }
 }
