@@ -14,6 +14,7 @@ import { useAuth } from "@/store/auth-context";
 import Link from "next/link";
 import Image from "next/image";
 import DeleteVideoButton from "../video/DeleteVideoButton";
+import { EditVideoModal } from "../video/EditVideoModal";
 import { formatDistanceToNow } from "date-fns";
 import {
   Table,
@@ -41,31 +42,9 @@ import {
   X,
 } from "lucide-react";
 
-type UserDTO = {
-  userId: string;
-  user_name: string;
-  user_email: string;
-  avatar_url?: string | null;
-};
+import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
 
-type Video = {
-  videoId: number;
-  video_title: string;
-  video_uploadDate: string;
-  video_views: number;
-  m3u8Url: string;
-  video_uploader: UserDTO;
-  video_duration: string;
-  thumbnail_url: string;
-  videoStatus: "PENDING" | "PROCESSING" | "COMPLETED" | string;
-};
-
-type PaginatedVideoResponse = {
-  content: Video[];
-  number: number;
-  totalPages: number;
-  last: boolean;
-};
+type Video = VideoDTO;
 
 export default function MyVideos() {
   const { user, token } = useAuth();
@@ -131,7 +110,7 @@ export default function MyVideos() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
     switch (status) {
       case "COMPLETED":
         return (
@@ -157,7 +136,7 @@ export default function MyVideos() {
       default:
         return (
           <Badge className="bg-muted text-muted-foreground border border-border/50 font-medium px-2.5 py-0.5 whitespace-nowrap w-fit">
-            {status}
+            {status || "UNKNOWN"}
           </Badge>
         );
     }
@@ -383,6 +362,10 @@ export default function MyVideos() {
                       day: "numeric",
                     });
 
+                    const videoHref = video.slug
+                      ? `/watch/${video.slug}`
+                      : `/video/${video.videoId}/view`;
+
                     return (
                       <TableRow
                         key={video.videoId}
@@ -392,12 +375,16 @@ export default function MyVideos() {
                         <TableCell className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             <Link
-                              href={`/video/${video.videoId}/view`}
+                              href={videoHref}
                               className="relative w-24 h-14 rounded-lg overflow-hidden bg-black/10 shrink-0 group/thumb ring-1 ring-border/50 block"
                             >
-                              {video.videoStatus === "PROCESSING" ? (
+                              {video.videoStatus === "PROCESSING" || !video.thumbnail_url ? (
                                 <div className="w-full h-full flex items-center justify-center bg-muted/60">
-                                  <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                                  {video.videoStatus === "PROCESSING" ? (
+                                    <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
+                                  ) : (
+                                    <Film className="w-5 h-5 text-muted-foreground/50" />
+                                  )}
                                 </div>
                               ) : (
                                 <Image
@@ -423,15 +410,22 @@ export default function MyVideos() {
 
                             <div className="min-w-0 flex-1">
                               <Link
-                                href={`/video/${video.videoId}/view`}
+                                href={videoHref}
                                 className="font-semibold text-sm line-clamp-1 hover:text-primary transition-colors text-foreground"
                                 title={video.video_title}
                               >
                                 {video.video_title}
                               </Link>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                ID: #{video.videoId}
-                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-xs text-muted-foreground">
+                                  ID: #{video.videoId}
+                                </span>
+                                {video.category && (
+                                  <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-muted text-muted-foreground">
+                                    {video.category}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
@@ -462,7 +456,7 @@ export default function MyVideos() {
                         {/* Actions */}
                         <TableCell className="py-3 px-4 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <Link href={`/video/${video.videoId}/view`}>
+                            <Link href={videoHref}>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -473,6 +467,8 @@ export default function MyVideos() {
                                 <Play className="h-3.5 w-3.5" />
                               </Button>
                             </Link>
+
+                            <EditVideoModal video={video} />
 
                             <Button
                               variant="ghost"

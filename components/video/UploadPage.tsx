@@ -15,6 +15,9 @@ import {
   ArrowRight,
   LogIn,
   Film,
+  Tag,
+  AlignLeft,
+  Globe,
 } from "lucide-react";
 import axios from "axios";
 import { api_instance } from "@/global";
@@ -30,6 +33,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "../ui/badge";
 import {
@@ -41,14 +45,34 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
 import { MESSAGES } from "@/constants/messages";
+import { VideoCategory, VideoVisibility } from "@/types/video";
 
 const MAX_FILE_SIZE_MB = 50;
+
+const CATEGORIES: VideoCategory[] = [
+  "OTHER",
+  "TECH",
+  "EDUCATION",
+  "GAMING",
+  "ENTERTAINMENT",
+  "MUSIC",
+  "NEWS",
+  "SPORTS",
+  "LIFESTYLE",
+];
 
 const formSchema = z.object({
   videoTitle: z
     .string()
     .min(1, "Title is required")
     .max(100, "Title cannot exceed 100 characters"),
+  description: z
+    .string()
+    .max(2000, "Description cannot exceed 2000 characters")
+    .optional(),
+  category: z.string().default("OTHER"),
+  visibility: z.enum(["PUBLIC", "UNLISTED", "PRIVATE"]).default("PUBLIC"),
+  tags: z.string().optional(),
   file: z
     .any()
     .refine(
@@ -72,6 +96,10 @@ export default function UploadPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       videoTitle: "",
+      description: "",
+      category: "OTHER",
+      visibility: "PUBLIC" as VideoVisibility,
+      tags: "",
       file: null as unknown as File,
       userId: user?.userId || "",
     },
@@ -80,6 +108,7 @@ export default function UploadPage() {
   const { setValue, watch, reset, formState } = form;
   const selectedFile: File | null = watch("file");
   const videoTitle = watch("videoTitle") || "";
+  const description = watch("description") || "";
 
   useEffect(() => {
     if (user?.userId) {
@@ -154,6 +183,18 @@ export default function UploadPage() {
     formData.append("videoTitle", data.videoTitle);
     formData.append("file", data.file);
     formData.append("userId", data.userId);
+    if (data.description) {
+      formData.append("description", data.description);
+    }
+    if (data.category) {
+      formData.append("category", data.category);
+    }
+    if (data.visibility) {
+      formData.append("visibility", data.visibility);
+    }
+    if (data.tags) {
+      formData.append("tags", data.tags);
+    }
 
     return axios.post(`${api_instance}/vid/upload`, formData, {
       headers: {
@@ -183,6 +224,10 @@ export default function UploadPage() {
       setIsUploaded(true);
       reset({
         videoTitle: "",
+        description: "",
+        category: "OTHER",
+        visibility: "PUBLIC",
+        tags: "",
         file: null as unknown as File,
         userId: user?.userId || "",
       });
@@ -406,6 +451,125 @@ export default function UploadPage() {
                       />
                     </div>
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Video Description */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <AlignLeft className="w-3.5 h-3.5 text-muted-foreground/60" />
+                      Description
+                    </FormLabel>
+                    <span className="text-[11px] text-muted-foreground">
+                      {description.length}/2000
+                    </span>
+                  </div>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Tell viewers what your video is about (powers rich SEO description)..."
+                      className="min-h-24 bg-muted/30 border-muted-foreground/15 rounded-lg text-sm focus-visible:border-primary/50 resize-y"
+                      maxLength={2000}
+                      disabled={formState.isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Category & Visibility Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Category */}
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5 text-muted-foreground/60" />
+                      Category
+                    </FormLabel>
+                    <FormControl>
+                      <select
+                        className="w-full h-11 px-3 rounded-lg bg-muted/30 border border-muted-foreground/15 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50 transition-colors"
+                        disabled={formState.isSubmitting}
+                        {...field}
+                      >
+                        {CATEGORIES.map((cat) => (
+                          <option key={cat} value={cat} className="bg-popover text-foreground">
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Visibility */}
+              <FormField
+                control={form.control}
+                name="visibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Visibility
+                    </FormLabel>
+                    <FormControl>
+                      <select
+                        className="w-full h-11 px-3 rounded-lg bg-muted/30 border border-muted-foreground/15 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/50 transition-colors"
+                        disabled={formState.isSubmitting}
+                        {...field}
+                      >
+                        <option value="PUBLIC" className="bg-popover text-foreground">
+                          Public (Everyone)
+                        </option>
+                        <option value="UNLISTED" className="bg-popover text-foreground">
+                          Unlisted (Direct link)
+                        </option>
+                        <option value="PRIVATE" className="bg-popover text-foreground">
+                          Private (Only you)
+                        </option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Tags Input */}
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-1.5">
+                    <Tag className="w-3.5 h-3.5 text-muted-foreground/60" />
+                    <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Tags (Comma-separated)
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. springboot, nextjs, web-dev"
+                      className="h-11 bg-muted/30 border-muted-foreground/15 rounded-lg text-sm focus-visible:border-primary/50"
+                      disabled={formState.isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-[11px] text-muted-foreground">
+                    Comma-separated keywords used for video search and Schema.org VideoObject metadata.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}

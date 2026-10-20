@@ -1,4 +1,11 @@
 import { api_instance } from "@/global";
+import {
+  VideoDTO,
+  VideoMetadataUpdateRequest,
+  PaginatedVideoResponse,
+} from "@/types/video";
+
+export * from "@/types/video";
 
 export interface LoginPayload {
   email: string;
@@ -29,15 +36,8 @@ export interface VideoUploader {
   avatar_url: string | null;
 }
 
-export interface VideoResponse {
-  videoId: string;
-  video_title: string;
-  video_uploadDate: string;
-  video_views: number;
-  m3u8Url: string;
-  video_duration: string;
-  video_uploader: VideoUploader;
-}
+// Kept for backward-compatibility with existing components
+export type VideoResponse = VideoDTO;
 
 export interface User {
   userId: string;
@@ -263,3 +263,79 @@ export async function deleteVideo(
   if (!res.ok) throw new Error("Failed to fetch user videos");
   return res.text();
 }
+
+export const getVideoBySlug = async (slug: string): Promise<VideoDTO> => {
+  const res = await fetch(`${api_instance}/vid/slug/${encodeURIComponent(slug)}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to load video by slug: ${res.status} - ${text}`);
+  }
+  return res.json();
+};
+
+export const getVideoById = async (id: string | number): Promise<VideoDTO> => {
+  const res = await fetch(`${api_instance}/vid/view/${id}`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to load video: ${res.status} - ${text}`);
+  }
+  return res.json();
+};
+
+export const updateVideoMetadata = async (
+  videoId: number,
+  userId: string,
+  payload: VideoMetadataUpdateRequest,
+  token: string
+): Promise<VideoDTO> => {
+  const res = await fetch(
+    `${api_instance}/vid/${videoId}?userId=${encodeURIComponent(userId)}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update video metadata: ${res.status} - ${text}`);
+  }
+
+  return res.json();
+};
+
+export const searchVideos = async (
+  query?: string,
+  category?: string,
+  tag?: string,
+  page = 0,
+  size = 12
+): Promise<PaginatedVideoResponse> => {
+  const params = new URLSearchParams();
+  if (query && query.trim()) params.append("query", query.trim());
+  if (category && category !== "ALL") params.append("category", category);
+  if (tag && tag.trim()) params.append("tag", tag.trim());
+  params.append("page", page.toString());
+  params.append("size", size.toString());
+
+  const res = await fetch(`${api_instance}/vid/search?${params.toString()}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Search videos failed: ${res.status}`);
+  }
+
+  return res.json();
+};
+

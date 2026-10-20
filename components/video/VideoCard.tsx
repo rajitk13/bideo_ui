@@ -7,26 +7,18 @@ import { Share2, Play, Eye, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
 
+import { VideoDTO } from "@/types/video";
+
 type VideoCardProps = {
-  video: {
-    videoId: number;
-    video_title: string;
-    video_uploadDate: string;
-    video_views: number;
-    m3u8Url: string;
-    video_duration: string;
-    thumbnail_url: string;
-    video_uploader: {
-      userId: string;
-      user_name: string;
-      user_email: string;
-      avatar_url: string;
-    };
-  };
+  video: VideoDTO;
 };
 
 export default function VideoCard({ video }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const videoHref = video.slug
+    ? `/watch/${video.slug}`
+    : `/video/${video.videoId}/view`;
 
   const timeAgo = formatDistanceToNow(new Date(video.video_uploadDate), {
     addSuffix: true,
@@ -42,7 +34,7 @@ export default function VideoCard({ video }: VideoCardProps) {
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const videoUrl = `${window.location.origin}/video/${video.videoId}/view`;
+    const videoUrl = `${window.location.origin}${videoHref}`;
     try {
       await navigator.clipboard.writeText(videoUrl);
       toast.success("Link copied to clipboard!");
@@ -66,6 +58,11 @@ export default function VideoCard({ video }: VideoCardProps) {
     }
   };
 
+  const uploaderName = video.video_uploader?.user_name || "Creator";
+  const uploaderId = video.video_uploader?.userId || "";
+  const avatarUrl = video.video_uploader?.avatar_url || "";
+  const duration = video.video_duration || "0:00";
+
   return (
     <div
       className="group w-full max-w-sm"
@@ -73,7 +70,7 @@ export default function VideoCard({ video }: VideoCardProps) {
       onMouseLeave={handleMouseLeave}
     >
       {/* Thumbnail with hover preview */}
-      <Link href={`/video/${video.videoId}/view`} className="block">
+      <Link href={videoHref} className="block">
         <div className="relative rounded-xl overflow-hidden aspect-video bg-black/5 dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-hover:ring-2 group-hover:ring-primary/30 group-hover:shadow-lg group-hover:shadow-primary/5">
           {/* Poster/Thumbnail */}
           <video
@@ -100,7 +97,7 @@ export default function VideoCard({ video }: VideoCardProps) {
           {/* Duration badge */}
           <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/75 backdrop-blur-sm text-white text-[11px] font-medium px-2 py-0.5 rounded-md transition-all duration-300 group-hover:bottom-3 group-hover:right-3">
             <Clock className="w-3 h-3" />
-            {video.video_duration}
+            {duration}
           </div>
 
           {/* Share button (appears on hover) */}
@@ -116,26 +113,26 @@ export default function VideoCard({ video }: VideoCardProps) {
 
       {/* Video info */}
       <div className="flex items-start gap-3 mt-3">
-        <Link href={`/profile/${video.video_uploader.userId}`} className="shrink-0">
+        <Link href={uploaderId ? `/profile/${uploaderId}` : "#"} className="shrink-0">
           <Avatar className="h-9 w-9 ring-2 ring-transparent transition-all duration-300 group-hover:ring-primary/20">
             <AvatarImage
-              src={video.video_uploader?.avatar_url || ""}
-              alt={video.video_uploader.user_name || "User"}
+              src={avatarUrl}
+              alt={uploaderName}
             />
             <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
-              {video.video_uploader.user_name.slice(0, 2).toUpperCase()}
+              {uploaderName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link href={`/video/${video.videoId}/view`}>
+          <Link href={videoHref}>
             <h3 className="text-sm font-semibold line-clamp-2 leading-snug text-foreground group-hover:text-primary transition-colors duration-200">
               {video.video_title}
             </h3>
           </Link>
           <p className="text-muted-foreground text-xs mt-1 truncate hover:text-foreground transition-colors duration-200">
-            {video.video_uploader.user_name}
+            {uploaderName}
           </p>
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs mt-0.5">
             <span className="flex items-center gap-1">

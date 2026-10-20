@@ -1,7 +1,13 @@
 "use client";
 
 import VideoPlayer from "@/components/player/VideoPlayer";
-import { getVideoData, fetchVideos, VideoResponse } from "@/utility/requests";
+import {
+  getVideoById,
+  getVideoBySlug,
+  fetchVideos,
+  VideoDTO,
+} from "@/utility/requests";
+import { VideoSeoHead } from "./VideoSeoHead";
 import { useEffect, useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
@@ -23,36 +29,38 @@ import {
   AlertCircle,
   ArrowLeft,
   Check,
+  Tag,
 } from "lucide-react";
 
-type RecommendedVideo = {
-  videoId: number;
-  video_title: string;
-  video_uploadDate: string;
-  video_views: number;
-  m3u8Url: string;
-  video_duration: string;
-  thumbnail_url: string;
-  videoStatus: string;
-  video_uploader: {
-    userId: string;
-    user_name: string;
-    avatar_url?: string | null;
-  };
-};
+interface ViewVideoProps {
+  id?: string;
+  slug?: string;
+}
 
-export default function ViewVideo({ id }: { id: string }) {
-  const [video, setVideo] = useState<VideoResponse | null>(null);
+export default function ViewVideo({ id, slug }: ViewVideoProps) {
+  const [video, setVideo] = useState<VideoDTO | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Fetch current video details
+  // Fetch current video details by slug or id
   useEffect(() => {
     let isMounted = true;
     async function fetchVideo() {
       try {
         setError(null);
-        const data = await getVideoData({ id });
+        let data: VideoDTO;
+        if (slug) {
+          data = await getVideoBySlug(slug);
+        } else if (id) {
+          // If pure number, use view by id; otherwise treat as slug
+          if (/^\d+$/.test(id)) {
+            data = await getVideoById(id);
+          } else {
+            data = await getVideoBySlug(id);
+          }
+        } else {
+          throw new Error("No video identifier provided");
+        }
         if (isMounted) setVideo(data);
       } catch (err: unknown) {
         const errorMsg =
@@ -65,11 +73,11 @@ export default function ViewVideo({ id }: { id: string }) {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, slug]);
 
   // Fetch recommended videos for sidebar
   const { data: recsData, isLoading: recsLoading } = useQuery<{
-    content: RecommendedVideo[];
+    content: VideoDTO[];
   }>({
     queryKey: ["recommendedVideos"],
     queryFn: () => fetchVideos(0),
@@ -82,10 +90,11 @@ export default function ViewVideo({ id }: { id: string }) {
       .filter(
         (v) =>
           v.videoId.toString() !== id &&
+          v.slug !== slug &&
           (v.videoStatus === "COMPLETED" || !v.videoStatus)
       )
       .slice(0, 8);
-  }, [recsData, id]);
+  }, [recsData, id, slug]);
 
   const handleShare = async () => {
     try {
@@ -146,12 +155,15 @@ export default function ViewVideo({ id }: { id: string }) {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+      {/* Dynamic SEO Meta Tags & Schema.org JSON-LD */}
+      {video && <VideoSeoHead video={video} />}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* === Left: Main Player & Video Details (Col 8) === */}
         <div className="lg:col-span-8 space-y-5">
           {/* Theater Video Player */}
           <div className="relative rounded-2xl overflow-hidden bg-black aspect-video ring-1 ring-border/50 shadow-2xl shadow-black/30">
-            {video ? (
+            {video && video.m3u8Url ? (
               <VideoPlayer src={video.m3u8Url} />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center bg-black/60">
@@ -171,24 +183,26 @@ export default function ViewVideo({ id }: { id: string }) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/40">
                 {/* Creator Profile */}
                 <div className="flex items-center gap-3">
-                  <Link href={`/profile/${video.video_uploader.userId}`}>
+                  <Link href={`/profile/${video.video_uploader?.userId || ""}`}>
                     <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
                       <AvatarImage
-                        src={video.video_uploader.avatar_url || ""}
-                        alt={video.video_uploader.user_name}
+                        src={video.video_uploader?.avatar_url || ""}
+                        alt={video.video_uploader?.user_name || "Creator"}
                       />
                       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                        {video.video_uploader.user_name.slice(0, 2).toUpperCase()}
+                        {(video.video_uploader?.user_name || "U")
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </Link>
 
                   <div>
                     <Link
-                      href={`/profile/${video.video_uploader.userId}`}
+                      href={`/profile/${video.video_uploader?.userId || ""}`}
                       className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block"
                     >
-                      {video.video_uploader.user_name}
+                      {video.video_uploader?.user_name || "Creator"}
                     </Link>
                     <span className="text-xs text-muted-foreground">
                       Channel Creator
@@ -226,7 +240,7 @@ export default function ViewVideo({ id }: { id: string }) {
 
               {/* Video Details Card */}
               <Card className="border border-border/40 bg-card/75 backdrop-blur-sm rounded-xl p-4 sm:p-5">
-                <CardContent className="p-0 space-y-3">
+                <CardContent className="p-0 space-y-3.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge
                       variant="secondary"
@@ -235,9 +249,29 @@ export default function ViewVideo({ id }: { id: string }) {
                       <Sparkles className="w-3 h-3 mr-1" />
                       HLS Adaptive Stream
                     </Badge>
+
+                    {video.category && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-semibold bg-background/50 uppercase tracking-wider"
+                      >
+                        {video.category}
+                      </Badge>
+                    )}
+
+                    {video.visibility && video.visibility !== "PUBLIC" && (
+                      <Badge
+                        variant="outline"
+                        className="text-xs font-medium text-amber-500 border-amber-500/30"
+                      >
+                        {video.visibility}
+                      </Badge>
+                    )}
+
                     <Badge variant="outline" className="text-xs font-medium">
                       HD Quality
                     </Badge>
+
                     {video.video_duration && (
                       <Badge variant="outline" className="text-xs font-medium">
                         Duration: {video.video_duration}
@@ -245,7 +279,33 @@ export default function ViewVideo({ id }: { id: string }) {
                     )}
                   </div>
 
-                  <p className="text-xs text-muted-foreground pt-1">
+                  {/* Video Description */}
+                  {video.description ? (
+                    <div className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed pt-1">
+                      {video.description}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">
+                      No description provided.
+                    </p>
+                  )}
+
+                  {/* Tags */}
+                  {video.tags && video.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {video.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-foreground transition-colors"
+                        >
+                          <Tag className="w-2.5 h-2.5" />
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="text-xs text-muted-foreground pt-2 border-t border-border/30">
                     Uploaded on{" "}
                     <span className="font-medium text-foreground">
                       {formattedDate}
@@ -309,16 +369,20 @@ export default function ViewVideo({ id }: { id: string }) {
                     ? `${(item.video_views / 1000).toFixed(1)}K`
                     : item.video_views.toString();
 
+                const videoHref = item.slug
+                  ? `/watch/${item.slug}`
+                  : `/video/${item.videoId}/view`;
+
                 return (
                   <Link
                     key={item.videoId}
-                    href={`/video/${item.videoId}/view`}
+                    href={videoHref}
                     className="group flex gap-3 p-1.5 rounded-xl hover:bg-muted/40 transition-colors"
                   >
                     {/* Compact Thumbnail */}
                     <div className="relative w-36 h-20 rounded-lg overflow-hidden bg-black/10 shrink-0 group-hover:ring-1 group-hover:ring-primary/30 transition-all">
                       <Image
-                        src={item.thumbnail_url}
+                        src={item.thumbnail_url || ""}
                         alt={item.video_title}
                         fill
                         sizes="144px"
@@ -343,7 +407,7 @@ export default function ViewVideo({ id }: { id: string }) {
                         {item.video_title}
                       </h3>
                       <p className="text-[11px] text-muted-foreground mt-1 truncate">
-                        {item.video_uploader.user_name}
+                        {item.video_uploader?.user_name || "Creator"}
                       </p>
                       <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
                         <span>{itemViews} views</span>
