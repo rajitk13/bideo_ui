@@ -1,6 +1,7 @@
 import { api_instance } from "@/global";
 import {
   VideoDTO,
+  UserDTO,
   VideoMetadataUpdateRequest,
   PaginatedVideoResponse,
 } from "@/types/video";
@@ -337,5 +338,41 @@ export const searchVideos = async (
   }
 
   return res.json();
+};
+
+export const getPublicUser = async (
+  userId: string
+): Promise<UserDTO | null> => {
+  try {
+    const res = await fetch(
+      `${api_instance}/user/getUser/${encodeURIComponent(userId)}`,
+      {
+        next: { revalidate: 60 },
+      }
+    );
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+};
+
+export const getPublicUserVideos = async (
+  userId: string,
+  page = 0,
+  size = 24
+): Promise<PaginatedVideoResponse | null> => {
+  try {
+    const res = await fetch(
+      `${api_instance}/vid/user/${encodeURIComponent(userId)}?page=${page}&size=${size}`,
+      {
+        next: { revalidate: 60 },
+      }
+    );
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 };
 
