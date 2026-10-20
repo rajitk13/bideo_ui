@@ -98,7 +98,7 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/video/upload" className="hover:underline">
+              <Link href="/video/upload" prefetch={false} className="hover:underline">
                 Upload
               </Link>
             </li>
