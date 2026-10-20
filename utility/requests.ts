@@ -75,7 +75,9 @@ export const loginUser = async (
 ): Promise<LoginResponse> => {
   const formData = new FormData();
   formData.append("email", payload.email);
+  formData.append("username", payload.email);
   formData.append("identifier", payload.email);
+  formData.append("user_name", payload.email);
   formData.append("password", payload.password);
 
   const res = await fetch(`${api_instance}/app/login`, {
@@ -433,3 +435,47 @@ export const getPublicUserVideos = async (
   }
 };
 
+
+export interface ServiceHealth {
+  status: "UP" | "DOWN" | "DEGRADED";
+  latencyMs: number;
+  details?: string;
+}
+
+export interface SystemHealthResponse {
+  status: "UP" | "DOWN" | "DEGRADED";
+  timestamp: number;
+  services: {
+    postgres?: ServiceHealth;
+    redis?: ServiceHealth;
+    rabbitmq?: ServiceHealth;
+    firebase?: ServiceHealth;
+    s3?: ServiceHealth;
+    [key: string]: ServiceHealth | undefined;
+  };
+}
+
+export const fetchSystemHealth = async (): Promise<SystemHealthResponse> => {
+  const res = await fetch(`${api_instance}/health`, {
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Health check returned HTTP ${res.status}`);
+  }
+  return res.json();
+};
+
+export const recordVideoView = async (
+  videoId: string | number
+): Promise<boolean> => {
+  try {
+    const res = await fetch(`${api_instance}/vid/${videoId}/view`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+};

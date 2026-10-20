@@ -5,6 +5,7 @@ import {
   getVideoById,
   getVideoBySlug,
   fetchVideos,
+  recordVideoView,
   VideoDTO,
 } from "@/utility/requests";
 import { VideoSeoHead } from "./VideoSeoHead";
@@ -84,6 +85,15 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
       isMounted = false;
     };
   }, [id, slug, initialVideo]);
+
+  // Record verified view after 5 seconds of playback engagement
+  useEffect(() => {
+    if (!video?.videoId) return;
+    const timer = setTimeout(() => {
+      recordVideoView(video.videoId);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [video?.videoId]);
 
   // Fetch recommended videos for sidebar
   const { data: recsData, isLoading: recsLoading } = useQuery<{

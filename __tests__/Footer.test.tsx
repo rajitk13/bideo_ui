@@ -11,6 +11,7 @@ describe("Footer Component", () => {
     expect(screen.getByText("Rajit Kuthiala")).toBeInTheDocument();
     expect(screen.getByText("Tech Stack")).toBeInTheDocument();
     expect(screen.getByText("Contribute")).toBeInTheDocument();
+    expect(screen.getByText("System Status")).toBeInTheDocument();
   });
 
   it("displays copyright with current year", () => {

@@ -112,6 +112,12 @@ export function Footer() {
                 Tech Stack
               </Link>
             </li>
+            <li>
+              <Link href="/status" className="hover:underline flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                System Status
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

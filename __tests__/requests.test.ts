@@ -680,4 +680,54 @@ describe("Video Requests Utility", () => {
       expect(await getPublicUserVideos("net-err")).toBeNull();
     });
   });
+
+  describe("fetchSystemHealth & recordVideoView", () => {
+    it("fetches system health successfully", async () => {
+      const mockHealth = { status: "UP", timestamp: 12345, services: {} };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockHealth,
+      });
+
+      const { fetchSystemHealth } = await import("@/utility/requests");
+      const res = await fetchSystemHealth();
+      expect(res).toEqual(mockHealth);
+      expect(global.fetch).toHaveBeenCalledWith(`${api_instance}/health`, {
+        cache: "no-store",
+      });
+    });
+
+    it("throws on system health failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+      });
+
+      const { fetchSystemHealth } = await import("@/utility/requests");
+      await expect(fetchSystemHealth()).rejects.toThrow(
+        "Health check returned HTTP 503"
+      );
+    });
+
+    it("records video view successfully", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: true });
+      const { recordVideoView } = await import("@/utility/requests");
+      const res = await recordVideoView(42);
+      expect(res).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/42/view`,
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("returns false when recording video view fails or throws", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const { recordVideoView } = await import("@/utility/requests");
+      expect(await recordVideoView(42)).toBe(false);
+
+      global.fetch = jest.fn().mockRejectedValue(new Error("Network fail"));
+      expect(await recordVideoView(42)).toBe(false);
+    });
+  });
 });
+
