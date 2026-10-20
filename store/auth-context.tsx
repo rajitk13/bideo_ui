@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const res = await fetch("/ui/auth/session");
         const { token, uid } = await res.json();
-        setToken(token);
-        setUid(uid);
+        setToken((prev) => (prev !== null ? prev : token));
+        setUid((prev) => (prev !== null ? prev : uid));
       } catch (err) {
         console.error("Session load failed:", err);
       }

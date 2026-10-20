@@ -47,7 +47,7 @@ export default function VideoCard({ video }: VideoCardProps) {
   const handleMouseEnter = () => {
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
+      videoRef.current.play()?.catch(() => {});
     }
   };
 

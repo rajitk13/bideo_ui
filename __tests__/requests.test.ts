@@ -214,4 +214,425 @@ describe("Video Requests Utility", () => {
       );
     });
   });
+
+  describe("verifyToken", () => {
+    it("returns verified user id object on success", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ id: "uid123" }),
+      });
+
+      const res = await (await import("@/utility/requests")).verifyToken("valid-token");
+      expect(res).toEqual({ id: "uid123" });
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/app/verifyToken`,
+        expect.objectContaining({
+          method: "POST",
+          body: "valid-token",
+        })
+      );
+    });
+
+    it("throws on failed verification", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        text: async () => "Invalid token signature",
+      });
+
+      await expect(
+        (await import("@/utility/requests")).verifyToken("bad-token")
+      ).rejects.toThrow("Token verification failed: Invalid token signature");
+    });
+  });
+
+  describe("loginUser", () => {
+    it("logs in user and sets auth session", async () => {
+      global.fetch = jest.fn().mockImplementation((url) => {
+        if (url === `${api_instance}/app/login`) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ idToken: "token-1", refreshToken: "ref-1" }),
+          });
+        }
+        if (url === `${api_instance}/app/verifyToken`) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ id: "uid-abc" }),
+          });
+        }
+        return Promise.resolve({ ok: true, json: async () => ({}) });
+      });
+
+      const { loginUser } = await import("@/utility/requests");
+      const res = await loginUser({ email: "user@test.com", password: "pwd" });
+      expect(res).toEqual({
+        idToken: "token-1",
+        refreshToken: "ref-1",
+        uid: "uid-abc",
+      });
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/ui/auth/setSession",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ token: "token-1", uid: "uid-abc" }),
+        })
+      );
+    });
+
+    it("throws when login endpoint fails", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        text: async () => "Unauthorized credentials",
+      });
+
+      const { loginUser } = await import("@/utility/requests");
+      await expect(
+        loginUser({ email: "bad@test.com", password: "pwd" })
+      ).rejects.toThrow("Login failed with status 401: Unauthorized credentials");
+    });
+  });
+
+  describe("createUser", () => {
+    it("creates user successfully", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        statusText: "Created",
+      });
+
+      const { createUser } = await import("@/utility/requests");
+      const res = await createUser({
+        email: "new@test.com",
+        password: "pwd",
+        user_name: "NewUser",
+        avatar_url: "/avatar.png",
+      });
+
+      expect(res).toBe("Created");
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/app/createUser`,
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("throws when creation fails", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 409,
+        text: async () => "Email already exists",
+      });
+
+      const { createUser } = await import("@/utility/requests");
+      await expect(
+        createUser({
+          email: "dup@test.com",
+          password: "pwd",
+          user_name: "Dup",
+          avatar_url: "/avatar.png",
+        })
+      ).rejects.toThrow("User creation failed: 409 - Email already exists");
+    });
+  });
+
+  describe("getVideoData", () => {
+    it("fetches video data by id", async () => {
+      const mockVideo = { videoId: 101, video_title: "Video 101" };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockVideo,
+      });
+
+      const { getVideoData } = await import("@/utility/requests");
+      const result = await getVideoData({ id: "101" });
+      expect(result).toEqual(mockVideo);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/view/101`,
+        { cache: "no-store" }
+      );
+    });
+
+    it("throws on error", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => "Video not found",
+      });
+
+      const { getVideoData } = await import("@/utility/requests");
+      await expect(getVideoData({ id: "999" })).rejects.toThrow(
+        "Failed to Load Video: 404 - Video not found"
+      );
+    });
+  });
+
+  describe("getUser & updateUser", () => {
+    it("fetches user by uid with auth header", async () => {
+      const mockUser = {
+        userId: "u123",
+        user_name: "Test",
+        user_email: "test@example.com",
+        avatar_url: "/av.png",
+      };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockUser,
+      });
+
+      const { getUser } = await import("@/utility/requests");
+      const res = await getUser("u123", "token123");
+      expect(res).toEqual(mockUser);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/user/getUser/u123`,
+        {
+          headers: { Authorization: "Bearer token123" },
+        }
+      );
+    });
+
+    it("throws on getUser error", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => "User missing",
+      });
+
+      const { getUser } = await import("@/utility/requests");
+      await expect(getUser("u999", "tok")).rejects.toThrow(
+        "Get user failed: 404 - User missing"
+      );
+    });
+
+    it("updates user with form data and bearer token", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: true });
+
+      const { updateUser } = await import("@/utility/requests");
+      await updateUser(
+        {
+          userId: "u123",
+          user_name: "New Name",
+          user_email: "test@example.com",
+          avatar_url: "/new.png",
+        },
+        "token123"
+      );
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/user/update`,
+        expect.objectContaining({
+          method: "POST",
+          headers: { Authorization: "Bearer token123" },
+        })
+      );
+    });
+
+    it("throws on updateUser failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 });
+
+      const { updateUser } = await import("@/utility/requests");
+      await expect(
+        updateUser(
+          {
+            userId: "u123",
+            user_name: "New Name",
+            user_email: "test@example.com",
+            avatar_url: "/new.png",
+          },
+          "tok"
+        )
+      ).rejects.toThrow("Update user failed: 500");
+    });
+  });
+
+  describe("uploadVideo & sendResetPasswordEmail", () => {
+    it("posts video upload FormData", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: true });
+      const fakeFile = new File(["dummy content"], "test.mp4", {
+        type: "video/mp4",
+      });
+
+      const { uploadVideo } = await import("@/utility/requests");
+      await uploadVideo(
+        { videoTitle: "My Upload", file: fakeFile, userId: "u123" },
+        "token123"
+      );
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/upload`,
+        expect.objectContaining({
+          method: "POST",
+          headers: { Authorization: "Bearer token123" },
+        })
+      );
+    });
+
+    it("throws on uploadVideo failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        text: async () => "Corrupted file",
+      });
+      const fakeFile = new File(["dummy"], "test.mp4");
+
+      const { uploadVideo } = await import("@/utility/requests");
+      await expect(
+        uploadVideo(
+          { videoTitle: "My Upload", file: fakeFile, userId: "u123" },
+          "token"
+        )
+      ).rejects.toThrow("Video upload failed: 400 - Corrupted file");
+    });
+
+    it("sends reset password email", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: true });
+
+      const { sendResetPasswordEmail } = await import("@/utility/requests");
+      await sendResetPasswordEmail("reset@example.com");
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/app/reset`,
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("throws on reset password email failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: false,
+        text: async () => "Account not registered",
+      });
+
+      const { sendResetPasswordEmail } = await import("@/utility/requests");
+      await expect(
+        sendResetPasswordEmail("notfound@example.com")
+      ).rejects.toThrow("User Password could not be reset : Account not registered");
+    });
+  });
+
+  describe("fetchVideos, fetchUserVideos & deleteVideo", () => {
+    it("fetches paginated videos", async () => {
+      const mockData = { content: [] };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockData,
+      });
+
+      const { fetchVideos } = await import("@/utility/requests");
+      const res = await fetchVideos(2);
+      expect(res).toEqual(mockData);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/all?page=2&size=12`,
+        { headers: { "Content-Type": "application/json" } }
+      );
+    });
+
+    it("throws on fetchVideos failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 500 });
+      const { fetchVideos } = await import("@/utility/requests");
+      await expect(fetchVideos(1)).rejects.toThrow("Fetch videos failed: 500");
+    });
+
+    it("fetches user specific videos", async () => {
+      const mockData = { content: [] };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockData,
+      });
+
+      const { fetchUserVideos } = await import("@/utility/requests");
+      const res = await fetchUserVideos(0, "u123", "token123");
+      expect(res).toEqual(mockData);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/user/u123?page=0&size=10`,
+        expect.objectContaining({
+          credentials: "include",
+          headers: { Authorization: "Bearer token123" },
+        })
+      );
+    });
+
+    it("throws on fetchUserVideos failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const { fetchUserVideos } = await import("@/utility/requests");
+      await expect(fetchUserVideos(0, "u123", "tok")).rejects.toThrow(
+        "Failed to fetch user videos"
+      );
+    });
+
+    it("deletes user video", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        text: async () => "Video deleted",
+      });
+
+      const { deleteVideo } = await import("@/utility/requests");
+      const res = await deleteVideo("u123", 55, "token123");
+      expect(res).toBe("Video deleted");
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/user/u123/55`,
+        expect.objectContaining({
+          method: "POST",
+          headers: { Authorization: "Bearer token123" },
+        })
+      );
+    });
+
+    it("throws on deleteVideo failure", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const { deleteVideo } = await import("@/utility/requests");
+      await expect(deleteVideo("u123", 55, "tok")).rejects.toThrow(
+        "Failed to fetch user videos"
+      );
+    });
+  });
+
+  describe("getPublicUser & getPublicUserVideos", () => {
+    it("returns public user data on success", async () => {
+      const mockUser = { userId: "pub1", user_name: "PublicCreator" };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockUser,
+      });
+
+      const { getPublicUser } = await import("@/utility/requests");
+      const res = await getPublicUser("pub1");
+      expect(res).toEqual(mockUser);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/user/getUser/pub1`,
+        { next: { revalidate: 60 } }
+      );
+    });
+
+    it("returns null on getPublicUser failure or network exception", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const { getPublicUser } = await import("@/utility/requests");
+      expect(await getPublicUser("missing")).toBeNull();
+
+      global.fetch = jest.fn().mockRejectedValue(new Error("Network failed"));
+      expect(await getPublicUser("network-err")).toBeNull();
+    });
+
+    it("returns public user videos on success", async () => {
+      const mockFeed = { content: [{ videoId: 1 }] };
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => mockFeed,
+      });
+
+      const { getPublicUserVideos } = await import("@/utility/requests");
+      const res = await getPublicUserVideos("pub1", 0, 24);
+      expect(res).toEqual(mockFeed);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/user/pub1?page=0&size=24`,
+        { next: { revalidate: 60 } }
+      );
+    });
+
+    it("returns null on getPublicUserVideos failure or exception", async () => {
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const { getPublicUserVideos } = await import("@/utility/requests");
+      expect(await getPublicUserVideos("missing")).toBeNull();
+
+      global.fetch = jest.fn().mockRejectedValue(new Error("Net error"));
+      expect(await getPublicUserVideos("net-err")).toBeNull();
+    });
+  });
 });

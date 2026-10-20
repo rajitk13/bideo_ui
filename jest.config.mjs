@@ -19,6 +19,34 @@ const config = {
     "**/__tests__/**/*.[jt]s?(x)",
     "**/?(*.)+(spec|test).[jt]s?(x)",
   ],
+  collectCoverageFrom: [
+    "utility/**/*.{ts,tsx}",
+    "lib/**/*.{ts,tsx}",
+    "constants/**/*.{ts,tsx}",
+    "store/**/*.{ts,tsx}",
+    "types/**/*.{ts,tsx}",
+    "components/video/**/*.{ts,tsx}",
+    "!components/video/UploadPage.tsx",
+    "!components/video/ViewVideo.tsx",
+    "components/partials/**/*.{ts,tsx}",
+    "components/user/ViewProfile.tsx",
+    "components/CodeBlock.tsx",
+    "components/Loader.tsx",
+    "app/api/**/*.{ts,tsx}",
+    "app/robots.ts",
+    "app/sitemap.ts",
+    "app/video-sitemap.xml/**/*.{ts,tsx}",
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
 };
 
 export default createJestConfig(config);

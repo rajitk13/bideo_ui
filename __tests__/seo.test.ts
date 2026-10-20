@@ -85,6 +85,36 @@ describe("SEO & Indexing Infrastructure", () => {
         )
       ).toBe(false);
     });
+    it("handles missing slug, missing uploadDate, and error fallbacks in sitemap", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          content: [
+            {
+              videoId: 777,
+              videoStatus: undefined, // test !v.videoStatus branch
+              visibility: "PUBLIC",
+              video_uploadDate: null, // test fallback to new Date()
+            },
+          ],
+        }),
+      });
+
+      const sitemapEntries = await sitemap();
+      expect(
+        sitemapEntries.some((e) => e.url === "https://bideo.rajit.cc/watch/777")
+      ).toBe(true);
+
+      // Test res.ok = false
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const fallbackEntries = await sitemap();
+      expect(fallbackEntries.length).toBeGreaterThan(0);
+
+      // Test fetch exception
+      global.fetch = jest.fn().mockRejectedValue(new Error("Network failure"));
+      const caughtEntries = await sitemap();
+      expect(caughtEntries.length).toBeGreaterThan(0);
+    });
   });
 
   describe("app/api/oembed/route.ts", () => {
@@ -110,7 +140,7 @@ describe("SEO & Indexing Infrastructure", () => {
       });
 
       const req = new Request(
-        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2Fhow-to-code"
+        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2Fhow-to-code&maxwidth=800&maxheight=450"
       );
       const res = await oembedHandler(req);
 
@@ -120,7 +150,35 @@ describe("SEO & Indexing Infrastructure", () => {
       expect(json.title).toBe("How to Code");
       expect(json.author_name).toBe("Coder");
       expect(json.provider_name).toBe("bideo");
+      expect(json.width).toBe(1280);
+      expect(json.height).toBe(720);
       expect(json.html).toContain("iframe");
+    });
+
+    it("resolves numeric id via getVideoById", async () => {
+      const { getVideoById } = await import("@/utility/requests");
+      (getVideoById as jest.Mock).mockResolvedValue({
+        videoId: 555,
+        video_title: "Numeric Video",
+        video_uploader: null,
+      });
+
+      const req = new Request(
+        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2F555"
+      );
+      const res = await oembedHandler(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.title).toBe("Numeric Video");
+      expect(json.author_name).toBe("bideo Creator");
+    });
+
+    it("returns 404 when url format is unrecognized or invalid", async () => {
+      const req = new Request(
+        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fotherdomain.com%2Funknown"
+      );
+      const res = await oembedHandler(req);
+      expect(res.status).toBe(404);
     });
 
     it("returns 404 when video cannot be resolved", async () => {

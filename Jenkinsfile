@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Unit Tests') {
+        stage('Lint') {
             steps {
                 sh '''
                     set -eux
-                    echo "🧪 Preparing environment for Frontend Unit Tests..."
+                    echo "🔍 Preparing environment for Linting..."
 
                     # 1. Search for existing node/npm installations in PATH or common paths
-                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin; do
+                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin /tmp/node-standalone/bin; do
                         if [ -x "$node_dir/npm" ]; then
                             export PATH="$node_dir:$PATH"
                             break
@@ -41,7 +41,38 @@ pipeline {
                         npm ci || npm install
                     fi
 
-                    # 4. Run unit tests in CI mode
+                    # 4. Run ESLint code quality check
+                    echo "🧹 Running npm run lint..."
+                    npm run lint
+                '''
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                    set -eux
+                    echo "🧪 Preparing environment for Frontend Unit Tests (80% coverage threshold)..."
+
+                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin /tmp/node-standalone/bin; do
+                        if [ -x "$node_dir/npm" ]; then
+                            export PATH="$node_dir:$PATH"
+                            break
+                        fi
+                    done
+
+                    if ! command -v npm >/dev/null 2>&1; then
+                        if [ -x "/tmp/node-standalone/bin/npm" ]; then
+                            export PATH="/tmp/node-standalone/bin:$PATH"
+                        fi
+                    fi
+
+                    # Ensure dependencies are installed
+                    if [ ! -d "node_modules" ]; then
+                        npm ci || npm install
+                    fi
+
+                    # Run unit tests and enforce >=80% coverage criteria in CI mode
                     npm test -- --ci --maxWorkers=2
                 '''
             }

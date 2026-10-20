@@ -79,4 +79,49 @@ describe("VideoCard Component", () => {
       expect.stringContaining("/watch/introduction-to-antigravity")
     );
   });
+
+  it("handles share button failure gracefully with toast error", async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockRejectedValue(new Error("Clipboard denied")),
+      },
+    });
+
+    render(<VideoCard video={baseVideo} />);
+    const shareButton = screen.getByRole("button", { name: /share video/i });
+    fireEvent.click(shareButton);
+
+    const { toast } = await import("sonner");
+    expect(toast.error).toHaveBeenCalledWith("Failed to copy link.");
+  });
+
+  it("formats views for millions, small view counts, and falls back to default creator", () => {
+    const videoWithMillionViews: VideoDTO = {
+      ...baseVideo,
+      video_views: 2500000,
+      video_uploader: undefined,
+    };
+
+    const { rerender } = render(<VideoCard video={videoWithMillionViews} />);
+    expect(screen.getByText(/25\.0L views/i)).toBeInTheDocument();
+    expect(screen.getByText("Creator")).toBeInTheDocument();
+
+    const videoWithFewViews: VideoDTO = {
+      ...baseVideo,
+      video_views: 42,
+    };
+    rerender(<VideoCard video={videoWithFewViews} />);
+    expect(screen.getByText(/42 views/i)).toBeInTheDocument();
+  });
+
+  it("triggers mouseenter and mouseleave on card wrapper", () => {
+    window.HTMLMediaElement.prototype.play = jest.fn().mockImplementation(() => Promise.resolve());
+    window.HTMLMediaElement.prototype.pause = jest.fn();
+
+    const { container } = render(<VideoCard video={baseVideo} />);
+    const card = container.firstChild as HTMLElement;
+
+    fireEvent.mouseEnter(card);
+    fireEvent.mouseLeave(card);
+  });
 });
