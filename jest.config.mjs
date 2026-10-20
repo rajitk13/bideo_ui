@@ -25,6 +25,8 @@ const config = {
     "constants/**/*.{ts,tsx}",
     "store/**/*.{ts,tsx}",
     "types/**/*.{ts,tsx}",
+    "components/search/**/*.{ts,tsx}",
+    "app/search/**/*.{ts,tsx}",
     "components/video/**/*.{ts,tsx}",
     "!components/video/UploadPage.tsx",
     "!components/video/ViewVideo.tsx",

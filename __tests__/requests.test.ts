@@ -203,6 +203,51 @@ describe("Video Requests Utility", () => {
       );
     });
 
+    it("supports multi-select categories and tags via SearchVideosParams object", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [] }),
+      });
+
+      await searchVideos({
+        query: "nextjs",
+        categories: ["TECH", "GAMING"],
+        tags: ["react", "frontend"],
+        page: 1,
+        size: 24,
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/search?query=nextjs&category=TECH%2CGAMING&tag=react%2Cfrontend&page=1&size=24`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+
+    it("handles single category and tag inside params object", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [] }),
+      });
+
+      await searchVideos({
+        category: "EDUCATION",
+        tag: "#tutorial",
+      });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/search?category=EDUCATION&tag=tutorial&page=0&size=12`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    });
+
     it("should throw when search endpoint fails", async () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,

@@ -306,7 +306,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                       {video.tags.map((tag) => (
                         <Link
                           key={tag}
-                          href={`/?tag=${encodeURIComponent(tag)}`}
+                          href={`/search?tag=${encodeURIComponent(tag)}`}
                           className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors cursor-pointer"
                         >
                           <Tag className="w-2.5 h-2.5" />

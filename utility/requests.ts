@@ -4,6 +4,8 @@ import {
   UserDTO,
   VideoMetadataUpdateRequest,
   PaginatedVideoResponse,
+  VideoCategory,
+  PageResponse,
 } from "@/types/video";
 
 export * from "@/types/video";
@@ -313,19 +315,73 @@ export const updateVideoMetadata = async (
   return res.json();
 };
 
+export interface SearchVideosParams {
+  query?: string;
+  categories?: VideoCategory[];
+  category?: string;
+  tags?: string[];
+  tag?: string;
+  page?: number;
+  size?: number;
+}
+
 export const searchVideos = async (
-  query?: string,
+  paramsOrQuery?: SearchVideosParams | string,
   category?: string,
   tag?: string,
   page = 0,
   size = 12
-): Promise<PaginatedVideoResponse> => {
+): Promise<PageResponse<VideoDTO>> => {
+  let queryVal: string | undefined;
+  let categoriesList: string[] = [];
+  let tagsList: string[] = [];
+  let pageVal = 0;
+  let sizeVal = 12;
+
+  if (typeof paramsOrQuery === "object" && paramsOrQuery !== null) {
+    queryVal = paramsOrQuery.query;
+    if (paramsOrQuery.categories && paramsOrQuery.categories.length > 0) {
+      categoriesList = paramsOrQuery.categories.filter(
+        (c) => (c as string) !== "ALL"
+      );
+    } else if (paramsOrQuery.category && paramsOrQuery.category !== "ALL") {
+      categoriesList = [paramsOrQuery.category];
+    }
+
+    if (paramsOrQuery.tags && paramsOrQuery.tags.length > 0) {
+      tagsList = paramsOrQuery.tags
+        .filter((t) => t && t.trim())
+        .map((t) => t.trim().replace(/^#/, ""));
+    } else if (paramsOrQuery.tag && paramsOrQuery.tag.trim()) {
+      tagsList = [paramsOrQuery.tag.trim().replace(/^#/, "")];
+    }
+
+    pageVal = paramsOrQuery.page ?? 0;
+    sizeVal = paramsOrQuery.size ?? 12;
+  } else {
+    queryVal = paramsOrQuery;
+    if (category && category !== "ALL") {
+      categoriesList = [category];
+    }
+    if (tag && tag.trim()) {
+      tagsList = [tag.trim().replace(/^#/, "")];
+    }
+    pageVal = page;
+    sizeVal = size;
+  }
+
   const params = new URLSearchParams();
-  if (query && query.trim()) params.append("query", query.trim());
-  if (category && category !== "ALL") params.append("category", category);
-  if (tag && tag.trim()) params.append("tag", tag.trim());
-  params.append("page", page.toString());
-  params.append("size", size.toString());
+  if (queryVal && queryVal.trim()) {
+    params.append("query", queryVal.trim());
+  }
+  if (categoriesList.length > 0) {
+    params.append("category", categoriesList.join(","));
+  }
+  if (tagsList.length > 0) {
+    params.append("tag", tagsList.join(","));
+  }
+  params.append("page", pageVal.toString());
+  params.append("size", sizeVal.toString());
 
   const res = await fetch(`${api_instance}/vid/search?${params.toString()}`, {
     headers: {
