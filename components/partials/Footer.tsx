@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Github, Linkedin } from "lucide-react";
+import { Github, Linkedin, GitCommit } from "lucide-react";
 
 const creators = [
   {
@@ -16,6 +16,14 @@ const creators = [
 ];
 
 export function Footer() {
+  const commitSha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA || "dev";
+  const buildNumber = process.env.NEXT_PUBLIC_BUILD_NUMBER;
+  const shortSha = commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
+  const commitUrl =
+    commitSha !== "dev"
+      ? `https://github.com/rajitk13/bideo_ui/commit/${commitSha}`
+      : "https://github.com/rajitk13/bideo_ui";
+
   return (
     <footer className="w-full border-t mt-auto bg-background/80 backdrop-blur-sm text-muted-foreground">
       <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
@@ -96,8 +104,32 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t text-center py-4 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} bideo | MIT License
+      <div className="border-t py-4 text-xs text-muted-foreground">
+        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-center">
+          <span>© {new Date().getFullYear()} bideo | MIT License</span>
+          <span className="hidden sm:inline text-muted-foreground/30">•</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
+            <span className="text-[11px] font-medium text-muted-foreground/80">
+              build:
+            </span>
+            <Link
+              href={commitUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] font-semibold text-foreground/80 hover:text-primary transition-colors flex items-center gap-1"
+              title={
+                buildNumber
+                  ? `Build #${buildNumber} (${commitSha})`
+                  : `Commit ${commitSha}`
+              }
+            >
+              <GitCommit className="w-3 h-3 text-muted-foreground" />
+              <span>
+                {buildNumber ? `#${buildNumber} • ${shortSha}` : shortSha}
+              </span>
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

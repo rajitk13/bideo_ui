@@ -21,4 +21,22 @@ describe("Footer Component", () => {
       screen.getByText(new RegExp(`${currentYear} bideo \\| MIT License`, "i"))
     ).toBeInTheDocument();
   });
+
+  it("displays build commit badge linking to github commit", () => {
+    process.env.NEXT_PUBLIC_GIT_COMMIT_SHA = "584bd9a";
+    process.env.NEXT_PUBLIC_BUILD_NUMBER = "42";
+
+    render(<Footer />);
+
+    expect(screen.getByText("build:")).toBeInTheDocument();
+    expect(screen.getByText(/#42 • 584bd9a/i)).toBeInTheDocument();
+
+    const commitLink = screen.getByRole("link", {
+      name: /#42 • 584bd9a/i,
+    });
+    expect(commitLink).toHaveAttribute(
+      "href",
+      "https://github.com/rajitk13/bideo_ui/commit/584bd9a"
+    );
+  });
 });

@@ -100,6 +100,12 @@ pipeline {
 
                     cd /home/rajit/Bideo_proj
 
+                    # Pass Jenkins automated build metadata to deployment script
+                    export BUILD_NUMBER="${BUILD_NUMBER:-}"
+                    export GIT_COMMIT="${GIT_COMMIT:-}"
+                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUMBER:-}"
+                    export NEXT_PUBLIC_GIT_COMMIT_SHA="${GIT_COMMIT:-}"
+
                     chmod +x script.sh
                     ./script.sh
                 '''
