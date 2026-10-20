@@ -2,6 +2,21 @@ pipeline {
     agent any
 
     stages {
+        stage('Unit Tests') {
+            steps {
+                sh '''
+                    set -eux
+                    echo "🧪 Running Frontend Unit Tests..."
+
+                    if [ ! -d "node_modules" ]; then
+                        npm ci || npm install
+                    fi
+
+                    npm test -- --ci --maxWorkers=2
+                '''
+            }
+        }
+
         stage('Deploy') {
             steps {
                 sh '''
