@@ -1,4 +1,4 @@
 module.exports = {
-  siteUrl: 'https://bideo.tech/',
-  generateRobotsTxt: true,
+  siteUrl: 'https://bideo.rajit.cc',
+  generateRobotsTxt: false, // Managed dynamically by Next.js app/robots.ts
 };

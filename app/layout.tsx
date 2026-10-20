@@ -19,10 +19,52 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "bideo",
-  description: "A video sharing platform",
+  metadataBase: new URL("https://bideo.rajit.cc"),
+  title: {
+    default: "bideo - Next-Gen Video Streaming Platform",
+    template: "%s | bideo",
+  },
+  description:
+    "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming, fast discovery, and creator-first tools.",
+  keywords: [
+    "video streaming",
+    "watch videos",
+    "bideo",
+    "HLS streaming",
+    "video creators",
+    "video sharing",
+  ],
   icons: {
     icon: "/favicon.ico",
+  },
+  alternates: {
+    canonical: "https://bideo.rajit.cc",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://bideo.rajit.cc",
+    siteName: "bideo",
+    title: "bideo - Next-Gen Video Streaming Platform",
+    description:
+      "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming and creator tools.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "bideo - Next-Gen Video Streaming Platform",
+    description:
+      "Explore, share, and stream high-quality videos on bideo.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 

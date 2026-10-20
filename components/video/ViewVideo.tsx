@@ -35,10 +35,11 @@ import {
 interface ViewVideoProps {
   id?: string;
   slug?: string;
+  initialVideo?: VideoDTO;
 }
 
-export default function ViewVideo({ id, slug }: ViewVideoProps) {
-  const [video, setVideo] = useState<VideoDTO | null>(null);
+export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
+  const [video, setVideo] = useState<VideoDTO | null>(initialVideo || null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -46,6 +47,15 @@ export default function ViewVideo({ id, slug }: ViewVideoProps) {
   useEffect(() => {
     let isMounted = true;
     async function fetchVideo() {
+      if (
+        initialVideo &&
+        ((slug && initialVideo.slug === slug) ||
+          (id &&
+            (String(initialVideo.videoId) === id ||
+              initialVideo.slug === id)))
+      ) {
+        return;
+      }
       try {
         setError(null);
         let data: VideoDTO;
@@ -73,7 +83,7 @@ export default function ViewVideo({ id, slug }: ViewVideoProps) {
     return () => {
       isMounted = false;
     };
-  }, [id, slug]);
+  }, [id, slug, initialVideo]);
 
   // Fetch recommended videos for sidebar
   const { data: recsData, isLoading: recsLoading } = useQuery<{

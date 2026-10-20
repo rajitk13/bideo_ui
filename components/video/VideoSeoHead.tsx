@@ -80,11 +80,18 @@ export const VideoSeoHead: React.FC<VideoSeoHeadProps> = ({ video }) => {
     };
   }, [seo]);
 
-  // Also render direct ld+json tag in client DOM for immediate crawling
-  if (!seo?.jsonLdVideoObject) return null;
+  // Avoid rendering duplicate tag if already server-rendered by WatchPage
+  if (
+    !seo?.jsonLdVideoObject ||
+    (typeof document !== "undefined" &&
+      document.getElementById("server-video-schema-jsonld"))
+  ) {
+    return null;
+  }
 
   return (
     <script
+      id="video-schema-jsonld"
       type="application/ld+json"
       dangerouslySetInnerHTML={{
         __html: JSON.stringify(seo.jsonLdVideoObject),
