@@ -39,4 +39,34 @@ describe("Footer Component", () => {
       "https://github.com/rajitk13/bideo_ui/commit/584bd9a"
     );
   });
+
+  it("handles commit SHA without build number", () => {
+    delete process.env.NEXT_PUBLIC_BUILD_NUMBER;
+    process.env.NEXT_PUBLIC_GIT_COMMIT_SHA = "abcdef123456";
+
+    render(<Footer />);
+
+    expect(screen.getByText("abcdef1")).toBeInTheDocument();
+    const commitLink = screen.getByRole("link", {
+      name: "abcdef1",
+    });
+    expect(commitLink).toHaveAttribute(
+      "href",
+      "https://github.com/rajitk13/bideo_ui/commit/abcdef1"
+    );
+  });
+
+  it("links to repo root when commitSha is dev", () => {
+    delete process.env.NEXT_PUBLIC_BUILD_NUMBER;
+    process.env.NEXT_PUBLIC_GIT_COMMIT_SHA = "dev";
+
+    // Mock fallbackBuildInfo by simulating dev
+    render(<Footer />);
+
+    const links = screen.getAllByRole("link");
+    const commitLink = links.find((l) =>
+      l.getAttribute("href") === "https://github.com/rajitk13/bideo_ui"
+    );
+    expect(commitLink).toBeDefined();
+  });
 });

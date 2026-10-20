@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build:info": "node scripts/generate-build-info.js",
+    "predev": "node scripts/generate-build-info.js",
+    "prebuild": "node scripts/generate-build-info.js",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",

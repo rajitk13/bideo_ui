@@ -15,13 +15,25 @@ const creators = [
   },
 ];
 
+let fallbackBuildInfo: { commitSha?: string; buildNumber?: string } = {};
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  fallbackBuildInfo = require("@/build-info.json");
+} catch {
+  // build-info.json may not exist in test runner or before build
+}
+
 export function Footer() {
-  const commitSha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA || "dev";
-  const buildNumber = process.env.NEXT_PUBLIC_BUILD_NUMBER;
+  const envSha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA;
+  const commitSha = envSha ?? fallbackBuildInfo.commitSha ?? "dev";
+  const buildNumber =
+    process.env.NEXT_PUBLIC_BUILD_NUMBER ??
+    fallbackBuildInfo.buildNumber ??
+    "";
   const shortSha = commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
   const commitUrl =
     commitSha !== "dev"
-      ? `https://github.com/rajitk13/bideo_ui/commit/${commitSha}`
+      ? `https://github.com/rajitk13/bideo_ui/commit/${shortSha}`
       : "https://github.com/rajitk13/bideo_ui";
 
   return (

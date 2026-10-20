@@ -75,6 +75,7 @@ export const loginUser = async (
 ): Promise<LoginResponse> => {
   const formData = new FormData();
   formData.append("email", payload.email);
+  formData.append("identifier", payload.email);
   formData.append("password", payload.password);
 
   const res = await fetch(`${api_instance}/app/login`, {

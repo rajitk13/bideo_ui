@@ -32,7 +32,7 @@ import { MESSAGES } from "@/constants/messages";
 import { Eye, EyeOff, Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email"),
+  email: z.string().min(1, "Email or username is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -128,13 +128,15 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Email
+                    Email or Username
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                       <Input
-                        placeholder="you@example.com"
+                        placeholder="you@example.com or username"
+                        autoCapitalize="none"
+                        autoCorrect="off"
                         className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
                         {...field}
                         disabled={isLoading}

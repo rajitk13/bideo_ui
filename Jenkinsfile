@@ -1,14 +1,29 @@
 pipeline {
     agent any
 
+    options {
+        // Prevent concurrent deployments from colliding on /home/rajit/Bideo_proj
+        disableConcurrentBuilds()
+        // Abort pipeline if stuck for more than 25 minutes
+        timeout(time: 25, unit: 'MINUTES')
+        // Retain the last 15 builds to conserve server disk space
+        buildDiscarder(logRotator(numToKeepStr: '15', artifactNumToKeepStr: '5'))
+        // Add timestamps to build logs
+        timestamps()
+    }
+
+    environment {
+        CI = 'true'
+    }
+
     stages {
-        stage('Lint') {
+        stage('Setup Environment') {
             steps {
                 sh '''
                     set -eux
-                    echo "🔍 Preparing environment for Linting..."
+                    echo "🔧 Preparing Node.js and caching dependencies..."
 
-                    # 1. Search for existing node/npm installations in PATH or common paths
+                    # Search for existing node/npm installations in PATH or standard paths
                     for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin /tmp/node-standalone/bin; do
                         if [ -x "$node_dir/npm" ]; then
                             export PATH="$node_dir:$PATH"
@@ -16,7 +31,7 @@ pipeline {
                         fi
                     done
 
-                    # 2. If node/npm is still not found, download portable standalone Node.js
+                    # If npm is still missing, download standalone portable Node.js v20
                     if ! command -v npm >/dev/null 2>&1; then
                         echo "📦 Node/npm not found. Downloading standalone Node.js..."
                         ARCH=$(uname -m)
@@ -36,13 +51,24 @@ pipeline {
                     node -v
                     npm -v
 
-                    # 3. Ensure dependencies are installed
+                    # Cache and install dependencies
                     if [ ! -d "node_modules" ]; then
                         npm ci || npm install
                     fi
+                '''
+            }
+        }
 
-                    # 4. Run ESLint code quality check
-                    echo "🧹 Running npm run lint..."
+        stage('Lint') {
+            steps {
+                sh '''
+                    set -eux
+                    echo "🧹 Running ESLint code quality check..."
+                    export PATH="/tmp/node-standalone/bin:$PATH"
+                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin; do
+                        [ -x "$node_dir/npm" ] && export PATH="$node_dir:$PATH" && break
+                    done
+
                     npm run lint
                 '''
             }
@@ -52,28 +78,13 @@ pipeline {
             steps {
                 sh '''
                     set -eux
-                    echo "🧪 Preparing environment for Frontend Unit Tests (80% coverage threshold)..."
-
-                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin /tmp/node-standalone/bin; do
-                        if [ -x "$node_dir/npm" ]; then
-                            export PATH="$node_dir:$PATH"
-                            break
-                        fi
+                    echo "🧪 Running Frontend Unit Tests (enforcing >=80% coverage criteria)..."
+                    export PATH="/tmp/node-standalone/bin:$PATH"
+                    for node_dir in /usr/local/bin /usr/bin /opt/node/bin /home/rajit/.nvm/versions/node/*/bin /root/.nvm/versions/node/*/bin /var/jenkins_home/.nvm/versions/node/*/bin; do
+                        [ -x "$node_dir/npm" ] && export PATH="$node_dir:$PATH" && break
                     done
 
-                    if ! command -v npm >/dev/null 2>&1; then
-                        if [ -x "/tmp/node-standalone/bin/npm" ]; then
-                            export PATH="/tmp/node-standalone/bin:$PATH"
-                        fi
-                    fi
-
-                    # Ensure dependencies are installed
-                    if [ ! -d "node_modules" ]; then
-                        npm ci || npm install
-                    fi
-
-                    # Run unit tests and enforce >=80% coverage criteria in CI mode
-                    npm test -- --ci --maxWorkers=2
+                    npm test -- --ci --maxWorkers=2 --coverage
                 '''
             }
         }
@@ -82,32 +93,88 @@ pipeline {
             steps {
                 sh '''
                     set -eux
+                    echo "🚀 Preparing deployment to /home/rajit/Bideo_proj..."
 
-                    # Install Maven if not available
+                    # Install Maven if not available (required by backend dependencies in script.sh)
                     if ! command -v mvn >/dev/null 2>&1; then
                         echo "📦 Installing Maven..."
                         apt-get update -qq && apt-get install -y -qq maven || {
-                            # Fallback: download Maven manually
                             curl -fsSL https://dlcdn.apache.org/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.tar.gz | tar xz -C /opt/
                             export PATH="/opt/apache-maven-3.9.9/bin:$PATH"
                         }
                     fi
 
+                    # Ensure git safe directories
                     git config --global --add safe.directory /home/rajit/Bideo_proj || true
                     git config --global --add safe.directory /home/rajit/Bideo_proj/bideo_api || true
                     git config --global --add safe.directory /home/rajit/Bideo_proj/bideo_ui || true
                     git config --global --add safe.directory '*' || true
 
+                    # Resolve Git commit SHA reliably from the current Jenkins workspace
+                    COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "${GIT_COMMIT:-}")
+                    if [ -z "$COMMIT_SHA" ] || [ "$COMMIT_SHA" = "HEAD" ]; then
+                        COMMIT_SHA=$(git -C /home/rajit/Bideo_proj/bideo_ui rev-parse --short HEAD 2>/dev/null || echo "dev")
+                    fi
+                    BUILD_NUM="${BUILD_NUMBER:-}"
+
+                    echo "📌 Target Deployment Commit: ${COMMIT_SHA}"
+                    echo "🔢 Jenkins Build Number: #${BUILD_NUM}"
+
                     cd /home/rajit/Bideo_proj
 
+                    # Clean leftover untracked build files in bideo_ui so git pull never encounters merge conflicts
+                    if [ -d "/home/rajit/Bideo_proj/bideo_ui" ]; then
+                        echo "🧹 Cleaning untracked files in /home/rajit/Bideo_proj/bideo_ui before pull..."
+                        (cd /home/rajit/Bideo_proj/bideo_ui && rm -f build-info.json .env.production.local && git checkout -- . 2>/dev/null && git clean -fd 2>/dev/null || true)
+                    fi
+
+                    # Update /home/rajit/Bideo_proj/.env for docker-compose environment interpolation
+                    touch /home/rajit/Bideo_proj/.env
+                    sed -i '/^NEXT_PUBLIC_GIT_COMMIT_SHA=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
+                    sed -i '/^NEXT_PUBLIC_BUILD_NUMBER=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
+                    sed -i '/^GIT_COMMIT=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
+                    sed -i '/^BUILD_NUMBER=/d' /home/rajit/Bideo_proj/.env 2>/dev/null || true
+
+                    echo "NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}" >> /home/rajit/Bideo_proj/.env
+                    echo "NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}" >> /home/rajit/Bideo_proj/.env
+                    echo "GIT_COMMIT=${COMMIT_SHA}" >> /home/rajit/Bideo_proj/.env
+                    echo "BUILD_NUMBER=${BUILD_NUM}" >> /home/rajit/Bideo_proj/.env
+
                     # Pass Jenkins automated build metadata to deployment script
-                    export BUILD_NUMBER="${BUILD_NUMBER:-}"
-                    export GIT_COMMIT="${GIT_COMMIT:-}"
-                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUMBER:-}"
-                    export NEXT_PUBLIC_GIT_COMMIT_SHA="${GIT_COMMIT:-}"
+                    export BUILD_NUMBER="${BUILD_NUM}"
+                    export GIT_COMMIT="${COMMIT_SHA}"
+                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}"
+                    export NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}"
 
                     chmod +x script.sh
                     ./script.sh
+                '''
+            }
+        }
+
+        stage('Smoke Test') {
+            steps {
+                sh '''
+                    set +e
+                    echo "🩺 Running post-deployment health check..."
+
+                    # Allow containers up to 30 seconds to initialize
+                    SUCCESS=0
+                    for i in $(seq 1 10); do
+                        echo "Attempt $i/10: Checking frontend HTTP status..."
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 http://localhost:3000/ || true)
+                        if [ "$STATUS" = "200" ] || [ "$STATUS" = "307" ] || [ "$STATUS" = "308" ]; then
+                            echo "✅ Frontend service healthy! Responded with HTTP $STATUS"
+                            SUCCESS=1
+                            break
+                        fi
+                        sleep 3
+                    done
+
+                    if [ "$SUCCESS" -eq 0 ]; then
+                        echo "⚠️ Health check timed out or returned non-200. Container status:"
+                        docker ps --filter "name=bideo" || true
+                    fi
                 '''
             }
         }
@@ -115,11 +182,11 @@ pipeline {
 
     post {
         success {
-            echo 'Deployment successful'
+            echo "🎉 Deployment successful! Build #${env.BUILD_NUMBER} is now live."
         }
 
         failure {
-            echo 'Deployment failed'
+            echo "❌ Deployment failed on Build #${env.BUILD_NUMBER}. Please check the console output above."
         }
     }
 }
