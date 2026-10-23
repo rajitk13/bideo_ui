@@ -14,7 +14,7 @@ describe("VideoSeoHead", () => {
     seo: {
       title: "How to Build Next.js Apps",
       description: "A complete step-by-step tutorial on Next.js 15.",
-      canonicalUrl: "https://bideo.rajit.cc/watch/how-to-build-nextjs-apps",
+      canonicalUrl: "https://buzzclips.app/watch/how-to-build-nextjs-apps",
       openGraph: {
         "og:title": "How to Build Next.js Apps",
         "og:description": "A complete step-by-step tutorial on Next.js 15.",
@@ -69,7 +69,7 @@ describe("VideoSeoHead", () => {
     const canonical = document.querySelector('link[rel="canonical"]');
     expect(canonical).not.toBeNull();
     expect(canonical?.getAttribute("href")).toBe(
-      "https://bideo.rajit.cc/watch/how-to-build-nextjs-apps"
+      "https://buzzclips.app/watch/how-to-build-nextjs-apps"
     );
   });
 

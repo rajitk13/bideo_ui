@@ -19,7 +19,7 @@ describe("Video Sitemap XML Route", () => {
           video_title: "Learn <Next.js> & React",
           slug: "learn-nextjs-react",
           description: "A great video about web dev & more",
-          thumbnail_url: "https://bideo.rajit.cc/thumb.jpg",
+          thumbnail_url: "https://buzzclips.app/thumb.jpg",
           video_uploadDate: "2026-02-15T10:00:00Z",
           video_duration: "03:45",
           video_views: 1500,
@@ -30,7 +30,7 @@ describe("Video Sitemap XML Route", () => {
             userId: "u123",
             user_name: "John Doe",
           },
-          m3u8Url: "https://bideo.rajit.cc/stream/1/master.m3u8",
+          m3u8Url: "https://buzzclips.app/stream/1/master.m3u8",
         },
         {
           videoId: 2,

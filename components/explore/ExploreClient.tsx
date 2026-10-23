@@ -157,6 +157,8 @@ export default function ExploreClient({
 
   // Infinite scroll logic
   useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
