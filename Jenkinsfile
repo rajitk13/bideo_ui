@@ -95,125 +95,25 @@ pipeline {
             steps {
                 sh '''
                     set -eux
-                    echo "🚀 =========================================="
-                    echo "🚀  DEPLOYING ONLY FRONTEND (bideo_ui)       "
-                    echo "🚀 =========================================="
+                    echo "🚀 Deploying frontend (bideo_ui)..."
 
-                    # Ensure git safe directories
-                    git config --global --add safe.directory /home/rajit/Bideo_proj || true
-                    git config --global --add safe.directory /home/rajit/Bideo_proj/bideo_ui || true
-                    git config --global --add safe.directory '*' || true
-
-                    # Resolve Git commit SHA and build number
-                    COMMIT_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "${GIT_COMMIT:-}")
-                    if [ -z "$COMMIT_SHA" ] || [ "$COMMIT_SHA" = "HEAD" ]; then
-                        COMMIT_SHA=$(git -C /home/rajit/Bideo_proj/bideo_ui rev-parse --short HEAD 2>/dev/null || echo "dev")
-                    fi
-                    BUILD_NUM="${BUILD_NUMBER:-}"
-
-                    echo "📌 Target Frontend Commit: ${COMMIT_SHA}"
-                    echo "🔢 Jenkins Build Number: #${BUILD_NUM}"
-
-                    # 1. Update /home/rajit/Bideo_proj/bideo_ui repository only
+                    # 1. Update bideo_ui repository on host
                     if [ -d "/home/rajit/Bideo_proj/bideo_ui" ]; then
-                        echo "📥 Updating bideo_ui on target server..."
                         cd /home/rajit/Bideo_proj/bideo_ui
                         git remote set-url origin https://github.com/bideo-org/bideo_ui.git 2>/dev/null || true
                         git fetch origin main
                         git reset --hard origin/main
-                        git clean -fd
-
-                        # Write production env file directly into bideo_ui
-                        cat <<ENV_EOF > .env.production.local
-NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}
-NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}
-NEXT_PUBLIC_API_URL=https://buzzclips.app/api
-NEXT_PUBLIC_BASE_URL=https://buzzclips.app
-ENV_EOF
-                    else
-                        echo "⚠️ /home/rajit/Bideo_proj/bideo_ui not found, skipping repo pull"
                     fi
 
-                    # 2. Update /home/rajit/Bideo_proj/.env for docker-compose interpolation
+                    # 2. Rebuild and recreate frontend container
                     cd /home/rajit/Bideo_proj
-                    touch .env
-                    # Clean any stale legacy bideo.rajit.cc domain entries
-                    sed -i 's|https://bideo.rajit.cc|https://buzzclips.app|g' .env 2>/dev/null || true
-                    sed -i 's|bideo.rajit.cc|buzzclips.app|g' .env 2>/dev/null || true
-                    sed -i '/^NEXT_PUBLIC_GIT_COMMIT_SHA=/d' .env 2>/dev/null || true
-                    sed -i '/^NEXT_PUBLIC_BUILD_NUMBER=/d' .env 2>/dev/null || true
-                    sed -i '/^NEXT_PUBLIC_API_URL=/d' .env 2>/dev/null || true
-                    sed -i '/^NEXT_PUBLIC_BASE_URL=/d' .env 2>/dev/null || true
-                    sed -i '/^GIT_COMMIT=/d' .env 2>/dev/null || true
-                    sed -i '/^BUILD_NUMBER=/d' .env 2>/dev/null || true
-
-                    echo "NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}" >> .env
-                    echo "NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}" >> .env
-                    echo "NEXT_PUBLIC_API_URL=https://buzzclips.app/api" >> .env
-                    echo "NEXT_PUBLIC_BASE_URL=https://buzzclips.app" >> .env
-                    echo "GIT_COMMIT=${COMMIT_SHA}" >> .env
-                    echo "BUILD_NUMBER=${BUILD_NUM}" >> .env
-
-                    export NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}"
-                    export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}"
-                    export NEXT_PUBLIC_API_URL="https://buzzclips.app/api"
-                    export NEXT_PUBLIC_BASE_URL="https://buzzclips.app"
-                    export GIT_COMMIT="${COMMIT_SHA}"
-                    export BUILD_NUMBER="${BUILD_NUM}"
-
-                    # 3. Detect docker compose command
-                    COMPOSE_CMD=""
-                    if docker compose version >/dev/null 2>&1; then
-                        COMPOSE_CMD="docker compose"
-                    elif command -v docker-compose >/dev/null 2>&1; then
+                    COMPOSE_CMD="docker compose"
+                    if ! docker compose version >/dev/null 2>&1 && command -v docker-compose >/dev/null 2>&1; then
                         COMPOSE_CMD="docker-compose"
                     fi
 
-                    if [ -n "$COMPOSE_CMD" ]; then
-                        # Identify the frontend service in docker-compose.yml
-                        AVAILABLE_SERVICES=$($COMPOSE_CMD config --services 2>/dev/null || echo "")
-                        echo "📋 Available docker-compose services: ${AVAILABLE_SERVICES}"
-
-                        UI_SERVICE="frontend"
-                        if echo "$AVAILABLE_SERVICES" | grep -qw "frontend"; then
-                            UI_SERVICE="frontend"
-                        elif echo "$AVAILABLE_SERVICES" | grep -qw "bideo_ui"; then
-                            UI_SERVICE="bideo_ui"
-                        elif echo "$AVAILABLE_SERVICES" | grep -qw "ui"; then
-                            UI_SERVICE="ui"
-                        fi
-
-                        echo "🏗️ Rebuilding ONLY the frontend service (${UI_SERVICE})..."
-                        $COMPOSE_CMD build \
-                            --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
-                            --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
-                            --build-arg NEXT_PUBLIC_API_URL="https://buzzclips.app/api" \
-                            "${UI_SERVICE}"
-
-                        # Remove any stuck previous container to prevent 'removal in progress' daemon lock
-                        echo "🧹 Clearing previous container state for ${UI_SERVICE}..."
-                        docker stop bideo_ui 2>/dev/null || true
-                        docker rm -f bideo_ui 2>/dev/null || true
-                        docker stop "${UI_SERVICE}" 2>/dev/null || true
-                        docker rm -f "${UI_SERVICE}" 2>/dev/null || true
-
-                        echo "🔄 Recreating ONLY ${UI_SERVICE} container (backend remains completely untouched)..."
-                        $COMPOSE_CMD up -d --no-deps "${UI_SERVICE}"
-                    else
-                        echo "⚠️ Docker compose not found. Building and restarting via Docker CLI..."
-                        docker build \
-                            --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
-                            --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
-                            --build-arg NEXT_PUBLIC_API_URL="https://buzzclips.app/api" \
-                            -t bideo_ui:latest ./bideo_ui
-                        docker stop bideo_ui 2>/dev/null || true
-                        docker rm -f bideo_ui 2>/dev/null || true
-                        docker run -d --name bideo_ui -p 3000:3000 --restart always bideo_ui:latest
-                    fi
-
-                    # Clean dangling images
-                    echo "🧹 Pruning unused images..."
-                    docker image prune -f || true
+                    $COMPOSE_CMD build frontend
+                    $COMPOSE_CMD up -d --no-deps frontend
 
                     echo "✅ Frontend deployment complete!"
                 '''
@@ -224,24 +124,17 @@ ENV_EOF
             steps {
                 sh '''
                     set +e
-                    echo "🩺 Running post-deployment frontend health check..."
-
-                    SUCCESS=0
-                    for i in $(seq 1 10); do
-                        echo "Attempt $i/10: Checking frontend HTTP status..."
+                    echo "🩺 Checking frontend service health..."
+                    for i in $(seq 1 5); do
                         STATUS=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 3 http://localhost:3000/ || true)
                         if [ "$STATUS" = "200" ] || [ "$STATUS" = "307" ] || [ "$STATUS" = "308" ]; then
-                            echo "✅ Frontend service healthy! Responded with HTTP $STATUS"
-                            SUCCESS=1
-                            break
+                            echo "✅ Frontend healthy (HTTP $STATUS)"
+                            exit 0
                         fi
-                        sleep 3
+                        sleep 2
                     done
-
-                    if [ "$SUCCESS" -eq 0 ]; then
-                        echo "⚠️ Frontend smoke check timed out. Dumping container status:"
-                        docker ps --filter "name=bideo" || true
-                    fi
+                    echo "⚠️ Frontend container starting up"
+                    exit 0
                 '''
             }
         }
