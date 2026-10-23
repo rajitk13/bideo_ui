@@ -69,3 +69,27 @@ export interface PageResponse<T> {
 }
 
 export type PaginatedVideoResponse = PageResponse<VideoDTO>;
+
+export interface EngagementDTO {
+  videoId: number;
+  likesCount: number;
+  dislikesCount: number;
+  userReaction: 'LIKE' | 'DISLIKE' | 'NONE';
+}
+
+export interface CommentDTO {
+  commentId: number;
+  videoId: number;
+  content: string;
+  createdAt: string;
+  timestampInSeconds?: number;
+  isPinned?: boolean;
+  user?: UserDTO;
+}
+
+export interface ProgressDTO {
+  videoId: number;
+  progressSeconds: number;
+  durationSeconds: number;
+  completed: boolean;
+}

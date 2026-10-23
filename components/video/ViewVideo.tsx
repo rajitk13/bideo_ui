@@ -9,7 +9,11 @@ import {
   VideoDTO,
 } from "@/utility/requests";
 import { VideoSeoHead } from "./VideoSeoHead";
-import { useEffect, useState, useMemo } from "react";
+import EngagementButtons from "./EngagementButtons";
+import CommentsSection from "./CommentsSection";
+import useResumePlayback from "@/utility/useResumePlayback";
+import { useAuth } from "@/store/auth-context";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,13 +27,11 @@ import { formatDistanceToNow } from "date-fns";
 import {
   Eye,
   Clock,
-  Share2,
   Play,
   Sparkles,
   Film,
   AlertCircle,
   ArrowLeft,
-  Check,
   Tag,
 } from "lucide-react";
 
@@ -40,9 +42,25 @@ interface ViewVideoProps {
 }
 
 export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
+  const { token } = useAuth();
+  const playerRef = useRef<any>(null);
   const [video, setVideo] = useState<VideoDTO | null>(initialVideo || null);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+
+  const { onTimeUpdate } = useResumePlayback({
+    videoId: video?.videoId,
+    playerRef,
+    token: token || undefined,
+  });
+
+  const handleSeekTo = (seconds: number) => {
+    if (playerRef.current?.seekTo) {
+      playerRef.current.seekTo(seconds, "seconds");
+      const mins = Math.floor(seconds / 60);
+      const secs = (seconds % 60).toString().padStart(2, "0");
+      toast.info(`Jumped to ${mins}:${secs}`);
+    }
+  };
 
   // Fetch current video details by slug or id
   useEffect(() => {
@@ -116,18 +134,6 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
       .slice(0, 8);
   }, [recsData, id, slug]);
 
-  const handleShare = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      toast.success("Link copied to clipboard!");
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to copy link");
-    }
-  };
-
   // Error state
   if (error) {
     return (
@@ -184,7 +190,11 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
           {/* Theater Video Player */}
           <div className="relative rounded-2xl overflow-hidden bg-black aspect-video ring-1 ring-border/50 shadow-2xl shadow-black/30">
             {video && video.m3u8Url ? (
-              <VideoPlayer src={video.m3u8Url} />
+              <VideoPlayer
+                ref={playerRef}
+                src={video.m3u8Url}
+                onTimeUpdate={onTimeUpdate}
+              />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center bg-black/60">
                 <Skeleton className="w-full h-full rounded-2xl" />
@@ -230,7 +240,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                   </div>
                 </div>
 
-                {/* Right Actions: Views, Date, Share */}
+                {/* Right Actions: Views, Date, Engagement */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground">
                     <Eye className="w-3.5 h-3.5 text-muted-foreground" />
@@ -242,19 +252,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     <span>{timeAgo}</span>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleShare}
-                    className="h-8 rounded-full px-3 text-xs gap-1.5 hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    {copied ? (
-                      <Check className="w-3.5 h-3.5 text-emerald-500" />
-                    ) : (
-                      <Share2 className="w-3.5 h-3.5" />
-                    )}
-                    {copied ? "Copied" : "Share"}
-                  </Button>
+                  <EngagementButtons videoId={video.videoId} />
                 </div>
               </div>
 
@@ -271,12 +269,14 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     </Badge>
 
                     {video.category && (
-                      <Badge
-                        variant="outline"
-                        className="text-xs font-semibold bg-background/50 uppercase tracking-wider"
-                      >
-                        {video.category}
-                      </Badge>
+                      <Link href={`/category/${video.category.toLowerCase()}`}>
+                        <Badge
+                          variant="outline"
+                          className="text-xs font-semibold bg-background/50 uppercase tracking-wider hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                        >
+                          {video.category}
+                        </Badge>
+                      </Link>
                     )}
 
                     {video.visibility && video.visibility !== "PUBLIC" && (
@@ -310,19 +310,22 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     </p>
                   )}
 
-                  {/* Tags */}
+                  {/* Programmatic Tag Hub Links */}
                   {video.tags && video.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {video.tags.map((tag) => (
-                        <Link
-                          key={tag}
-                          href={`/search?tag=${encodeURIComponent(tag)}`}
-                          className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors cursor-pointer"
-                        >
-                          <Tag className="w-2.5 h-2.5" />
-                          #{tag}
-                        </Link>
-                      ))}
+                      {video.tags.map((tag) => {
+                        const cleanTag = tag.trim().replace(/^#/, "");
+                        return (
+                          <Link
+                            key={tag}
+                            href={`/tag/${encodeURIComponent(cleanTag)}`}
+                            className="inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40 font-medium hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-colors cursor-pointer"
+                          >
+                            <Tag className="w-2.5 h-2.5" />
+                            #{cleanTag}
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
 
@@ -336,6 +339,12 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Interactive Comments Section with Timestamp Seeking */}
+              <CommentsSection
+                videoId={video.videoId}
+                onSeekTo={handleSeekTo}
+              />
             </div>
           ) : (
             <div className="space-y-4 pt-2">

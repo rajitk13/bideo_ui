@@ -8,12 +8,14 @@ RUN apt-get update -qq && apt-get install -y -qq git && rm -rf /var/lib/apt/list
 # Accept build arguments passed from CI/CD or docker-compose
 ARG NEXT_PUBLIC_GIT_COMMIT_SHA
 ARG NEXT_PUBLIC_BUILD_NUMBER
+ARG NEXT_PUBLIC_API_URL
 ARG GIT_COMMIT
 ARG BUILD_NUMBER
 
 # Export environment variables for Next.js build
 ENV NEXT_PUBLIC_GIT_COMMIT_SHA=${NEXT_PUBLIC_GIT_COMMIT_SHA:-${GIT_COMMIT}}
 ENV NEXT_PUBLIC_BUILD_NUMBER=${NEXT_PUBLIC_BUILD_NUMBER:-${BUILD_NUMBER}}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://buzzclips.app/api}
 
 COPY package*.json ./
 RUN npm install

@@ -127,6 +127,8 @@ pipeline {
                         cat <<ENV_EOF > .env.production.local
 NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}
 NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}
+NEXT_PUBLIC_API_URL=https://buzzclips.app/api
+NEXT_PUBLIC_BASE_URL=https://buzzclips.app
 ENV_EOF
                     else
                         echo "⚠️ /home/rajit/Bideo_proj/bideo_ui not found, skipping repo pull"
@@ -135,18 +137,27 @@ ENV_EOF
                     # 2. Update /home/rajit/Bideo_proj/.env for docker-compose interpolation
                     cd /home/rajit/Bideo_proj
                     touch .env
+                    # Clean any stale legacy bideo.rajit.cc domain entries
+                    sed -i 's|https://bideo.rajit.cc|https://buzzclips.app|g' .env 2>/dev/null || true
+                    sed -i 's|bideo.rajit.cc|buzzclips.app|g' .env 2>/dev/null || true
                     sed -i '/^NEXT_PUBLIC_GIT_COMMIT_SHA=/d' .env 2>/dev/null || true
                     sed -i '/^NEXT_PUBLIC_BUILD_NUMBER=/d' .env 2>/dev/null || true
+                    sed -i '/^NEXT_PUBLIC_API_URL=/d' .env 2>/dev/null || true
+                    sed -i '/^NEXT_PUBLIC_BASE_URL=/d' .env 2>/dev/null || true
                     sed -i '/^GIT_COMMIT=/d' .env 2>/dev/null || true
                     sed -i '/^BUILD_NUMBER=/d' .env 2>/dev/null || true
 
                     echo "NEXT_PUBLIC_GIT_COMMIT_SHA=${COMMIT_SHA}" >> .env
                     echo "NEXT_PUBLIC_BUILD_NUMBER=${BUILD_NUM}" >> .env
+                    echo "NEXT_PUBLIC_API_URL=https://buzzclips.app/api" >> .env
+                    echo "NEXT_PUBLIC_BASE_URL=https://buzzclips.app" >> .env
                     echo "GIT_COMMIT=${COMMIT_SHA}" >> .env
                     echo "BUILD_NUMBER=${BUILD_NUM}" >> .env
 
                     export NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}"
                     export NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}"
+                    export NEXT_PUBLIC_API_URL="https://buzzclips.app/api"
+                    export NEXT_PUBLIC_BASE_URL="https://buzzclips.app"
                     export GIT_COMMIT="${COMMIT_SHA}"
                     export BUILD_NUMBER="${BUILD_NUM}"
 
@@ -176,6 +187,7 @@ ENV_EOF
                         $COMPOSE_CMD build \
                             --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
                             --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
+                            --build-arg NEXT_PUBLIC_API_URL="https://buzzclips.app/api" \
                             "${UI_SERVICE}"
 
                         # Remove any stuck previous container to prevent 'removal in progress' daemon lock
@@ -192,6 +204,7 @@ ENV_EOF
                         docker build \
                             --build-arg NEXT_PUBLIC_GIT_COMMIT_SHA="${COMMIT_SHA}" \
                             --build-arg NEXT_PUBLIC_BUILD_NUMBER="${BUILD_NUM}" \
+                            --build-arg NEXT_PUBLIC_API_URL="https://buzzclips.app/api" \
                             -t bideo_ui:latest ./bideo_ui
                         docker stop bideo_ui 2>/dev/null || true
                         docker rm -f bideo_ui 2>/dev/null || true
