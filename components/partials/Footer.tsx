@@ -86,6 +86,45 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Categories Hub for Deep Internal SEO Linking */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Categories
+          </h3>
+          <ul className="space-y-1">
+            <li>
+              <Link href="/category/tech" className="hover:underline">
+                Tech & Coding
+              </Link>
+            </li>
+            <li>
+              <Link href="/category/gaming" className="hover:underline">
+                Gaming Highlights
+              </Link>
+            </li>
+            <li>
+              <Link href="/category/entertainment" className="hover:underline">
+                Entertainment & Shorts
+              </Link>
+            </li>
+            <li>
+              <Link href="/category/music" className="hover:underline">
+                Music & Beats
+              </Link>
+            </li>
+            <li>
+              <Link href="/category/education" className="hover:underline">
+                Education & Tutorials
+              </Link>
+            </li>
+            <li>
+              <Link href="/category/lifestyle" className="hover:underline">
+                Lifestyle & Vlogs
+              </Link>
+            </li>
+          </ul>
+        </div>
+
         {/* Quick Links */}
         <div className="flex flex-col gap-2">
           <h3 className="text-lg font-semibold text-foreground mb-2">

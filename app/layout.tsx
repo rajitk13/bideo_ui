@@ -11,6 +11,8 @@ import {
   SITE_URL,
   generateWebSiteSchema,
   generateOrganizationSchema,
+  generateSiteNavigationSchema,
+  generateSoftwareApplicationSchema,
 } from "@/utility/seo";
 
 const geistSans = Geist({
@@ -26,23 +28,61 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "BuzzClips - Next-Gen Video Streaming & Entertainment Platform",
+    default: "BuzzClips - Next-Gen Video Streaming, Viral Clips & Entertainment Platform",
     template: "%s | BuzzClips",
   },
   description:
-    "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
+    "Explore, watch, and share trending videos on BuzzClips. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
+  applicationName: "BuzzClips",
+  appleWebApp: {
+    capable: true,
+    title: "BuzzClips",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  category: "video streaming & entertainment",
+  classification: "Video Streaming Platform, Creator Media, Viral Video Clips",
   keywords: [
+    // Brand Variations
     "buzzclips",
     "buzzclips app",
+    "buzz clips",
+    "buzzclips video streaming",
+    "buzzclips platform",
+    "buzzclips official",
+    "buzzclips creator hub",
+    // Core Video & Streaming Keywords
     "video streaming",
     "watch videos",
+    "video streaming platform",
+    "viral video clips",
+    "trending video shorts",
+    "creator clips",
+    "short video clips",
     "shorts",
     "reels",
-    "video platform",
+    "watch videos online",
+    "free video streaming",
+    "video sharing platform",
+    // Technical Features
     "HLS streaming",
-    "video creators",
-    "video sharing",
-    "entertainment platform",
+    "adaptive bitrate streaming",
+    "buffer-free video playback",
+    "fast video player",
+    "video transcoding",
+    // Popular Niches
+    "tech clips",
+    "coding tutorials",
+    "gaming highlights",
+    "gaming walkthroughs",
+    "entertainment clips",
+    "viral humor shorts",
+    "music videos and beats",
+    "sports highlights",
+    "lifestyle vlogs",
+    "community videos",
   ],
   icons: {
     icon: "/favicon.ico",
@@ -57,7 +97,7 @@ export const metadata: Metadata = {
     siteName: "BuzzClips",
     title: "BuzzClips - Next-Gen Video Streaming Platform",
     description:
-      "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming and creator tools.",
+      "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming, creator tools, and instant video discovery.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
@@ -71,7 +111,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "BuzzClips - Next-Gen Video Streaming Platform",
     description:
-      "Explore, share, and stream high-quality videos on BuzzClips.",
+      "Explore, share, and stream high-quality videos on BuzzClips with adaptive HLS playback.",
     images: [`${SITE_URL}/opengraph-image`],
   },
   robots: {
@@ -94,6 +134,8 @@ export default function RootLayout({
 }>) {
   const websiteSchema = generateWebSiteSchema(SITE_URL);
   const organizationSchema = generateOrganizationSchema(SITE_URL);
+  const siteNavSchema = generateSiteNavigationSchema(SITE_URL);
+  const softwareAppSchema = generateSoftwareApplicationSchema(SITE_URL);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -112,6 +154,20 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(organizationSchema),
+          }}
+        />
+        <script
+          id="global-sitenav-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(siteNavSchema),
+          }}
+        />
+        <script
+          id="global-webapp-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(softwareAppSchema),
           }}
         />
       </head>

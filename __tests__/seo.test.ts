@@ -198,6 +198,9 @@ describe("SEO & Indexing Infrastructure", () => {
       formatToIsoDuration,
       generateWebSiteSchema,
       generateOrganizationSchema,
+      generateSiteNavigationSchema,
+      generateSoftwareApplicationSchema,
+      generateFaqSchema,
       generateBreadcrumbSchema,
       generateVideoJsonLd,
       SITE_URL,
@@ -313,6 +316,34 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(schema.thumbnailUrl[0]).toContain("favicon.ico");
         expect(schema.author.name).toBe("BuzzClips Creator");
         expect(schema.duration).toBeUndefined();
+      });
+
+      it("generates SiteNavigationElement schema with valid nav items", () => {
+        const schema = generateSiteNavigationSchema();
+        expect(schema["@context"]).toBe("https://schema.org");
+        expect(schema["@graph"]).toBeInstanceOf(Array);
+        expect(schema["@graph"].length).toBeGreaterThan(0);
+        expect(schema["@graph"][0]["@type"]).toBe("SiteNavigationElement");
+        expect(schema["@graph"][0].url).toBe("https://buzzclips.app");
+      });
+
+      it("generates WebApplication schema with applicationCategory and offers", () => {
+        const schema = generateSoftwareApplicationSchema();
+        expect(schema["@type"]).toBe("WebApplication");
+        expect(schema.name).toBe("BuzzClips");
+        expect(schema.applicationCategory).toBe("MultimediaApplication");
+        expect(schema.offers.price).toBe("0");
+        expect(schema.featureList).toBeInstanceOf(Array);
+      });
+
+      it("generates FAQPage schema with questions and accepted answers", () => {
+        const schema = generateFaqSchema();
+        expect(schema["@type"]).toBe("FAQPage");
+        expect(schema.mainEntity).toBeInstanceOf(Array);
+        expect(schema.mainEntity.length).toBeGreaterThan(0);
+        expect(schema.mainEntity[0]["@type"]).toBe("Question");
+        expect(schema.mainEntity[0].name).toContain("BuzzClips");
+        expect(schema.mainEntity[0].acceptedAnswer["@type"]).toBe("Answer");
       });
     });
   });

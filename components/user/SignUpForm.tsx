@@ -76,7 +76,7 @@ export function SignUpForm() {
           Create your account
         </CardTitle>
         <CardDescription className="text-muted-foreground/80">
-          Join bideo and start sharing videos
+          Join BuzzClips and start sharing videos
         </CardDescription>
       </CardHeader>
       <CardContent>

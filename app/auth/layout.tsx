@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Authentication | bideo",
-  description: "Sign in or register for your bideo account",
+  title: "Authentication | BuzzClips",
+  description: "Sign in or register for your BuzzClips account to share and stream video clips.",
 };
 
 export default function AuthLayout({

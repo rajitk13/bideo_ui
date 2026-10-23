@@ -65,13 +65,13 @@ export default function VideoCard({ video }: VideoCardProps) {
 
   return (
     <div
-      className="group w-full max-w-sm"
+      className="group w-full max-w-sm flex flex-col transition-transform duration-200"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Thumbnail with hover preview */}
       <Link href={videoHref} className="block">
-        <div className="relative rounded-xl overflow-hidden aspect-video bg-black/5 dark:bg-white/5 ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300 group-hover:ring-2 group-hover:ring-primary/30 group-hover:shadow-lg group-hover:shadow-primary/5">
+        <div className="relative rounded-2xl overflow-hidden aspect-video bg-black/5 dark:bg-white/5 ring-1 ring-border/50 transition-all duration-300 group-hover:ring-2 group-hover:ring-primary/40 group-hover:shadow-xl group-hover:shadow-primary/5">
           {/* Poster/Thumbnail */}
           <video
             ref={videoRef}
@@ -84,18 +84,27 @@ export default function VideoCard({ video }: VideoCardProps) {
             loop
           />
 
+          {/* Category Badge (Top-Left) */}
+          {video.category && (
+            <div className="absolute top-2.5 left-2.5 z-10">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-black/70 backdrop-blur-md text-white border border-white/15 shadow-xs">
+                {video.category}
+              </span>
+            </div>
+          )}
+
           {/* Hover overlay gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Play icon on hover */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 scale-75 group-hover:scale-100 transition-transform duration-300">
+            <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 scale-75 group-hover:scale-100 transition-transform duration-300 shadow-lg">
               <Play className="w-5 h-5 text-white fill-white ml-0.5" />
             </div>
           </div>
 
           {/* Duration badge */}
-          <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/75 backdrop-blur-sm text-white text-[11px] font-medium px-2 py-0.5 rounded-md transition-all duration-300 group-hover:bottom-3 group-hover:right-3">
+          <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-black/80 backdrop-blur-md text-white text-[11px] font-semibold px-2 py-0.5 rounded-md border border-white/10 transition-all duration-300">
             <Clock className="w-3 h-3" />
             {duration}
           </div>
@@ -103,7 +112,7 @@ export default function VideoCard({ video }: VideoCardProps) {
           {/* Share button (appears on hover) */}
           <button
             onClick={handleShare}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/60 scale-75 group-hover:scale-100"
+            className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-black/80 scale-75 group-hover:scale-100 border border-white/10 shadow-md"
             aria-label="Share video"
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -112,14 +121,14 @@ export default function VideoCard({ video }: VideoCardProps) {
       </Link>
 
       {/* Video info */}
-      <div className="flex items-start gap-3 mt-3">
-        <Link href={uploaderId ? `/profile/${uploaderId}` : "#"} className="shrink-0">
-          <Avatar className="h-9 w-9 ring-2 ring-transparent transition-all duration-300 group-hover:ring-primary/20">
+      <div className="flex items-start gap-3 mt-3 px-0.5">
+        <Link href={uploaderId ? `/profile/${uploaderId}` : "#"} className="shrink-0 mt-0.5">
+          <Avatar className="h-9 w-9 ring-2 ring-transparent transition-all duration-300 group-hover:ring-primary/40 shadow-xs">
             <AvatarImage
               src={avatarUrl}
               alt={uploaderName}
             />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-semibold">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white text-xs font-bold">
               {uploaderName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
@@ -135,11 +144,11 @@ export default function VideoCard({ video }: VideoCardProps) {
             {uploaderName}
           </p>
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs mt-0.5">
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 font-medium">
               <Eye className="w-3 h-3" />
               {formattedViews} views
             </span>
-            <span className="text-muted-foreground/50">•</span>
+            <span className="text-muted-foreground/40">•</span>
             <span>{timeAgo}</span>
           </div>
         </div>

@@ -86,8 +86,12 @@ export async function GET() {
         parseDurationToSeconds(video.iso_duration || video.video_duration) || 120;
       const views = video.video_views || 0;
       const uploader = escapeXml(
-        video.video_uploader?.user_name || "bideo Creator"
+        video.video_uploader?.user_name || "BuzzClips Creator"
       );
+
+      const categoryXml = video.category
+        ? `      <video:category>${escapeXml(video.category)}</video:category>\n`
+        : "";
 
       const tagsXml = (video.tags || [])
         .slice(0, 32)
@@ -110,7 +114,8 @@ export async function GET() {
       <video:view_count>${views}</video:view_count>
       <video:publication_date>${pubDate}</video:publication_date>
       <video:family_friendly>yes</video:family_friendly>
-      <video:uploader info="${baseUrl}/profile/${escapeXml(
+      <video:live>no</video:live>
+${categoryXml}      <video:uploader info="${baseUrl}/profile/${escapeXml(
         video.video_uploader?.userId || ""
       )}">${uploader}</video:uploader>
 ${tagsXml ? tagsXml + "\n" : ""}    </video:video>

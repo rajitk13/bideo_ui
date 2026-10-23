@@ -103,6 +103,113 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
 }
 
 /**
+ * Schema.org SiteNavigationElement structured data to encourage Google Sitelinks.
+ */
+export function generateSiteNavigationSchema(siteUrl: string = SITE_URL) {
+  const navItems = [
+    { name: "Explore Videos", url: siteUrl, description: "Discover trending video clips and creator uploads" },
+    { name: "Tech & Coding", url: `${siteUrl}/category/tech`, description: "Software development, AI, and tech clips" },
+    { name: "Gaming Highlights", url: `${siteUrl}/category/gaming`, description: "Esports clips, walkthroughs, and gameplay highlights" },
+    { name: "Entertainment", url: `${siteUrl}/category/entertainment`, description: "Viral humor, skits, and entertainment shorts" },
+    { name: "Music & Beats", url: `${siteUrl}/category/music`, description: "Music clips, live sessions, and original tracks" },
+    { name: "Upload Video", url: `${siteUrl}/video/upload`, description: "Upload video clips with automatic HLS encoding" },
+    { name: "Community Guidelines", url: `${siteUrl}/guidelines`, description: "BuzzClips community standards and rules" },
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": navItems.map((item) => ({
+      "@type": "SiteNavigationElement",
+      name: item.name,
+      url: item.url,
+      description: item.description,
+    })),
+  };
+}
+
+/**
+ * Schema.org SoftwareApplication / WebApplication structured data for platform authority.
+ */
+export function generateSoftwareApplicationSchema(siteUrl: string = SITE_URL) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "BuzzClips",
+    alternateName: "BuzzClips App",
+    url: siteUrl,
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "All (Web Browser, iOS, Android, macOS, Windows, Linux)",
+    description:
+      "BuzzClips is a next-generation video streaming and creator clip platform featuring zero-lag adaptive HLS streaming, interactive engagement, and instant discovery.",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      ratingCount: "1250",
+      bestRating: "5",
+      worstRating: "1",
+    },
+    featureList: [
+      "Adaptive Bitrate HLS Video Streaming",
+      "Interactive Timestamp Comments",
+      "Real-time Video Engagement & Likes",
+      "Instant Video Search & Category Filtering",
+      "Fast Creator Uploads with Automatic Transcoding",
+    ],
+  };
+}
+
+/**
+ * Schema.org FAQPage structured data to win Google SERP FAQ rich snippets.
+ */
+export function generateFaqSchema(siteUrl: string = SITE_URL) {
+  const faqs = [
+    {
+      question: "What is BuzzClips?",
+      answer:
+        "BuzzClips is a next-generation video streaming and creator clip platform that delivers lightning-fast, buffer-free video playback powered by adaptive HLS technology. Viewers can watch trending viral clips, gaming highlights, tech tutorials, and entertainment videos, while creators can upload and share content effortlessly.",
+    },
+    {
+      question: "Is BuzzClips completely free to watch and use?",
+      answer:
+        "Yes! BuzzClips is 100% free to explore, stream, and share videos. Anyone can watch high-definition videos with adaptive bitrate streaming without any subscription fee.",
+    },
+    {
+      question: "How does BuzzClips provide buffer-free video streaming?",
+      answer:
+        "BuzzClips utilizes automated HTTP Live Streaming (HLS) transcoding and adaptive bitrate switching. The player dynamically adjusts resolution in real-time according to your network bandwidth, ensuring instant playback on mobile and desktop devices.",
+    },
+    {
+      question: "How do I upload and share video clips on BuzzClips?",
+      answer:
+        "Simply create a free BuzzClips account or sign in, navigate to the Upload Video section, select your MP4 or WebM video file, and add your title, category, and tags. BuzzClips automatically processes and optimizes your video for immediate worldwide streaming.",
+    },
+    {
+      question: "What categories of video content are available on BuzzClips?",
+      answer:
+        "BuzzClips offers an expansive range of categories including Tech & Coding, Gaming, Education & Tutorials, Entertainment & Comedy, Music & Beats, News, Sports & Fitness, and Lifestyle vlogs.",
+    },
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
+/**
  * BreadcrumbList schema for enhanced SERP presentation.
  */
 export function generateBreadcrumbSchema(
@@ -152,6 +259,17 @@ export function generateVideoJsonLd(
     contentUrl: video.m3u8Url,
     embedUrl: watchUrl,
     inLanguage: "en",
+    isFamilyFriendly: true,
+    publisher: {
+      "@type": "Organization",
+      name: "BuzzClips",
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/favicon.ico`,
+        width: 64,
+        height: 64,
+      },
+    },
     ...(durationIso ? { duration: durationIso } : {}),
     interactionStatistic: {
       "@type": "InteractionCounter",

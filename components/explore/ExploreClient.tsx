@@ -13,17 +13,17 @@ import { MESSAGES } from "@/constants/messages";
 import { Search, X, Film, Tag } from "lucide-react";
 import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
 
-export const CATEGORIES: { label: string; value: string; slug: string }[] = [
-  { label: "All", value: "ALL", slug: "" },
-  { label: "Tech", value: "TECH", slug: "tech" },
-  { label: "Education", value: "EDUCATION", slug: "education" },
-  { label: "Gaming", value: "GAMING", slug: "gaming" },
-  { label: "Entertainment", value: "ENTERTAINMENT", slug: "entertainment" },
-  { label: "Music", value: "MUSIC", slug: "music" },
-  { label: "News", value: "NEWS", slug: "news" },
-  { label: "Sports", value: "SPORTS", slug: "sports" },
-  { label: "Lifestyle", value: "LIFESTYLE", slug: "lifestyle" },
-  { label: "Other", value: "OTHER", slug: "other" },
+export const CATEGORIES: { label: string; value: string; slug: string; icon?: string }[] = [
+  { label: "All", value: "ALL", slug: "", icon: "🔥" },
+  { label: "Tech", value: "TECH", slug: "tech", icon: "💻" },
+  { label: "Education", value: "EDUCATION", slug: "education", icon: "🎓" },
+  { label: "Gaming", value: "GAMING", slug: "gaming", icon: "🎮" },
+  { label: "Entertainment", value: "ENTERTAINMENT", slug: "entertainment", icon: "🎬" },
+  { label: "Music", value: "MUSIC", slug: "music", icon: "🎵" },
+  { label: "News", value: "NEWS", slug: "news", icon: "📰" },
+  { label: "Sports", value: "SPORTS", slug: "sports", icon: "⚽" },
+  { label: "Lifestyle", value: "LIFESTYLE", slug: "lifestyle", icon: "🌿" },
+  { label: "Other", value: "OTHER", slug: "other", icon: "🌐" },
 ];
 
 interface ExploreClientProps {
@@ -260,13 +260,15 @@ export default function ExploreClient({
               <button
                 key={cat.value}
                 onClick={() => handleCategorySelect(cat.value)}
-                className={`whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shrink-0 ${
+                aria-label={cat.label}
+                className={`flex items-center gap-1.5 whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 shrink-0 ${
                   isSelected
-                    ? "bg-primary text-primary-foreground shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25 scale-[1.02]"
                     : "bg-card/70 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/50"
                 }`}
               >
-                {cat.label}
+                {cat.icon && <span aria-hidden="true">{cat.icon}</span>}
+                <span>{cat.label}</span>
               </button>
             );
           })}

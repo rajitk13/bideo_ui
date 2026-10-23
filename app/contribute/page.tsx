@@ -5,19 +5,19 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Contribute to Bideo.tech",
+  title: "Contribute to BuzzClips | Open-Source Video Platform",
   description:
-    "Overview of the Bideo.tech project and how to contribute to its UI and backend",
+    "Overview of the BuzzClips project and how to contribute to its Next.js frontend and Spring Boot backend",
 };
 
 export default function ContributeLandingPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold mb-4">📽️ Contribute to Bideo.tech</h1>
+      <h1 className="text-4xl font-bold mb-4">📽️ Contribute to BuzzClips</h1>
 
       <p className="text-muted-foreground mb-6">
-        <strong>Bideo.tech</strong> is a modern video-sharing platform built
-        with a microfrontend architecture using:
+        <strong>BuzzClips</strong> is a modern video streaming and creator clip platform built
+        with a modern cloud architecture using:
       </p>
       <ul className="list-disc pl-5 space-y-1 mb-4 text-muted-foreground">
         <li>

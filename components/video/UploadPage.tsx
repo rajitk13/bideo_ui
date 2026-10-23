@@ -252,7 +252,7 @@ export default function UploadPage() {
         <div className="space-y-1.5">
           <h2 className="text-xl font-bold tracking-tight">Upload Studio</h2>
           <p className="text-sm text-muted-foreground">
-            You need to be logged in to upload and share videos on bideo.
+            You need to be logged in to upload and share videos on BuzzClips.
           </p>
         </div>
         <Link href="/auth/login" className="block pt-2">
@@ -317,7 +317,7 @@ export default function UploadPage() {
           Upload a Video
         </CardTitle>
         <CardDescription className="text-muted-foreground text-sm">
-          Publish your video to bideo. Automatic HLS encoding will generate adaptive streams.
+          Publish your video to BuzzClips. Automatic HLS encoding will generate adaptive streams.
         </CardDescription>
       </CardHeader>
 
