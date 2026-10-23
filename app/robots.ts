@@ -1,7 +1,8 @@
 import { MetadataRoute } from "next";
+import { SITE_URL } from "@/utility/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
 
   return {
     rules: [

@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { api_instance } from "@/global";
 import { PaginatedVideoResponse } from "@/types/video";
+import { SITE_URL } from "@/utility/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -28,6 +29,42 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/tech-stack`,
       lastModified: new Date(),
       changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/dmca`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/guidelines`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/contribute`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/status`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
       priority: 0.4,
     },
   ];

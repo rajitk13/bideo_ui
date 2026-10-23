@@ -120,6 +120,35 @@ export function Footer() {
             </li>
           </ul>
         </div>
+
+        {/* Legal & Policies */}
+        <div className="flex flex-col gap-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            Legal & Trust
+          </h3>
+          <ul className="space-y-1">
+            <li>
+              <Link href="/terms" className="hover:underline">
+                Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link href="/privacy" className="hover:underline">
+                Privacy Policy
+              </Link>
+            </li>
+            <li>
+              <Link href="/dmca" className="hover:underline">
+                Copyright / DMCA
+              </Link>
+            </li>
+            <li>
+              <Link href="/guidelines" className="hover:underline">
+                Community Guidelines
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
 
       <div className="border-t py-4 text-xs text-muted-foreground">

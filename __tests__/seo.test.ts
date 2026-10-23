@@ -192,4 +192,129 @@ describe("SEO & Indexing Infrastructure", () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe("utility/seo.ts", () => {
+    const {
+      formatToIsoDuration,
+      generateWebSiteSchema,
+      generateOrganizationSchema,
+      generateBreadcrumbSchema,
+      generateVideoJsonLd,
+      SITE_URL,
+    } = require("@/utility/seo");
+
+    it("verifies SITE_URL defaults to bideo.rajit.cc", () => {
+      expect(SITE_URL).toBe("https://bideo.rajit.cc");
+    });
+
+    describe("formatToIsoDuration", () => {
+      it("returns undefined for empty, null, or invalid inputs", () => {
+        expect(formatToIsoDuration()).toBeUndefined();
+        expect(formatToIsoDuration(null)).toBeUndefined();
+        expect(formatToIsoDuration("")).toBeUndefined();
+        expect(formatToIsoDuration("invalid-format")).toBeUndefined();
+        expect(formatToIsoDuration(-10)).toBeUndefined();
+      });
+
+      it("preserves already valid ISO 8601 duration strings", () => {
+        expect(formatToIsoDuration("PT2M30S")).toBe("PT2M30S");
+        expect(formatToIsoDuration("pt45s")).toBe("PT45S");
+        expect(formatToIsoDuration("PT1H30M0S")).toBe("PT1H30M0S");
+      });
+
+      it("converts numeric seconds to ISO 8601", () => {
+        expect(formatToIsoDuration(45)).toBe("PT45S");
+        expect(formatToIsoDuration(90)).toBe("PT1M30S");
+        expect(formatToIsoDuration(3665)).toBe("PT1H1M5S");
+      });
+
+      it("converts MM:SS strings to ISO 8601", () => {
+        expect(formatToIsoDuration("03:25")).toBe("PT3M25S");
+        expect(formatToIsoDuration("0:45")).toBe("PT45S");
+      });
+
+      it("converts HH:MM:SS strings to ISO 8601", () => {
+        expect(formatToIsoDuration("01:10:05")).toBe("PT1H10M5S");
+      });
+
+      it("converts raw numeric string to ISO 8601", () => {
+        expect(formatToIsoDuration("120")).toBe("PT2M");
+      });
+    });
+
+    describe("Schema Generators", () => {
+      it("generates WebSite schema with SearchAction", () => {
+        const schema = generateWebSiteSchema();
+        expect(schema["@type"]).toBe("WebSite");
+        expect(schema.potentialAction["@type"]).toBe("SearchAction");
+        expect(schema.potentialAction.target.urlTemplate).toContain("?query=");
+      });
+
+      it("generates Organization schema with social signals", () => {
+        const schema = generateOrganizationSchema();
+        expect(schema["@type"]).toBe("Organization");
+        expect(schema.name).toBe("bideo");
+        expect(schema.sameAs).toBeDefined();
+        expect(schema.logo.url).toContain("favicon.ico");
+      });
+
+      it("generates BreadcrumbList schema accurately", () => {
+        const items = [
+          { name: "Home", url: "https://bideo.rajit.cc" },
+          { name: "Tech", url: "https://bideo.rajit.cc/?category=TECH" },
+          { name: "My Video", url: "https://bideo.rajit.cc/watch/my-video" },
+        ];
+        const schema = generateBreadcrumbSchema(items);
+        expect(schema["@type"]).toBe("BreadcrumbList");
+        expect(schema.itemListElement).toHaveLength(3);
+        expect(schema.itemListElement[0].position).toBe(1);
+        expect(schema.itemListElement[2].name).toBe("My Video");
+      });
+
+      it("generates VideoObject schema with full metadata", () => {
+        const mockVideo = {
+          videoId: 123,
+          video_title: "Full Stack Tutorial",
+          slug: "full-stack-tutorial",
+          description: "Learn full stack web development",
+          thumbnail_url: "https://bideo.rajit.cc/thumb.png",
+          video_uploadDate: "2026-05-01T12:00:00Z",
+          video_views: 5000,
+          video_duration: "10:30",
+          m3u8Url: "https://bideo.rajit.cc/master.m3u8",
+          tags: ["coding", "react", "nextjs"],
+          video_uploader: {
+            userId: "user_42",
+            user_name: "LeadDev",
+          },
+        };
+
+        const schema = generateVideoJsonLd(mockVideo);
+        expect(schema["@type"]).toBe("VideoObject");
+        expect(schema.name).toBe("Full Stack Tutorial");
+        expect(schema.description).toBe("Learn full stack web development");
+        expect(schema.duration).toBe("PT10M30S");
+        expect(schema.keywords).toBe("coding, react, nextjs");
+        expect(schema.author.name).toBe("LeadDev");
+        expect(schema.author.url).toContain("/profile/user_42");
+        expect(schema.interactionStatistic.userInteractionCount).toBe(5000);
+      });
+
+      it("handles fallback defaults in VideoObject schema", () => {
+        const minimalVideo = {
+          videoId: 999,
+          video_title: "",
+          video_uploadDate: null,
+          video_views: 0,
+        };
+
+        const schema = generateVideoJsonLd(minimalVideo as any);
+        expect(schema.name).toBe("Watch Video");
+        expect(schema.thumbnailUrl[0]).toContain("favicon.ico");
+        expect(schema.author.name).toBe("bideo Creator");
+        expect(schema.duration).toBeUndefined();
+      });
+    });
+  });
 });
+

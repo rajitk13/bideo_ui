@@ -1,5 +1,6 @@
 import { api_instance } from "@/global";
 import { PaginatedVideoResponse, VideoDTO } from "@/types/video";
+import { SITE_URL } from "@/utility/seo";
 
 function escapeXml(str: string): string {
   return str.replace(/[<>&'"]/g, (char) => {
@@ -48,7 +49,7 @@ function parseDurationToSeconds(durationStr?: string): number | null {
 }
 
 export async function GET() {
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
   let videos: VideoDTO[] = [];
 
   try {

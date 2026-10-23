@@ -7,6 +7,11 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/store/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { ReactQueryProvider } from "@/components/providers/react-query-provider";
+import {
+  SITE_URL,
+  generateWebSiteSchema,
+  generateOrganizationSchema,
+} from "@/utility/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,41 +24,55 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://bideo.rajit.cc"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "bideo - Next-Gen Video Streaming Platform",
+    default: "bideo - Next-Gen Video Streaming & Entertainment Platform",
     template: "%s | bideo",
   },
   description:
-    "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming, fast discovery, and creator-first tools.",
+    "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
   keywords: [
+    "bideo",
+    "bideo app",
     "video streaming",
     "watch videos",
-    "bideo",
+    "shorts",
+    "reels",
+    "video platform",
     "HLS streaming",
     "video creators",
     "video sharing",
+    "entertainment platform",
   ],
   icons: {
     icon: "/favicon.ico",
   },
   alternates: {
-    canonical: "https://bideo.rajit.cc",
+    canonical: SITE_URL,
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://bideo.rajit.cc",
+    url: SITE_URL,
     siteName: "bideo",
     title: "bideo - Next-Gen Video Streaming Platform",
     description:
       "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming and creator tools.",
+    images: [
+      {
+        url: `${SITE_URL}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "bideo - Next-Gen Video Streaming Platform",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "bideo - Next-Gen Video Streaming Platform",
     description:
       "Explore, share, and stream high-quality videos on bideo.",
+    images: [`${SITE_URL}/opengraph-image`],
   },
   robots: {
     index: true,
@@ -73,8 +92,27 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const websiteSchema = generateWebSiteSchema(SITE_URL);
+  const organizationSchema = generateOrganizationSchema(SITE_URL);
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          id="global-website-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(websiteSchema),
+          }}
+        />
+        <script
+          id="global-org-schema"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col relative`}
       >

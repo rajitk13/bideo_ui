@@ -2,6 +2,11 @@ import ViewVideo from "@/components/video/ViewVideo";
 import { Metadata } from "next";
 import { getVideoBySlug } from "@/utility/requests";
 import { VideoDTO } from "@/types/video";
+import {
+  SITE_URL,
+  generateVideoJsonLd,
+  generateBreadcrumbSchema,
+} from "@/utility/seo";
 
 export const revalidate = 60; // Incremental Static Regeneration every 60 seconds
 
@@ -11,7 +16,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
   const canonicalUrl = `${baseUrl}/watch/${slug}`;
 
   try {
@@ -86,7 +91,7 @@ export default async function WatchPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
   let video: VideoDTO | null = null;
 
   try {
@@ -97,42 +102,21 @@ export default async function WatchPage({
 
   const watchUrl = `${baseUrl}/watch/${slug}`;
   const title = video?.seo?.title || video?.video_title || "Watch Video";
-  const description =
-    video?.seo?.description ||
-    video?.description ||
-    `Watch ${title} on bideo.`;
-  const thumbnailUrl = video?.thumbnail_url || `${baseUrl}/favicon.ico`;
-  const uploadDate = video?.video_uploadDate
-    ? new Date(video.video_uploadDate).toISOString()
-    : new Date().toISOString();
 
-  // Construct Google-compliant Schema.org VideoObject for SSR
+  // Construct Google-compliant Schema.org VideoObject and Breadcrumbs for SSR
   const jsonLdVideoObject = video
-    ? {
-        "@context": "https://schema.org",
-        "@type": "VideoObject",
-        name: title,
-        description,
-        thumbnailUrl: [thumbnailUrl],
-        uploadDate,
-        contentUrl: video.m3u8Url,
-        embedUrl: watchUrl,
-        interactionStatistic: {
-          "@type": "InteractionCounter",
-          interactionType: { "@type": "https://schema.org/WatchAction" },
-          userInteractionCount: video.video_views || 0,
+    ? generateVideoJsonLd(video, baseUrl)
+    : null;
+
+  const breadcrumbSchema = video
+    ? generateBreadcrumbSchema([
+        { name: "Home", url: baseUrl },
+        {
+          name: video.category || "Videos",
+          url: `${baseUrl}/?category=${video.category || "ALL"}`,
         },
-        author: {
-          "@type": "Person",
-          name: video.video_uploader?.user_name || "bideo Creator",
-          url: video.video_uploader?.userId
-            ? `${baseUrl}/profile/${video.video_uploader.userId}`
-            : baseUrl,
-        },
-        ...(video.tags && video.tags.length > 0
-          ? { keywords: video.tags.join(", ") }
-          : {}),
-      }
+        { name: title, url: watchUrl },
+      ])
     : null;
 
   return (
@@ -146,7 +130,17 @@ export default async function WatchPage({
           }}
         />
       )}
+      {breadcrumbSchema && (
+        <script
+          id="server-breadcrumb-schema-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbSchema),
+          }}
+        />
+      )}
       <ViewVideo slug={slug} initialVideo={video || undefined} />
     </>
   );
 }
+
