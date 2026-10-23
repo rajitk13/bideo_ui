@@ -14,7 +14,7 @@ export const VideoSeoHead: React.FC<VideoSeoHeadProps> = ({ video }) => {
     if (!seo) return;
 
     // Document title
-    document.title = `${seo.title} | bideo.rajit.cc`;
+    document.title = `${seo.title} | BuzzClips`;
 
     // Helper to set or create meta tags
     const setMetaTag = (property: string, content: string, isName = false) => {

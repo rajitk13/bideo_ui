@@ -75,7 +75,7 @@ export async function GET() {
       const description = escapeXml(
         video.description ||
           video.seo?.description ||
-          `Watch ${video.video_title} on bideo.`
+          `Watch ${video.video_title} on BuzzClips.`
       );
       const thumbnail =
         video.thumbnail_url || `${baseUrl}/favicon.ico`;

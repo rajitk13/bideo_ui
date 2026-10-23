@@ -101,13 +101,24 @@ const nextConfig: NextConfig = {
     domains: [
       "github.com",
       "cdn.jsdelivr.net",
+      "buzzclips.app",
       "bideo-tech-uploads.s3.ap-south-1.amazonaws.com",
     ],
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "buzzclips.app",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "bideo.tech",
         port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
         pathname: "/**",
       },
     ],

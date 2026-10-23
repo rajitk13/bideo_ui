@@ -17,12 +17,12 @@ describe("SEO & Indexing Infrastructure", () => {
     it("returns compliant robots rules and sitemap links", () => {
       const robotsConfig = robots();
 
-      expect(robotsConfig.host).toBe("https://bideo.rajit.cc");
+      expect(robotsConfig.host).toBe("https://buzzclips.app");
       expect(robotsConfig.sitemap).toContain(
-        "https://bideo.rajit.cc/sitemap.xml"
+        "https://buzzclips.app/sitemap.xml"
       );
       expect(robotsConfig.sitemap).toContain(
-        "https://bideo.rajit.cc/video-sitemap.xml"
+        "https://buzzclips.app/video-sitemap.xml"
       );
 
       const rules = Array.isArray(robotsConfig.rules)
@@ -71,17 +71,17 @@ describe("SEO & Indexing Infrastructure", () => {
 
       const sitemapEntries = await sitemap();
 
-      expect(sitemapEntries.some((e) => e.url === "https://bideo.rajit.cc")).toBe(
+      expect(sitemapEntries.some((e) => e.url === "https://buzzclips.app")).toBe(
         true
       );
       expect(
         sitemapEntries.some(
-          (e) => e.url === "https://bideo.rajit.cc/watch/awesome-video"
+          (e) => e.url === "https://buzzclips.app/watch/awesome-video"
         )
       ).toBe(true);
       expect(
         sitemapEntries.some(
-          (e) => e.url === "https://bideo.rajit.cc/watch/private-video"
+          (e) => e.url === "https://buzzclips.app/watch/private-video"
         )
       ).toBe(false);
     });
@@ -102,7 +102,7 @@ describe("SEO & Indexing Infrastructure", () => {
 
       const sitemapEntries = await sitemap();
       expect(
-        sitemapEntries.some((e) => e.url === "https://bideo.rajit.cc/watch/777")
+        sitemapEntries.some((e) => e.url === "https://buzzclips.app/watch/777")
       ).toBe(true);
 
       // Test res.ok = false
@@ -119,7 +119,7 @@ describe("SEO & Indexing Infrastructure", () => {
 
   describe("app/api/oembed/route.ts", () => {
     it("returns 400 when url param is missing", async () => {
-      const req = new Request("https://bideo.rajit.cc/api/oembed");
+      const req = new Request("https://buzzclips.app/api/oembed");
       const res = await oembedHandler(req);
 
       expect(res.status).toBe(400);
@@ -132,7 +132,7 @@ describe("SEO & Indexing Infrastructure", () => {
         videoId: 99,
         video_title: "How to Code",
         slug: "how-to-code",
-        thumbnail_url: "https://bideo.rajit.cc/thumb.jpg",
+        thumbnail_url: "https://buzzclips.app/thumb.jpg",
         video_uploader: {
           userId: "dev_1",
           user_name: "Coder",
@@ -140,7 +140,7 @@ describe("SEO & Indexing Infrastructure", () => {
       });
 
       const req = new Request(
-        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2Fhow-to-code&maxwidth=800&maxheight=450"
+        "https://buzzclips.app/api/oembed?url=https%3A%2F%2Fbuzzclips.app%2Fwatch%2Fhow-to-code&maxwidth=800&maxheight=450"
       );
       const res = await oembedHandler(req);
 
@@ -149,7 +149,7 @@ describe("SEO & Indexing Infrastructure", () => {
       expect(json.type).toBe("video");
       expect(json.title).toBe("How to Code");
       expect(json.author_name).toBe("Coder");
-      expect(json.provider_name).toBe("bideo");
+      expect(json.provider_name).toBe("BuzzClips");
       expect(json.width).toBe(1280);
       expect(json.height).toBe(720);
       expect(json.html).toContain("iframe");
@@ -164,18 +164,18 @@ describe("SEO & Indexing Infrastructure", () => {
       });
 
       const req = new Request(
-        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2F555"
+        "https://buzzclips.app/api/oembed?url=https%3A%2F%2Fbuzzclips.app%2Fwatch%2F555"
       );
       const res = await oembedHandler(req);
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.title).toBe("Numeric Video");
-      expect(json.author_name).toBe("bideo Creator");
+      expect(json.author_name).toBe("BuzzClips Creator");
     });
 
     it("returns 404 when url format is unrecognized or invalid", async () => {
       const req = new Request(
-        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fotherdomain.com%2Funknown"
+        "https://buzzclips.app/api/oembed?url=https%3A%2F%2Fotherdomain.com%2Funknown"
       );
       const res = await oembedHandler(req);
       expect(res.status).toBe(404);
@@ -185,7 +185,7 @@ describe("SEO & Indexing Infrastructure", () => {
       (getVideoBySlug as jest.Mock).mockRejectedValue(new Error("Not found"));
 
       const req = new Request(
-        "https://bideo.rajit.cc/api/oembed?url=https%3A%2F%2Fbideo.rajit.cc%2Fwatch%2Fnon-existent"
+        "https://buzzclips.app/api/oembed?url=https%3A%2F%2Fbuzzclips.app%2Fwatch%2Fnon-existent"
       );
       const res = await oembedHandler(req);
 
@@ -203,8 +203,8 @@ describe("SEO & Indexing Infrastructure", () => {
       SITE_URL,
     } = require("@/utility/seo");
 
-    it("verifies SITE_URL defaults to bideo.rajit.cc", () => {
-      expect(SITE_URL).toBe("https://bideo.rajit.cc");
+    it("verifies SITE_URL defaults to buzzclips.app", () => {
+      expect(SITE_URL).toBe("https://buzzclips.app");
     });
 
     describe("formatToIsoDuration", () => {
@@ -260,9 +260,9 @@ describe("SEO & Indexing Infrastructure", () => {
 
       it("generates BreadcrumbList schema accurately", () => {
         const items = [
-          { name: "Home", url: "https://bideo.rajit.cc" },
-          { name: "Tech", url: "https://bideo.rajit.cc/?category=TECH" },
-          { name: "My Video", url: "https://bideo.rajit.cc/watch/my-video" },
+          { name: "Home", url: "https://buzzclips.app" },
+          { name: "Tech", url: "https://buzzclips.app/?category=TECH" },
+          { name: "My Video", url: "https://buzzclips.app/watch/my-video" },
         ];
         const schema = generateBreadcrumbSchema(items);
         expect(schema["@type"]).toBe("BreadcrumbList");
@@ -277,11 +277,11 @@ describe("SEO & Indexing Infrastructure", () => {
           video_title: "Full Stack Tutorial",
           slug: "full-stack-tutorial",
           description: "Learn full stack web development",
-          thumbnail_url: "https://bideo.rajit.cc/thumb.png",
+          thumbnail_url: "https://buzzclips.app/thumb.png",
           video_uploadDate: "2026-05-01T12:00:00Z",
           video_views: 5000,
           video_duration: "10:30",
-          m3u8Url: "https://bideo.rajit.cc/master.m3u8",
+          m3u8Url: "https://buzzclips.app/master.m3u8",
           tags: ["coding", "react", "nextjs"],
           video_uploader: {
             userId: "user_42",

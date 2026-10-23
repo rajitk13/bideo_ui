@@ -37,7 +37,7 @@ describe("Footer Component", () => {
     });
     expect(commitLink).toHaveAttribute(
       "href",
-      "https://github.com/rajitk13/bideo_ui/commit/584bd9a"
+      "https://github.com/bideo-org/bideo_ui/commit/584bd9a"
     );
   });
 
@@ -53,7 +53,7 @@ describe("Footer Component", () => {
     });
     expect(commitLink).toHaveAttribute(
       "href",
-      "https://github.com/rajitk13/bideo_ui/commit/abcdef1"
+      "https://github.com/bideo-org/bideo_ui/commit/abcdef1"
     );
   });
 
@@ -66,7 +66,7 @@ describe("Footer Component", () => {
 
     const links = screen.getAllByRole("link");
     const commitLink = links.find((l) =>
-      l.getAttribute("href") === "https://github.com/rajitk13/bideo_ui"
+      l.getAttribute("href") === "https://github.com/bideo-org/bideo_ui"
     );
     expect(commitLink).toBeDefined();
   });

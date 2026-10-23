@@ -33,8 +33,8 @@ export function Footer() {
   const shortSha = commitSha.length > 7 ? commitSha.slice(0, 7) : commitSha;
   const commitUrl =
     commitSha !== "dev"
-      ? `https://github.com/rajitk13/bideo_ui/commit/${shortSha}`
-      : "https://github.com/rajitk13/bideo_ui";
+      ? `https://github.com/bideo-org/bideo_ui/commit/${shortSha}`
+      : "https://github.com/bideo-org/bideo_ui";
 
   return (
     <footer className="w-full border-t mt-auto bg-background/80 backdrop-blur-sm text-muted-foreground">

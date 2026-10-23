@@ -1,5 +1,6 @@
 import { getVideoBySlug, getVideoById } from "@/utility/requests";
 import { VideoDTO } from "@/types/video";
+import { SITE_URL } from "@/utility/seo";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
   }
 
   let video: VideoDTO | null = null;
-  const baseUrl = "https://bideo.rajit.cc";
+  const baseUrl = SITE_URL;
 
   try {
     const parsedUrl = new URL(urlParam);
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
   }
 
   const watchUrl = `${baseUrl}/watch/${video.slug || video.videoId}`;
-  const authorName = video.video_uploader?.user_name || "bideo Creator";
+  const authorName = video.video_uploader?.user_name || "BuzzClips Creator";
   const authorUrl = video.video_uploader?.userId
     ? `${baseUrl}/profile/${video.video_uploader.userId}`
     : baseUrl;
@@ -62,7 +63,7 @@ export async function GET(request: Request) {
     title: video.video_title,
     author_name: authorName,
     author_url: authorUrl,
-    provider_name: "bideo",
+    provider_name: "BuzzClips",
     provider_url: baseUrl,
     thumbnail_url: video.thumbnail_url || `${baseUrl}/favicon.ico`,
     thumbnail_width: 1280,

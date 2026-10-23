@@ -54,7 +54,7 @@ describe("Video Sitemap XML Route", () => {
 
     expect(xml).toContain("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
     expect(xml).toContain("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"");
-    expect(xml).toContain("https://bideo.rajit.cc/watch/learn-nextjs-react");
+    expect(xml).toContain("https://buzzclips.app/watch/learn-nextjs-react");
     expect(xml).toContain("&lt;Next.js&gt; &amp; React");
     expect(xml).toContain("<video:duration>225</video:duration>");
     expect(xml).toContain("<video:view_count>1500</video:view_count>");

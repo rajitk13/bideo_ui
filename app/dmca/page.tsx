@@ -53,7 +53,7 @@ export default function DmcaPage() {
             <ul className="list-disc pl-6 space-y-1.5">
               <li>A physical or electronic signature of the person authorized to act on behalf of the copyright owner.</li>
               <li>Identification of the copyrighted work claimed to have been infringed (or a representative list of works).</li>
-              <li>Identification of the material claimed to be infringing, including the specific bideo URL (e.g., <code>https://bideo.rajit.cc/watch/example-slug</code>).</li>
+              <li>Identification of the material claimed to be infringing, including the specific BuzzClips URL (e.g., <code>https://buzzclips.app/watch/example-slug</code>).</li>
               <li>Your contact information, including name, physical address, telephone number, and email address.</li>
               <li>A statement that you have a good faith belief that use of the material is not authorized by the copyright owner, agent, or the law.</li>
               <li>A statement made under penalty of perjury that the information in the notification is accurate and that you are authorized to act on behalf of the owner.</li>

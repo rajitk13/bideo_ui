@@ -44,7 +44,7 @@ describe("VideoSeoHead", () => {
   it("updates document.title and description meta tag", () => {
     render(<VideoSeoHead video={mockVideoWithSeo} />);
 
-    expect(document.title).toBe("How to Build Next.js Apps | bideo.rajit.cc");
+    expect(document.title).toBe("How to Build Next.js Apps | BuzzClips");
 
     const descMeta = document.querySelector('meta[name="description"]');
     expect(descMeta).not.toBeNull();

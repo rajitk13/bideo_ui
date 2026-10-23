@@ -2,6 +2,11 @@
   "name": "bideo_ui",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://buzzclips.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bideo-org/bideo_ui.git"
+  },
   "scripts": {
     "build:info": "node scripts/generate-build-info.js",
     "predev": "node scripts/generate-build-info.js",

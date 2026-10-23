@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { getPublicUser, getPublicUserVideos } from "@/utility/requests";
+import { SITE_URL } from "@/utility/seo";
 import VideoCard from "@/components/video/VideoCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -28,26 +29,26 @@ export async function generateMetadata({
 
   if (!user) {
     return {
-      title: "Creator Profile | bideo",
-      description: "View creator profile and videos on bideo.",
+      title: "Creator Profile | BuzzClips",
+      description: "View creator profile and videos on BuzzClips.",
     };
   }
 
   const name = user.user_name || "Creator";
-  const title = `${name} - Videos & Channel | bideo`;
-  const description = `Watch videos created by ${name} on bideo. Fast adaptive streaming and video discovery.`;
+  const title = `${name} - Videos & Channel | BuzzClips`;
+  const description = `Watch videos created by ${name} on BuzzClips. Fast adaptive streaming and video discovery.`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: `https://bideo.rajit.cc/profile/${userId}`,
+      canonical: `${SITE_URL}/profile/${userId}`,
     },
     openGraph: {
       type: "profile",
       title,
       description,
-      url: `https://bideo.rajit.cc/profile/${userId}`,
+      url: `${SITE_URL}/profile/${userId}`,
       images: user.avatar_url ? [{ url: user.avatar_url, alt: name }] : [],
     },
     twitter: {

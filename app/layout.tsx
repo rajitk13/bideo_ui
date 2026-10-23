@@ -98,6 +98,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="dns-prefetch" href="https://buzzclips.app" />
+        <link rel="preconnect" href="https://buzzclips.app" />
         <script
           id="global-website-schema"
           type="application/ld+json"

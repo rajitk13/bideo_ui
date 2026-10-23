@@ -1,7 +1,7 @@
 import { VideoDTO } from "@/types/video";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://bideo.rajit.cc";
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://buzzclips.app";
 
 /**
  * Normalizes any duration format (seconds, "MM:SS", "HH:MM:SS", or ISO 8601)
@@ -96,7 +96,7 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
       height: 64,
     },
     sameAs: [
-      "https://github.com/rajitk13/bideo_ui",
+      "https://github.com/bideo-org/bideo_ui",
       "https://linkedin.com/in/rajitkuthiala",
     ],
   };

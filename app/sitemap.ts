@@ -67,6 +67,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.4,
     },
+    ...[
+      "tech",
+      "gaming",
+      "education",
+      "entertainment",
+      "music",
+      "news",
+      "sports",
+      "lifestyle",
+      "other",
+    ].map((cat) => ({
+      url: `${baseUrl}/category/${cat}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.8,
+    })),
   ];
 
   try {
