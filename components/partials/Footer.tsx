@@ -42,10 +42,10 @@ export function Footer() {
         {/* About / Brand Info */}
         <div className="max-w-md">
           <h3 className="text-lg font-semibold text-foreground mb-2">
-            About | bideo{" "}
+            About | BuzzClips{" "}
           </h3>
           <p>
-            Bideo is a modern platform built to share, explore, and enjoy videos
+            BuzzClips is a modern platform built to share, explore, and enjoy videos
             from around the world. Crafted with passion by a small team of 2
             developers who love tech.
           </p>
@@ -153,7 +153,7 @@ export function Footer() {
 
       <div className="border-t py-4 text-xs text-muted-foreground">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-center">
-          <span>© {new Date().getFullYear()} bideo | MIT License</span>
+          <span>© {new Date().getFullYear()} BuzzClips | MIT License</span>
           <span className="hidden sm:inline text-muted-foreground/30">•</span>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
             <span className="text-[11px] font-medium text-muted-foreground/80">

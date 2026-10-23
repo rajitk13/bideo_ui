@@ -4,9 +4,9 @@ import { ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | bideo",
+  title: "Privacy Policy | BuzzClips",
   description:
-    "Learn how bideo collects, protects, and handles your data across our video streaming platform.",
+    "Learn how BuzzClips collects, protects, and handles your data across our video streaming platform.",
 };
 
 export default function PrivacyPage() {
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">1. Information We Collect</h2>
             <p>
-              When you use <strong>bideo</strong>, we collect information necessary to provide video streaming, personalized recommendations, and creator tools:
+              When you use <strong>BuzzClips</strong>, we collect information necessary to provide video streaming, personalized recommendations, and creator tools:
             </p>
             <ul className="list-disc pl-6 space-y-1">
               <li><strong>Account Information:</strong> Email address, username, display name, and avatar URL provided upon registration.</li>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">4. Cookies & Local Storage</h2>
             <p>
-              bideo uses standard session cookies and browser local storage to maintain your authentication state, remember player volume/playback preferences, and theme selections.
+              BuzzClips uses standard session cookies and browser local storage to maintain your authentication state, remember player volume/playback preferences, and theme selections.
             </p>
           </section>
 

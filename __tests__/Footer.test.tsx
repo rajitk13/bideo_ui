@@ -6,7 +6,7 @@ describe("Footer Component", () => {
   it("renders about description, creators, and quick links", () => {
     render(<Footer />);
 
-    expect(screen.getByText(/About \| bideo/i)).toBeInTheDocument();
+    expect(screen.getByText(/About \| BuzzClips/i)).toBeInTheDocument();
     expect(screen.getByText("Ayushmaan Aggarwal")).toBeInTheDocument();
     expect(screen.getByText("Rajit Kuthiala")).toBeInTheDocument();
     expect(screen.getByText("Tech Stack")).toBeInTheDocument();
@@ -19,7 +19,7 @@ describe("Footer Component", () => {
 
     const currentYear = new Date().getFullYear();
     expect(
-      screen.getByText(new RegExp(`${currentYear} bideo \\| MIT License`, "i"))
+      screen.getByText(new RegExp(`${currentYear} BuzzClips \\| MIT License`, "i"))
     ).toBeInTheDocument();
   });
 

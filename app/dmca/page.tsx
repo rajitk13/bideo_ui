@@ -4,9 +4,9 @@ import { ArrowLeft, Scale, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Copyright & DMCA Policy | bideo",
+  title: "Copyright & DMCA Policy | BuzzClips",
   description:
-    "Learn about bideo's Digital Millennium Copyright Act (DMCA) policy, copyright compliance, and notice-and-takedown procedure.",
+    "Learn about BuzzClips's Digital Millennium Copyright Act (DMCA) policy, copyright compliance, and notice-and-takedown procedure.",
 };
 
 export default function DmcaPage() {
@@ -41,14 +41,14 @@ export default function DmcaPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">1. Commitment to Copyright Protection</h2>
             <p>
-              <strong>bideo</strong> respects the intellectual property rights of creators and copyright holders. In accordance with the Digital Millennium Copyright Act (DMCA) and applicable global copyright laws, we respond promptly to notices of alleged copyright infringement and maintain a policy of terminating repeat infringers.
+              <strong>BuzzClips</strong> respects the intellectual property rights of creators and copyright holders. In accordance with the Digital Millennium Copyright Act (DMCA) and applicable global copyright laws, we respond promptly to notices of alleged copyright infringement and maintain a policy of terminating repeat infringers.
             </p>
           </section>
 
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">2. Filing a DMCA Takedown Notice</h2>
             <p>
-              If you are a copyright owner or authorized agent and believe that content hosted on bideo infringes your copyright, please send a written notification containing the following details to our designated Copyright Agent:
+              If you are a copyright owner or authorized agent and believe that content hosted on BuzzClips infringes your copyright, please send a written notification containing the following details to our designated Copyright Agent:
             </p>
             <ul className="list-disc pl-6 space-y-1.5">
               <li>A physical or electronic signature of the person authorized to act on behalf of the copyright owner.</li>
@@ -63,7 +63,7 @@ export default function DmcaPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">3. Designated Copyright Agent</h2>
             <div className="p-4 rounded-xl bg-muted/40 border border-border/50 text-sm space-y-1">
-              <p className="font-semibold text-foreground">bideo Copyright Agent</p>
+              <p className="font-semibold text-foreground">BuzzClips Copyright Agent</p>
               <p>Attn: Legal & Copyright Operations</p>
               <p className="flex items-center gap-1.5 text-primary">
                 <Mail className="w-4 h-4" />
@@ -84,7 +84,7 @@ export default function DmcaPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">5. Repeat Infringer Policy</h2>
             <p>
-              In appropriate circumstances and at our discretion, bideo terminates user accounts and channels that are subject to repeated copyright infringement notices.
+              In appropriate circumstances and at our discretion, BuzzClips terminates user accounts and channels that are subject to repeated copyright infringement notices.
             </p>
           </section>
         </div>

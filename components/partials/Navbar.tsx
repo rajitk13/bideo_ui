@@ -39,7 +39,7 @@ export function Navbar() {
         >
           <Link href="/" className="group flex flex-col leading-tight">
             <span className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
-              bideo
+              buzzclips
             </span>
           </Link>
         </motion.div>

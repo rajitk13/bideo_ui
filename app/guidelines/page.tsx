@@ -4,9 +4,9 @@ import { ArrowLeft, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Community Guidelines | bideo",
+  title: "Community Guidelines | BuzzClips",
   description:
-    "Explore bideo's community guidelines designed to ensure a safe, creative, and respectful video sharing environment.",
+    "Explore BuzzClips's community guidelines designed to ensure a safe, creative, and respectful video sharing environment.",
 };
 
 export default function GuidelinesPage() {
@@ -30,7 +30,7 @@ export default function GuidelinesPage() {
                 Community Guidelines
               </h1>
               <p className="text-sm text-muted-foreground">
-                Standards and rules to keep bideo safe, welcoming, and inspiring for everyone
+                Standards and rules to keep BuzzClips safe, welcoming, and inspiring for everyone
               </p>
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function GuidelinesPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">Our Philosophy</h2>
             <p>
-              bideo was built to give creators of all sizes an open, high-performance platform to publish original videos and connect with audiences worldwide. To ensure the experience remains constructive and safe, all users and creators must adhere to these standards.
+              BuzzClips was built to give creators of all sizes an open, high-performance platform to publish original videos and connect with audiences worldwide. To ensure the experience remains constructive and safe, all users and creators must adhere to these standards.
             </p>
           </section>
 

@@ -26,11 +26,11 @@ export async function generateMetadata({
       const description =
         video.seo?.description ||
         video.description ||
-        `Watch ${video.video_title} on bideo. Fast adaptive HLS streaming with instant playback.`;
+        `Watch ${video.video_title} on BuzzClips. Fast adaptive HLS streaming with instant playback.`;
       const thumbnailUrl = video.thumbnail_url || `${baseUrl}/favicon.ico`;
 
       return {
-        title: `${title} | bideo`,
+        title: `${title} | BuzzClips`,
         description,
         alternates: {
           canonical: canonicalUrl,
@@ -42,7 +42,7 @@ export async function generateMetadata({
         },
         openGraph: {
           type: "video.other",
-          siteName: "bideo",
+          siteName: "BuzzClips",
           title,
           description,
           url: canonicalUrl,
@@ -78,7 +78,7 @@ export async function generateMetadata({
   }
 
   return {
-    title: "Watch Video | bideo",
+    title: "Watch Video | BuzzClips",
     alternates: {
       canonical: canonicalUrl,
     },

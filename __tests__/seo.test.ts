@@ -253,7 +253,7 @@ describe("SEO & Indexing Infrastructure", () => {
       it("generates Organization schema with social signals", () => {
         const schema = generateOrganizationSchema();
         expect(schema["@type"]).toBe("Organization");
-        expect(schema.name).toBe("bideo");
+        expect(schema.name).toBe("BuzzClips");
         expect(schema.sameAs).toBeDefined();
         expect(schema.logo.url).toContain("favicon.ico");
       });
@@ -311,7 +311,7 @@ describe("SEO & Indexing Infrastructure", () => {
         const schema = generateVideoJsonLd(minimalVideo as any);
         expect(schema.name).toBe("Watch Video");
         expect(schema.thumbnailUrl[0]).toContain("favicon.ico");
-        expect(schema.author.name).toBe("bideo Creator");
+        expect(schema.author.name).toBe("BuzzClips Creator");
         expect(schema.duration).toBeUndefined();
       });
     });

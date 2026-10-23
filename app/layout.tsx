@@ -26,14 +26,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "bideo - Next-Gen Video Streaming & Entertainment Platform",
-    template: "%s | bideo",
+    default: "BuzzClips - Next-Gen Video Streaming & Entertainment Platform",
+    template: "%s | BuzzClips",
   },
   description:
-    "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
+    "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming, fast discovery, creator channels, and community entertainment.",
   keywords: [
-    "bideo",
-    "bideo app",
+    "buzzclips",
+    "buzzclips app",
     "video streaming",
     "watch videos",
     "shorts",
@@ -54,24 +54,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: SITE_URL,
-    siteName: "bideo",
-    title: "bideo - Next-Gen Video Streaming Platform",
+    siteName: "BuzzClips",
+    title: "BuzzClips - Next-Gen Video Streaming Platform",
     description:
-      "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming and creator tools.",
+      "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming and creator tools.",
     images: [
       {
         url: `${SITE_URL}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "bideo - Next-Gen Video Streaming Platform",
+        alt: "BuzzClips - Next-Gen Video Streaming Platform",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "bideo - Next-Gen Video Streaming Platform",
+    title: "BuzzClips - Next-Gen Video Streaming Platform",
     description:
-      "Explore, share, and stream high-quality videos on bideo.",
+      "Explore, share, and stream high-quality videos on BuzzClips.",
     images: [`${SITE_URL}/opengraph-image`],
   },
   robots: {

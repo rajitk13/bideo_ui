@@ -32,7 +32,7 @@ describe("Navbar Component", () => {
 
     render(<Navbar />);
 
-    expect(screen.getByText("bideo")).toBeInTheDocument();
+    expect(screen.getByText("buzzclips")).toBeInTheDocument();
     expect(screen.getByText("Home")).toBeInTheDocument();
   });
 

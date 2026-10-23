@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "bideo - Next-Gen Video Streaming Platform",
-    short_name: "bideo",
+    name: "BuzzClips - Next-Gen Video Streaming Platform",
+    short_name: "BuzzClips",
     description:
-      "Explore, share, and stream high-quality videos on bideo. Powered by adaptive HLS streaming and creator-first tools.",
+      "Explore, share, and stream high-quality videos on BuzzClips. Powered by adaptive HLS streaming and creator-first tools.",
     start_url: "/",
     display: "standalone",
     background_color: "#09090b",

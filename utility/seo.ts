@@ -64,8 +64,8 @@ export function generateWebSiteSchema(siteUrl: string = SITE_URL) {
     "@type": "WebSite",
     "@id": `${siteUrl}/#website`,
     url: siteUrl,
-    name: "bideo",
-    alternateName: ["Bideo", "Bideo Streaming", "Bideo Video Platform"],
+    name: "BuzzClips",
+    alternateName: ["BuzzClips", "BuzzClips App", "BuzzClips Streaming", "BuzzClips Video Platform"],
     description:
       "Next-Gen Video Streaming Platform with adaptive HLS playback, community creator tools, and fast video discovery.",
     potentialAction: {
@@ -87,7 +87,7 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${siteUrl}/#organization`,
-    name: "bideo",
+    name: "BuzzClips",
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
@@ -132,7 +132,7 @@ export function generateVideoJsonLd(
   const description =
     video.seo?.description ||
     video.description ||
-    `Watch ${title} on bideo. Fast adaptive HLS streaming with instant playback.`;
+    `Watch ${title} on BuzzClips. Fast adaptive HLS streaming with instant playback.`;
   const thumbnailUrl = video.thumbnail_url || `${siteUrl}/favicon.ico`;
   const uploadDate = video.video_uploadDate
     ? new Date(video.video_uploadDate).toISOString()
@@ -160,7 +160,7 @@ export function generateVideoJsonLd(
     },
     author: {
       "@type": "Person",
-      name: video.video_uploader?.user_name || "bideo Creator",
+      name: video.video_uploader?.user_name || "BuzzClips Creator",
       url: video.video_uploader?.userId
         ? `${siteUrl}/profile/${video.video_uploader.userId}`
         : siteUrl,

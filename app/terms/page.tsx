@@ -4,9 +4,9 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | bideo",
+  title: "Terms of Service | BuzzClips",
   description:
-    "Review the terms and conditions governing the use of the bideo video streaming platform and creator services.",
+    "Review the terms and conditions governing the use of the BuzzClips video streaming platform and creator services.",
 };
 
 export default function TermsPage() {
@@ -41,7 +41,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              By accessing, browsing, or using the <strong>bideo</strong> platform (&ldquo;Service&rdquo;), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use or access the Service.
+              By accessing, browsing, or using the <strong>BuzzClips</strong> platform (&ldquo;Service&rdquo;), you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use or access the Service.
             </p>
           </section>
 
@@ -58,7 +58,7 @@ export default function TermsPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">3. User Content & Intellectual Property</h2>
             <p>
-              You retain all ownership rights in the original videos and content you upload to bideo. By submitting content to the platform, you grant bideo a worldwide, non-exclusive, royalty-free license to host, transcode, adaptively stream (HLS), display, and distribute the content solely in connection with operating and promoting the Service.
+              You retain all ownership rights in the original videos and content you upload to BuzzClips. By submitting content to the platform, you grant BuzzClips a worldwide, non-exclusive, royalty-free license to host, transcode, adaptively stream (HLS), display, and distribute the content solely in connection with operating and promoting the Service.
             </p>
             <p>
               You represent and warrant that you own or have obtained all necessary licenses, rights, consents, and permissions to publish the content you upload.
@@ -67,7 +67,7 @@ export default function TermsPage() {
 
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">4. Prohibited Conduct</h2>
-            <p>When using bideo, you agree not to:</p>
+            <p>When using BuzzClips, you agree not to:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>Upload content that infringes upon copyright, trademark, or intellectual property rights.</li>
               <li>Publish harmful, abusive, harassing, defamatory, or unlawful materials.</li>
