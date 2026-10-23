@@ -22,13 +22,9 @@ export interface SeoMetadataDTO {
   twitterCard: Record<string, string>;
 }
 
-export interface UserDTO {
-  userId: string;
-  user_name: string;
-  user_email?: string;
-  user_role?: string;
-  avatar_url?: string;
-}
+import type { UserDTO } from "./user";
+export type { UserDTO } from "./user";
+export * from "./user";
 
 export interface VideoDTO {
   videoId: number;

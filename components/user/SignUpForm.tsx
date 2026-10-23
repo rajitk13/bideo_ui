@@ -30,33 +30,51 @@ import { toast } from "sonner";
 import { redirect, RedirectType } from "next/navigation";
 import { MESSAGES } from "@/constants/messages";
 import { AVATARS } from "@/constants/avatars"; // Adjust the import path as necessary
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2, UserPlus } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, AtSign, ArrowRight, Loader2, UserPlus, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { useUsernameAvailability, cleanHandle } from "@/utility/useUsernameAvailability";
 
 const formSchema = z.object({
+  fullName: z.string().max(100, { message: "Name must be under 100 characters" }).optional(),
+  username: z.string().min(3, { message: "Handle must be at least 3 characters" }).max(30, { message: "Handle must be under 30 characters" }),
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
-  user_name: z.string().min(2, { message: "username is too short" }),
   avatar_url: z.string().url({ message: "Invalid avatar URL" }),
 });
 
 export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const { setUsername, status, message, isAvailable, isChecking } =
+    useUsernameAvailability();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      fullName: "",
+      username: "",
       email: "",
       password: "",
-      user_name: "",
       avatar_url: AVATARS[0].src,
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const handle = cleanHandle(values.username);
+    if (!isAvailable) {
+      toast.error("Please choose a valid and available handle.");
+      return;
+    }
+
     try {
-      await createUser(values);
+      await createUser({
+        email: values.email,
+        password: values.password,
+        username: handle,
+        user_name: handle,
+        fullName: values.fullName?.trim() || handle,
+        avatar_url: values.avatar_url,
+      });
       toast.success(MESSAGES.ACCOUNT_CREATED);
       setTimeout(() => {
         redirect("/auth/login?status=account-created", RedirectType.replace);
@@ -120,25 +138,81 @@ export function SignUpForm() {
               )}
             />
 
-            {/* Name */}
+            {/* Full Name */}
             <FormField
               control={form.control}
-              name="user_name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Username
+                    Full Name / Channel Name
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                       <Input
-                        placeholder="johndoe"
+                        placeholder="e.g. Marques Brownlee"
                         className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"
                         {...field}
                       />
                     </div>
                   </FormControl>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    Public display name shown on your channel, videos, and comments.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Unique Handle (@username) */}
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                    <span>Unique Handle</span>
+                    {status !== "idle" && (
+                      <span
+                        className={clsx(
+                          "inline-flex items-center gap-1 text-[11px] font-semibold lowercase px-2 py-0.5 rounded-full border",
+                          status === "available" && "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+                          status === "taken" && "text-rose-500 bg-rose-500/10 border-rose-500/20",
+                          status === "checking" && "text-primary bg-primary/10 border-primary/20",
+                          status === "invalid" && "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                        )}
+                      >
+                        {status === "checking" && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {status === "available" && <CheckCircle2 className="w-3 h-3" />}
+                        {status === "taken" && <XCircle className="w-3 h-3" />}
+                        {status === "invalid" && <AlertCircle className="w-3 h-3" />}
+                        {message}
+                      </span>
+                    )}
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        placeholder="mkbhd"
+                        className={clsx(
+                          "pl-10 h-11 bg-muted/30 transition-colors font-mono text-sm",
+                          status === "available" && "border-emerald-500/50 focus-visible:border-emerald-500",
+                          status === "taken" && "border-rose-500/50 focus-visible:border-rose-500",
+                          status === "invalid" && "border-amber-500/50 focus-visible:border-amber-500"
+                        )}
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setUsername(e.target.value);
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    3-30 letters, numbers, and underscores. Used for your profile URL and @mentions.
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -209,8 +283,8 @@ export function SignUpForm() {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-11 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white shadow-lg shadow-pink-500/20 dark:shadow-pink-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/30"
-              disabled={form.formState.isSubmitting}
+              className="w-full h-11 font-semibold bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 text-white shadow-lg shadow-pink-500/20 dark:shadow-pink-500/10 transition-all duration-300 hover:shadow-xl hover:shadow-pink-500/30 disabled:opacity-50"
+              disabled={form.formState.isSubmitting || !isAvailable || isChecking}
             >
               {form.formState.isSubmitting ? (
                 <span className="flex items-center gap-2">

@@ -9,6 +9,10 @@ export interface User {
   user_email: string;
   user_name: string;
   avatar_url: string;
+  username?: string;
+  fullName?: string;
+  full_name?: string;
+  user_role?: string;
 }
 
 interface AuthContextType {

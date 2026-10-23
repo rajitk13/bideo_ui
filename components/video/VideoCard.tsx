@@ -58,9 +58,20 @@ export default function VideoCard({ video }: VideoCardProps) {
     }
   };
 
-  const uploaderName = video.video_uploader?.user_name || "Creator";
-  const uploaderId = video.video_uploader?.userId || "";
-  const avatarUrl = video.video_uploader?.avatar_url || "";
+  const uploader = video.video_uploader;
+  const displayName =
+    uploader?.fullName || uploader?.full_name || uploader?.user_name || "Creator";
+  const handle = uploader?.username
+    ? `@${uploader.username}`
+    : uploader?.user_name
+    ? `@${uploader.user_name}`
+    : "";
+  const channelHref = uploader?.username
+    ? `/channel/@${uploader.username}`
+    : uploader?.userId
+    ? `/channel/${uploader.userId}`
+    : "#";
+  const avatarUrl = uploader?.avatar_url || "";
   const duration = video.video_duration || "0:00";
 
   return (
@@ -122,14 +133,14 @@ export default function VideoCard({ video }: VideoCardProps) {
 
       {/* Video info */}
       <div className="flex items-start gap-3 mt-3 px-0.5">
-        <Link href={uploaderId ? `/profile/${uploaderId}` : "#"} className="shrink-0 mt-0.5">
+        <Link href={channelHref} className="shrink-0 mt-0.5">
           <Avatar className="h-9 w-9 ring-2 ring-transparent transition-all duration-300 group-hover:ring-primary/40 shadow-xs">
             <AvatarImage
               src={avatarUrl}
-              alt={uploaderName}
+              alt={displayName}
             />
             <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white text-xs font-bold">
-              {uploaderName.slice(0, 2).toUpperCase()}
+              {displayName.slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Link>
@@ -140,9 +151,17 @@ export default function VideoCard({ video }: VideoCardProps) {
               {video.video_title}
             </h3>
           </Link>
-          <p className="text-muted-foreground text-xs mt-1 truncate hover:text-foreground transition-colors duration-200">
-            {uploaderName}
-          </p>
+          <Link
+            href={channelHref}
+            className="text-muted-foreground text-xs mt-1 truncate hover:text-foreground transition-colors duration-200 flex items-center gap-1.5"
+          >
+            <span className="truncate">{displayName}</span>
+            {handle && (
+              <span className="text-[11px] font-mono text-muted-foreground/60 shrink-0">
+                {handle}
+              </span>
+            )}
+          </Link>
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs mt-0.5">
             <span className="flex items-center gap-1 font-medium">
               <Eye className="w-3 h-3" />

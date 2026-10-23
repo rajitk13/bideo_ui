@@ -32,7 +32,7 @@ import { MESSAGES } from "@/constants/messages";
 import { Eye, EyeOff, Mail, Lock, LogIn, ArrowRight, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email or username is required"),
+  email: z.string().min(1, "Email, username, or @handle is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -69,7 +69,12 @@ export function LoginForm() {
     setIsLoading(true);
     let loggedIn = false;
     try {
-      await loginUser(data)
+      const identifier = data.email.trim();
+      await loginUser({
+        identifier,
+        email: identifier,
+        password: data.password,
+      })
         .then((res) => {
           if (!res || !res.idToken) {
             throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
@@ -128,13 +133,13 @@ export function LoginForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    Email or Username
+                    Email, Username, or @handle
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
                       <Input
-                        placeholder="you@example.com or username"
+                        placeholder="you@example.com, username, or @handle"
                         autoCapitalize="none"
                         autoCorrect="off"
                         className="pl-10 h-11 bg-muted/30 border-muted-foreground/10 focus-visible:border-primary/50 transition-colors"

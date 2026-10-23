@@ -23,10 +23,14 @@ export default function ViewProfile() {
         <Avatar className="h-20 w-20 mb-4">
           <AvatarImage src={user?.avatar_url || ""} />
           <AvatarFallback>
-            {user?.user_name?.[0]?.toUpperCase() || "U"}
+            {user?.fullName?.[0]?.toUpperCase() ||
+              user?.user_name?.[0]?.toUpperCase() ||
+              "U"}
           </AvatarFallback>
         </Avatar>
-        <CardTitle>{user?.user_name || "Your Name"}</CardTitle>
+        <CardTitle>
+          {user?.fullName || user?.user_name || "Your Name"}
+        </CardTitle>
         <CardDescription>
           This is your public profile information
         </CardDescription>
@@ -36,8 +40,19 @@ export default function ViewProfile() {
         <form className="flex flex-col gap-6">
           <div className="grid gap-3">
             <Label htmlFor="name">Full Name</Label>
-            <Input id="name" value={user?.user_name || ""} disabled />
+            <Input
+              id="name"
+              value={user?.fullName || user?.user_name || ""}
+              disabled
+            />
           </div>
+
+          {user?.username && (
+            <div className="grid gap-3">
+              <Label htmlFor="handle">Handle</Label>
+              <Input id="handle" value={`@${user.username}`} disabled />
+            </div>
+          )}
 
           <div className="grid gap-3">
             <Label htmlFor="email">Email</Label>
@@ -46,15 +61,27 @@ export default function ViewProfile() {
 
           <div className="grid gap-3">
             <Label htmlFor="role">Role</Label>
-            <Input id="role" value={"User"} disabled />
+            <Input id="role" value={user?.user_role || "User"} disabled />
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Link href="/profile/edit">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/profile/edit" className="flex-1">
               <Button className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300">
                 Edit Profile
               </Button>
             </Link>
+
+            {user?.username && (
+              <Link href={`/channel/@${user.username}`} className="flex-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full h-11 font-semibold border-border/60"
+                >
+                  View Channel
+                </Button>
+              </Link>
+            )}
           </div>
         </form>
       </CardContent>

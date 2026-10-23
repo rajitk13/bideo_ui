@@ -23,7 +23,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
-import { useAuth } from "@/store/auth-context";
+import { useAuth, User } from "@/store/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
 import { AVATARS } from "@/constants/avatars";
@@ -31,18 +31,16 @@ import { MESSAGES } from "@/constants/messages";
 import { updateUser } from "@/utility/requests";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
-
-// Schema
-export interface User {
-  userId: string;
-  user_email: string;
-  user_name: string;
-  avatar_url: string;
-}
+import { AtSign, CheckCircle2, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import { useUsernameAvailability, cleanHandle } from "@/utility/useUsernameAvailability";
 
 const schema = z.object({
   userId: z.string(),
-  user_name: z.string().min(1, "Name is required"),
+  fullName: z.string().min(1, "Display name is required").max(100),
+  username: z
+    .string()
+    .min(3, "Handle must be 3-30 characters")
+    .max(30, "Handle must be 3-30 characters"),
   user_email: z.string().email("Invalid email address"),
   avatar_url: z.string().url(),
 });
@@ -51,14 +49,23 @@ type ProfileFormData = z.infer<typeof schema>;
 
 export default function EditProfile() {
   const { user, setUserInfo, fetchUser, token } = useAuth();
-
   const [isLoading, setIsLoading] = useState(true);
+
+  const initialHandle = user?.username || user?.user_name || "";
+  const {
+    setUsername: setCheckedUsername,
+    status,
+    message,
+    isAvailable,
+    isChecking,
+  } = useUsernameAvailability(initialHandle);
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       userId: "",
-      user_name: "",
+      fullName: "",
+      username: "",
       user_email: "",
       avatar_url: AVATARS[0].src,
     },
@@ -67,28 +74,53 @@ export default function EditProfile() {
   // Reset form when user data is loaded
   useEffect(() => {
     if (user) {
+      const handle = user.username || user.user_name || "";
       form.reset({
         userId: user.userId,
-        user_name: user.user_name,
+        fullName: user.fullName || user.user_name || "",
+        username: handle,
         user_email: user.user_email,
         avatar_url: user.avatar_url || AVATARS[0].src,
       });
+      setCheckedUsername(handle);
       setIsLoading(false);
     } else {
-      fetchUser(); // ensure user is fetched
+      fetchUser();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  const currentHandle = cleanHandle(form.watch("username"));
+  const originalHandle = cleanHandle(user?.username || user?.user_name || "");
+  const isUnchangedHandle = currentHandle.toLowerCase() === originalHandle.toLowerCase();
+
+  const canSave = isUnchangedHandle || isAvailable;
+
   const onSubmit = async (data: ProfileFormData) => {
+    const handle = cleanHandle(data.username);
+    if (!isUnchangedHandle && !isAvailable) {
+      toast.error("Please pick an available handle before saving.");
+      return;
+    }
+
     let userUpdated = false;
     try {
       if (!token) {
         toast.error(MESSAGES.USER_NOT_AUTHENTICATED);
         return;
       }
-      await updateUser(data, token);
-      setUserInfo(data);
+      const updatedUserPayload: User = {
+        userId: data.userId,
+        user_email: data.user_email,
+        user_name: handle,
+        username: handle,
+        fullName: data.fullName.trim(),
+        avatar_url: data.avatar_url,
+        user_role: user?.user_role,
+      };
+
+      await updateUser(updatedUserPayload, token);
+      setUserInfo(updatedUserPayload);
       toast.success(MESSAGES.PROFILE_UPDATED);
       userUpdated = true;
     } catch (err) {
@@ -105,7 +137,7 @@ export default function EditProfile() {
     <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl">
       <CardHeader>
         <CardTitle>Edit Profile</CardTitle>
-        <CardDescription>Update your personal information.</CardDescription>
+        <CardDescription>Update your creator details and public identity.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -113,16 +145,72 @@ export default function EditProfile() {
             onSubmit={form.handleSubmit(onSubmit)}
             className="flex flex-col gap-6"
           >
-            {/* Name */}
+            {/* Display Name / Full Name */}
             <FormField
               control={form.control}
-              name="user_name"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Full Name</FormLabel>
+                  <FormLabel>Display Name / Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your full name" {...field} />
+                    <Input placeholder="e.g. Marques Brownlee" {...field} />
                   </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Human-readable name shown on your channel, videos, and comments.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Unique Handle (@username) */}
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>Unique Handle</FormLabel>
+                    {!isUnchangedHandle && status !== "idle" && (
+                      <span
+                        className={clsx(
+                          "inline-flex items-center gap-1 text-[11px] font-semibold lowercase px-2 py-0.5 rounded-full border",
+                          status === "available" && "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+                          status === "taken" && "text-rose-500 bg-rose-500/10 border-rose-500/20",
+                          status === "checking" && "text-primary bg-primary/10 border-primary/20",
+                          status === "invalid" && "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                        )}
+                      >
+                        {status === "checking" && <Loader2 className="w-3 h-3 animate-spin" />}
+                        {status === "available" && <CheckCircle2 className="w-3 h-3" />}
+                        {status === "taken" && <XCircle className="w-3 h-3" />}
+                        {status === "invalid" && <AlertCircle className="w-3 h-3" />}
+                        {message}
+                      </span>
+                    )}
+                  </div>
+                  <FormControl>
+                    <div className="relative">
+                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
+                      <Input
+                        placeholder="mkbhd"
+                        className={clsx(
+                          "pl-10 font-mono text-sm",
+                          !isUnchangedHandle && status === "available" && "border-emerald-500/50",
+                          !isUnchangedHandle && status === "taken" && "border-rose-500/50",
+                          !isUnchangedHandle && status === "invalid" && "border-amber-500/50"
+                        )}
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setCheckedUsername(e.target.value);
+                        }}
+                      />
+                    </div>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Alphanumeric and underscores only (3-30 chars). Used for routing (/channel/@handle).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -184,7 +272,8 @@ export default function EditProfile() {
 
             <Button
               type="submit"
-              className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300"
+              disabled={form.formState.isSubmitting || (!isUnchangedHandle && (!canSave || isChecking))}
+              className="w-full h-11 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/20 dark:shadow-blue-500/10 transition-all duration-300 disabled:opacity-50"
             >
               Save Changes
             </Button>

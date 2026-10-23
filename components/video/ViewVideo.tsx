@@ -213,31 +213,61 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/40">
                 {/* Creator Profile */}
                 <div className="flex items-center gap-3">
-                  <Link href={`/profile/${video.video_uploader?.userId || ""}`}>
-                    <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
-                      <AvatarImage
-                        src={video.video_uploader?.avatar_url || ""}
-                        alt={video.video_uploader?.user_name || "Creator"}
-                      />
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                        {(video.video_uploader?.user_name || "U")
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Link>
+                  {(() => {
+                    const uploader = video.video_uploader;
+                    const displayName =
+                      uploader?.fullName ||
+                      uploader?.full_name ||
+                      uploader?.user_name ||
+                      "Creator";
+                    const handle = uploader?.username
+                      ? `@${uploader.username}`
+                      : uploader?.user_name
+                      ? `@${uploader.user_name}`
+                      : "";
+                    const channelHref = uploader?.username
+                      ? `/channel/@${uploader.username}`
+                      : uploader?.userId
+                      ? `/channel/${uploader.userId}`
+                      : "#";
 
-                  <div>
-                    <Link
-                      href={`/profile/${video.video_uploader?.userId || ""}`}
-                      className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block"
-                    >
-                      {video.video_uploader?.user_name || "Creator"}
-                    </Link>
-                    <span className="text-xs text-muted-foreground">
-                      Channel Creator
-                    </span>
-                  </div>
+                    return (
+                      <>
+                        <Link href={channelHref}>
+                          <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
+                            <AvatarImage
+                              src={uploader?.avatar_url || ""}
+                              alt={displayName}
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                              {displayName.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </Link>
+
+                        <div>
+                          <Link
+                            href={channelHref}
+                            className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block leading-tight"
+                          >
+                            {displayName}
+                          </Link>
+                          {handle ? (
+                            <Link
+                              href={channelHref}
+                              className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              {handle}
+                            </Link>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              Creator
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Right Actions: Views, Date, Engagement */}

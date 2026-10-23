@@ -210,17 +210,64 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
             >
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2.5">
-                  <Avatar className="w-7 h-7">
-                    <AvatarImage src={comment.user?.avatar_url || ""} />
-                    <AvatarFallback className="text-xs bg-muted font-semibold">
-                      {(comment.user?.user_name || "BC")
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-semibold text-foreground">
-                    {comment.user?.user_name || "BuzzClips User"}
-                  </span>
+                  {(() => {
+                    const author = comment.user;
+                    const authorName =
+                      author?.fullName ||
+                      author?.full_name ||
+                      author?.user_name ||
+                      "BuzzClips User";
+                    const authorHandle = author?.username
+                      ? `@${author.username}`
+                      : author?.user_name
+                      ? `@${author.user_name}`
+                      : "";
+                    const channelHref = author?.username
+                      ? `/channel/@${author.username}`
+                      : author?.userId
+                      ? `/channel/${author.userId}`
+                      : undefined;
+
+                    const avatarElem = (
+                      <Avatar className="w-7 h-7">
+                        <AvatarImage src={author?.avatar_url || ""} />
+                        <AvatarFallback className="text-xs bg-muted font-semibold">
+                          {(authorName || "BC").slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    );
+
+                    return (
+                      <>
+                        {channelHref ? (
+                          <Link href={channelHref} className="shrink-0">
+                            {avatarElem}
+                          </Link>
+                        ) : (
+                          avatarElem
+                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {channelHref ? (
+                            <Link
+                              href={channelHref}
+                              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                            >
+                              {authorName}
+                            </Link>
+                          ) : (
+                            <span className="text-sm font-semibold text-foreground">
+                              {authorName}
+                            </span>
+                          )}
+                          {authorHandle && (
+                            <span className="text-xs font-mono text-muted-foreground/70">
+                              {authorHandle}
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                   {comment.isPinned && (
                     <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
                       <Pin className="w-2.5 h-2.5" /> Pinned

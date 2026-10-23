@@ -2,6 +2,7 @@ import { api_instance } from "@/global";
 import {
   VideoDTO,
   UserDTO,
+  UsernameCheckResult,
   VideoMetadataUpdateRequest,
   PaginatedVideoResponse,
   VideoCategory,
@@ -11,7 +12,8 @@ import {
 export * from "@/types/video";
 
 export interface LoginPayload {
-  email: string;
+  email?: string;
+  identifier?: string;
   password: string;
 }
 
@@ -24,7 +26,9 @@ export interface LoginResponse {
 export interface createUserPayload {
   email: string;
   password: string;
-  user_name: string;
+  username?: string;
+  fullName?: string;
+  user_name?: string;
   avatar_url: string;
 }
 
@@ -47,6 +51,10 @@ export interface User {
   user_email: string;
   user_name: string;
   avatar_url: string;
+  username?: string;
+  fullName?: string;
+  full_name?: string;
+  user_role?: string;
 }
 
 export interface UploadVideo {
@@ -54,6 +62,34 @@ export interface UploadVideo {
   file: File;
   userId: string;
 }
+
+export const checkUsernameAvailability = async (
+  username: string
+): Promise<UsernameCheckResult> => {
+  const res = await fetch(
+    `${api_instance}/app/check-username?username=${encodeURIComponent(username)}`
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Username check failed with status ${res.status}: ${text}`);
+  }
+  return res.json();
+};
+
+export const searchUsers = async (
+  query: string,
+  limit = 10
+): Promise<UserDTO[]> => {
+  try {
+    const res = await fetch(
+      `${api_instance}/user/search?q=${encodeURIComponent(query)}&limit=${limit}`
+    );
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+};
 
 export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
   const res = await fetch(`${api_instance}/app/verifyToken`, {
@@ -73,11 +109,12 @@ export const verifyToken = async (idToken: string): Promise<{ id: string }> => {
 export const loginUser = async (
   payload: LoginPayload
 ): Promise<LoginResponse> => {
+  const ident = payload.identifier || payload.email || "";
   const formData = new FormData();
-  formData.append("email", payload.email);
-  formData.append("username", payload.email);
-  formData.append("identifier", payload.email);
-  formData.append("user_name", payload.email);
+  formData.append("email", ident);
+  formData.append("username", ident);
+  formData.append("identifier", ident);
+  formData.append("user_name", ident);
   formData.append("password", payload.password);
 
   const res = await fetch(`${api_instance}/app/login`, {
@@ -114,11 +151,16 @@ export const loginUser = async (
 export const createUser = async (
   payload: createUserPayload
 ): Promise<string> => {
+  const handle = payload.username || payload.user_name || "";
+  const fullName = payload.fullName || payload.user_name || handle;
+
   const formData = new FormData();
   formData.append("email", payload.email);
   formData.append("password", payload.password);
   formData.append("avatar_url", payload.avatar_url);
-  formData.append("user_name", payload.user_name);
+  formData.append("username", handle);
+  formData.append("user_name", handle);
+  formData.append("fullName", fullName);
 
   const res = await fetch(`${api_instance}/app/createUser`, {
     method: "POST",
@@ -169,6 +211,8 @@ export const updateUser = async (data: User, token: string): Promise<void> => {
   formData.append("avatar_url", data.avatar_url);
   formData.append("user_name", data.user_name);
   formData.append("userId", data.userId);
+  if (data.fullName) formData.append("fullName", data.fullName);
+  if (data.username) formData.append("username", data.username);
 
   const res = await fetch(`${api_instance}/user/update`, {
     method: "POST",

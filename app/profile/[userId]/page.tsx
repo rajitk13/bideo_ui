@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getPublicUser, getPublicUserVideos } from "@/utility/requests";
 import { SITE_URL } from "@/utility/seo";
 import VideoCard from "@/components/video/VideoCard";
@@ -34,7 +35,7 @@ export async function generateMetadata({
     };
   }
 
-  const name = user.user_name || "Creator";
+  const name = user.fullName || user.user_name || "Creator";
   const title = `${name} - Videos & Channel | BuzzClips`;
   const description = `Watch videos created by ${name} on BuzzClips. Fast adaptive streaming and video discovery.`;
 
@@ -67,10 +68,12 @@ export default async function ProfilePage({
 }) {
   const { userId } = await params;
 
-  const [user, videosResponse] = await Promise.all([
-    getPublicUser(userId),
-    getPublicUserVideos(userId, 0, 24),
-  ]);
+  const user = await getPublicUser(userId);
+  if (user?.username) {
+    redirect(`/channel/@${encodeURIComponent(user.username)}`);
+  }
+
+  const videosResponse = user ? await getPublicUserVideos(userId, 0, 24) : null;
 
   if (!user) {
     return (
@@ -136,46 +139,61 @@ export default async function ProfilePage({
           <CardContent className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {/* Creator Avatar */}
-              <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-4 ring-primary/20 shadow-xl shrink-0">
-                <AvatarImage src={user.avatar_url || ""} alt={user.user_name} />
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-2xl">
-                  {user.user_name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              {(() => {
+                const displayName = user.fullName || user.user_name || "Creator";
+                const handle = user.username
+                  ? `@${user.username}`
+                  : user.user_name
+                  ? `@${user.user_name}`
+                  : "";
 
-              {/* Creator Details */}
-              <div className="flex-1 text-center sm:text-left space-y-3">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-                      {user.user_name}
-                    </h1>
-                    <Badge
-                      variant="outline"
-                      className="text-xs bg-primary/10 text-primary border-primary/20 gap-1"
-                    >
-                      <Sparkles className="w-3 h-3" />
-                      Creator
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    @{user.user_name.toLowerCase().replace(/\s+/g, "")}
-                  </p>
-                </div>
+                return (
+                  <>
+                    <Avatar className="h-24 w-24 sm:h-28 sm:w-28 ring-4 ring-primary/20 shadow-xl shrink-0">
+                      <AvatarImage src={user.avatar_url || ""} alt={displayName} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white font-bold text-2xl">
+                        {displayName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
 
-                {/* Stats Counters */}
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
-                    <VideoIcon className="w-3.5 h-3.5 text-primary" />
-                    <span>{videos.length} Videos</span>
-                  </div>
+                    {/* Creator Details */}
+                    <div className="flex-1 text-center sm:text-left space-y-3">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                            {displayName}
+                          </h1>
+                          <Badge
+                            variant="outline"
+                            className="text-xs bg-primary/10 text-primary border-primary/20 gap-1"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            Creator
+                          </Badge>
+                        </div>
+                        {handle && (
+                          <p className="text-sm font-mono text-muted-foreground">
+                            {handle}
+                          </p>
+                        )}
+                      </div>
 
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
-                    <Eye className="w-3.5 h-3.5 text-blue-500" />
-                    <span>{formattedTotalViews} Total Views</span>
-                  </div>
-                </div>
-              </div>
+                      {/* Stats Counters */}
+                      <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
+                          <VideoIcon className="w-3.5 h-3.5 text-primary" />
+                          <span>{videos.length} Videos</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
+                          <Eye className="w-3.5 h-3.5 text-blue-500" />
+                          <span>{formattedTotalViews} Total Views</span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>

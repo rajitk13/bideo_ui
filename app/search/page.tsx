@@ -3,13 +3,16 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { VideoDTO, VideoCategory } from "@/types/video";
-import { searchVideos } from "@/utility/requests";
+import { searchVideos, searchUsers } from "@/utility/requests";
 import { CategoryFilterBar } from "@/components/search/CategoryFilterBar";
 import VideoCard from "@/components/video/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, Tag, Sparkles } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
+import { Search, X, Tag, Sparkles, User } from "lucide-react";
+import { UserDTO } from "@/types/user";
 
 function SearchContent() {
   const searchParams = useSearchParams();
@@ -31,6 +34,7 @@ function SearchContent() {
   );
 
   const [videos, setVideos] = useState<VideoDTO[]>([]);
+  const [matchingCreators, setMatchingCreators] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Sync state if URL changes externally
@@ -65,27 +69,35 @@ function SearchContent() {
     }
   }, [query, selectedCategories, selectedTags, router, searchParams]);
 
-  // Fetch videos whenever query, categories, or tags change
+  // Fetch videos and creators whenever query, categories, or tags change
   useEffect(() => {
     let isCancelled = false;
 
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const res = await searchVideos({
-          query,
-          categories: selectedCategories,
-          tags: selectedTags,
-          page: 0,
-          size: 24,
-        });
+        const [videosRes, creatorsRes] = await Promise.all([
+          searchVideos({
+            query,
+            categories: selectedCategories,
+            tags: selectedTags,
+            page: 0,
+            size: 24,
+          }),
+          query.trim() && typeof searchUsers === "function"
+            ? searchUsers(query.trim(), 6)
+            : Promise.resolve([]),
+        ]);
+
         if (!isCancelled) {
-          setVideos(res.content || []);
+          setVideos(videosRes.content || []);
+          setMatchingCreators(creatorsRes || []);
         }
       } catch (err) {
         console.error("Failed to load search results", err);
         if (!isCancelled) {
           setVideos([]);
+          setMatchingCreators([]);
         }
       } finally {
         if (!isCancelled) {
@@ -218,6 +230,54 @@ function SearchContent() {
             )}
             {!loading && ` (${videos.length} ${videos.length === 1 ? "video" : "videos"})`}
           </span>
+        </div>
+      )}
+
+      {/* 4.5 Matching Creators & Channels */}
+      {!loading && matchingCreators.length > 0 && (
+        <div className="space-y-3 pb-3 border-b border-border/40">
+          <h3 className="text-xs uppercase tracking-wider font-semibold text-muted-foreground flex items-center gap-1.5">
+            <User className="w-3.5 h-3.5 text-primary" />
+            Matching Creators & Channels
+          </h3>
+          <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+            {matchingCreators.map((creator) => {
+              const handle = creator.username || creator.user_name || "";
+              const displayName =
+                creator.fullName || creator.user_name || "Creator";
+              const channelHref = creator.username
+                ? `/channel/@${creator.username}`
+                : `/channel/${creator.userId}`;
+
+              return (
+                <Link
+                  key={creator.userId}
+                  href={channelHref}
+                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-card/70 hover:bg-card border border-border/50 hover:border-primary/40 transition-all shrink-0 group"
+                >
+                  <Avatar className="h-8 w-8 ring-1 ring-border/50 group-hover:ring-primary/40 transition-all">
+                    <AvatarImage
+                      src={creator.avatar_url || ""}
+                      alt={displayName}
+                    />
+                    <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold">
+                      {displayName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[140px]">
+                      {displayName}
+                    </span>
+                    {handle && (
+                      <span className="text-[11px] font-mono text-muted-foreground truncate max-w-[140px]">
+                        @{handle.replace(/^@/, "")}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       )}
 
