@@ -9,13 +9,33 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(url);
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: `Failed to fetch playlist: ${res.statusText}` },
+        { status: res.status }
+      );
+    }
     const text = await res.text();
 
     const basePath = url.substring(0, url.lastIndexOf("/") + 1);
 
-    // Replace relative segment URLs with proxy URLs
-    const rewrittenText = text.replace(/^(?!#)(.+\.ts)/gm, (line) => {
-      const segmentUrl = basePath + line.trim();
+    // 1. Replace relative sub-playlists (.m3u8) with proxy URLs
+    let rewrittenText = text.replace(/^(?!#)(.+\.m3u8[^\r\n]*)/gm, (line) => {
+      const trimmed = line.trim();
+      const subUrl =
+        trimmed.startsWith("http://") || trimmed.startsWith("https://")
+          ? trimmed
+          : basePath + trimmed;
+      return `/proxy/proxy-m3u8?url=${encodeURIComponent(subUrl)}`;
+    });
+
+    // 2. Replace relative segment URLs (.ts) with proxy segment URLs
+    rewrittenText = rewrittenText.replace(/^(?!#)(.+\.ts[^\r\n]*)/gm, (line) => {
+      const trimmed = line.trim();
+      const segmentUrl =
+        trimmed.startsWith("http://") || trimmed.startsWith("https://")
+          ? trimmed
+          : basePath + trimmed;
       return `/proxy/proxy-m3u8-segment?url=${encodeURIComponent(segmentUrl)}`;
     });
 
@@ -24,6 +44,7 @@ export async function GET(req: NextRequest) {
       headers: {
         "Content-Type": "application/vnd.apple.mpegurl",
         "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=60",
       },
     });
   } catch (err) {

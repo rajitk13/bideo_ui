@@ -47,6 +47,13 @@ import { VideoDTO, PaginatedVideoResponse } from "@/types/video";
 type Video = VideoDTO;
 
 export default function MyVideos() {
+  // Helper to normalize video status with fallback to m3u8Url
+  const getNormalizedStatus = (v: Video): string => {
+    if (v.videoStatus) return v.videoStatus;
+    if (v.m3u8Url && v.m3u8Url.trim() !== "") return "COMPLETED";
+    return "PENDING";
+  };
+
   const { user, token } = useAuth();
   const [page, setPage] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,7 +64,14 @@ export default function MyVideos() {
     enabled: !!user?.userId,
     queryFn: () =>
       fetchUserVideos(page, user?.userId as string, token as string),
-    staleTime: 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchInterval: (query) => {
+      const videos = query.state.data?.content ?? [];
+      const hasPending = videos.some(
+        (v) => getNormalizedStatus(v) === "PROCESSING" || getNormalizedStatus(v) === "PENDING"
+      );
+      return hasPending ? 5000 : false;
+    },
     retry: 1,
   });
 
@@ -77,7 +91,7 @@ export default function MyVideos() {
         .toLowerCase()
         .includes(searchQuery.toLowerCase().trim());
       const matchesStatus =
-        statusFilter === "ALL" || v.videoStatus === statusFilter;
+        statusFilter === "ALL" || getNormalizedStatus(v) === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [rawVideoList, searchQuery, statusFilter]);
@@ -88,12 +102,12 @@ export default function MyVideos() {
   }, [rawVideoList]);
 
   const completedCount = useMemo(() => {
-    return rawVideoList.filter((v) => v.videoStatus === "COMPLETED").length;
+    return rawVideoList.filter((v) => getNormalizedStatus(v) === "COMPLETED").length;
   }, [rawVideoList]);
 
   const processingCount = useMemo(() => {
     return rawVideoList.filter(
-      (v) => v.videoStatus === "PROCESSING" || v.videoStatus === "PENDING"
+      (v) => getNormalizedStatus(v) === "PROCESSING" || getNormalizedStatus(v) === "PENDING"
     ).length;
   }, [rawVideoList]);
 
@@ -378,9 +392,9 @@ export default function MyVideos() {
                               href={videoHref}
                               className="relative w-24 h-14 rounded-lg overflow-hidden bg-black/10 shrink-0 group/thumb ring-1 ring-border/50 block"
                             >
-                              {video.videoStatus === "PROCESSING" || !video.thumbnail_url ? (
+                              {getNormalizedStatus(video) === "PROCESSING" || !video.thumbnail_url ? (
                                 <div className="w-full h-full flex items-center justify-center bg-muted/60">
-                                  {video.videoStatus === "PROCESSING" ? (
+                                  {getNormalizedStatus(video) === "PROCESSING" ? (
                                     <Loader2 className="w-5 h-5 text-muted-foreground animate-spin" />
                                   ) : (
                                     <Film className="w-5 h-5 text-muted-foreground/50" />
@@ -450,7 +464,7 @@ export default function MyVideos() {
 
                         {/* Status */}
                         <TableCell className="py-3 px-4">
-                          {getStatusBadge(video.videoStatus)}
+                          {getStatusBadge(getNormalizedStatus(video))}
                         </TableCell>
 
                         {/* Actions */}

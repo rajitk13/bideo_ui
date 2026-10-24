@@ -102,11 +102,49 @@ export default function UploadPage() {
   const [createdVideoId, setCreatedVideoId] = useState<number | null>(null);
   const [transcodeProgress, setTranscodeProgress] = useState<TranscodeProgress | null>(null);
 
-  // Subscribe to live Server-Sent Events (SSE) for transcoding updates
+  // Subscribe to live Server-Sent Events (SSE) with REST polling fallback
   useEffect(() => {
     if (!createdVideoId) return;
 
     let eventSource: EventSource | null = null;
+    let pollInterval: NodeJS.Timeout | null = null;
+
+    const stopTracking = () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+      }
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+    };
+
+    const pollStatus = async () => {
+      try {
+        const res = await fetch(`${api_instance}/vid/${createdVideoId}/status`);
+        if (res.ok) {
+          const data = await res.json();
+          const videoStatus = data.videoStatus || data.status;
+          setTranscodeProgress({
+            videoId: createdVideoId,
+            stage: data.stage || (videoStatus === "COMPLETED" ? "COMPLETED" : "PROCESSING"),
+            percent: data.percent ?? (videoStatus === "COMPLETED" ? 100 : 50),
+            status: videoStatus || "PROCESSING",
+          });
+          if (videoStatus === "COMPLETED") {
+            toast.success("Multi-rendition HLS transcoding completed! Video is live 🎬");
+            stopTracking();
+          } else if (videoStatus === "FAILED") {
+            toast.error("Transcoding failed. Please check video format.");
+            stopTracking();
+          }
+        }
+      } catch (err) {
+        console.error("Polling status error", err);
+      }
+    };
+
     try {
       eventSource = new EventSource(
         `${api_instance}/vid/${createdVideoId}/transcode-progress`
@@ -118,10 +156,10 @@ export default function UploadPage() {
           setTranscodeProgress(data);
           if (data.status === "COMPLETED") {
             toast.success("Multi-rendition HLS transcoding completed! Video is live 🎬");
-            eventSource?.close();
+            stopTracking();
           } else if (data.status === "FAILED") {
             toast.error("Transcoding failed. Please check video format.");
-            eventSource?.close();
+            stopTracking();
           }
         } catch (e) {
           console.error("SSE parse error", e);
@@ -129,14 +167,24 @@ export default function UploadPage() {
       });
 
       eventSource.onerror = () => {
-        eventSource?.close();
+        // SSE connection dropped; initiate REST polling fallback
+        if (eventSource) {
+          eventSource.close();
+          eventSource = null;
+        }
+        if (!pollInterval) {
+          pollStatus();
+          pollInterval = setInterval(pollStatus, 3000);
+        }
       };
     } catch (e) {
-      console.error("Failed to connect to SSE", e);
+      console.error("Failed to connect to SSE, using polling fallback", e);
+      pollStatus();
+      pollInterval = setInterval(pollStatus, 3000);
     }
 
     return () => {
-      eventSource?.close();
+      stopTracking();
     };
   }, [createdVideoId]);
 
