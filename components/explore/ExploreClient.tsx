@@ -205,7 +205,7 @@ export default function ExploreClient({
         {/* === Header & Search Bar Section === */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground break-words">
               {activeCategory !== "ALL"
                 ? `${CATEGORIES.find((c) => c.value === activeCategory)?.label || activeCategory} Videos`
                 : activeTag

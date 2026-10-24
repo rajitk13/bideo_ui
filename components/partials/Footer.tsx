@@ -91,9 +91,9 @@ export function Footer() {
           </div>
 
           {/* Nav Links: 3 columns on desktop/tablet, compact 2/3 columns on mobile */}
-          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs sm:text-sm">
+          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs sm:text-sm min-w-0">
             {/* Categories */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
                 Categories
               </h4>
@@ -132,7 +132,7 @@ export function Footer() {
             </div>
 
             {/* Quick Links */}
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
                 Quick Links
               </h4>
@@ -187,7 +187,7 @@ export function Footer() {
             </div>
 
             {/* Legal & Trust */}
-            <div className="space-y-2 col-span-2 sm:col-span-1">
+            <div className="space-y-2 col-span-2 sm:col-span-1 min-w-0">
               <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
                 Legal & Trust
               </h4>

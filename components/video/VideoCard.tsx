@@ -167,7 +167,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
           >
             <span className="truncate">{displayName}</span>
             {handle && (
-              <span className="text-[11px] font-mono text-muted-foreground/60 shrink-0">
+              <span className="text-[11px] font-mono text-muted-foreground/60 truncate min-w-0">
                 {handle}
               </span>
             )}

@@ -208,8 +208,8 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                   : "border-border/40 bg-card/40 hover:bg-card/60"
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1 overflow-hidden">
                   {(() => {
                     const author = comment.user;
                     const authorName =
@@ -246,16 +246,16 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                         ) : (
                           avatarElem
                         )}
-                        <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                           {channelHref ? (
                             <Link
                               href={channelHref}
-                              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                              className="text-sm font-semibold text-foreground hover:text-primary transition-colors truncate"
                             >
                               {authorName}
                             </Link>
                           ) : (
-                            <span className="text-sm font-semibold text-foreground">
+                            <span className="text-sm font-semibold text-foreground truncate">
                               {authorName}
                             </span>
                           )}
@@ -281,7 +281,7 @@ export const CommentsSection: React.FC<CommentsSectionProps> = ({
                 </div>
               </div>
 
-              <div className="text-sm text-foreground/90 leading-relaxed pl-9">
+              <div className="text-sm text-foreground/90 leading-relaxed pl-9 break-words [overflow-wrap:anywhere] min-w-0">
                 {renderCommentContent(comment.content)}
               </div>
             </div>

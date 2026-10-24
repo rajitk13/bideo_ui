@@ -301,7 +301,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                 </div>
 
                 {/* Right Actions: Views, Date, Engagement, Save */}
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground">
                     <Eye className="w-3.5 h-3.5 text-muted-foreground" />
                     <span>{formattedViews} views</span>
@@ -372,7 +372,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
 
                   {/* Video Description */}
                   {video.description ? (
-                    <div className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed pt-1">
+                    <div className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed pt-1 break-words [overflow-wrap:anywhere] min-w-0">
                       {video.description}
                     </div>
                   ) : (
@@ -383,7 +383,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
 
                   {/* Programmatic Tag Hub Links */}
                   {video.tags && video.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
+                    <div className="flex flex-wrap gap-1.5 pt-1 min-w-0 max-w-full">
                       {video.tags.map((tag) => {
                         const cleanTag = tag.trim().replace(/^#/, "");
                         return (
@@ -510,7 +510,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                       <p className="text-[11px] text-muted-foreground mt-1 truncate">
                         {item.video_uploader?.user_name || "Creator"}
                       </p>
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5">
+                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-0.5 flex-wrap">
                         <span>{itemViews} views</span>
                         <span>•</span>
                         <span>{itemTimeAgo}</span>

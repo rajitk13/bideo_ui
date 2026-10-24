@@ -138,7 +138,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
       {/* Pill: Like & Dislike */}
       <div className="flex items-center bg-muted/60 border border-border/50 backdrop-blur-sm rounded-full p-0.5">
         <Button
@@ -146,7 +146,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
           size="sm"
           onClick={handleLike}
           aria-label="Like video"
-          className={`gap-1.5 rounded-full px-3.5 h-8 text-xs font-semibold transition-colors ${
+          className={`gap-1 sm:gap-1.5 rounded-full px-2.5 sm:px-3.5 h-8 text-xs font-semibold transition-colors ${
             data.userReaction === "LIKE"
               ? "text-primary bg-primary/10 shadow-sm"
               : "text-muted-foreground hover:text-foreground"
@@ -182,7 +182,7 @@ export const EngagementButtons: React.FC<EngagementButtonsProps> = ({
         variant="outline"
         size="sm"
         onClick={handleShare}
-        className="rounded-full gap-1.5 h-8 px-3.5 text-xs font-medium border-border/50 hover:bg-primary/10 hover:text-primary transition-colors"
+        className="rounded-full gap-1 sm:gap-1.5 h-8 px-2.5 sm:px-3.5 text-xs font-medium border-border/50 hover:bg-primary/10 hover:text-primary transition-colors"
       >
         {copied ? (
           <Check className="w-3.5 h-3.5 text-emerald-500" />
