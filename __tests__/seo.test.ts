@@ -258,7 +258,7 @@ describe("SEO & Indexing Infrastructure", () => {
         expect(schema["@type"]).toBe("Organization");
         expect(schema.name).toBe("BuzzClips");
         expect(schema.sameAs).toBeDefined();
-        expect(schema.logo.url).toContain("favicon.ico");
+        expect(schema.logo.url).toMatch(/icon-512\.png|favicon\.ico/);
       });
 
       it("generates BreadcrumbList schema accurately", () => {

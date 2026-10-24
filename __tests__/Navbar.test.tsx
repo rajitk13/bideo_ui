@@ -11,7 +11,7 @@ jest.mock("next-themes", () => ({
 // Mock framer-motion to avoid animation issues in Jest JSDOM
 jest.mock("framer-motion", () => ({
   motion: {
-    div: ({ children, ...props }: React.ComponentProps<"div">) => (
+    div: ({ children, whileHover, whileTap, transition, initial, animate, exit, variants, ...props }: any) => (
       <div {...props}>{children}</div>
     ),
   },
