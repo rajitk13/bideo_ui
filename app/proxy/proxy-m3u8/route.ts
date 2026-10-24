@@ -39,12 +39,18 @@ export async function GET(req: NextRequest) {
       return `/proxy/proxy-m3u8-segment?url=${encodeURIComponent(segmentUrl)}`;
     });
 
+    // Detect if live stream (live playlists lack #EXT-X-ENDLIST)
+    const isLiveStream = !text.includes("#EXT-X-ENDLIST");
+    const cacheHeader = isLiveStream
+      ? "no-cache, no-store, must-revalidate"
+      : "public, max-age=60";
+
     return new NextResponse(rewrittenText, {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.apple.mpegurl",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=60",
+        "Cache-Control": cacheHeader,
       },
     });
   } catch (err) {

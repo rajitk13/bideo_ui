@@ -44,18 +44,22 @@ export function Navbar() {
             <span className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-logo">
               buzzclips
             </span>
+            <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 ml-0.5">
+              <span>🇮🇳</span>
+              <span>India</span>
+            </span>
           </Link>
         </motion.div>
 
         {/* === Center: Navigation (Desktop only) === */}
         <div className="hidden md:flex items-center">
           <NavigationMenu>
-            <NavigationMenuList className="gap-2">
+            <NavigationMenuList className="gap-1">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
                     href="/"
-                    className="text-sm font-medium px-4 py-2 hover:underline"
+                    className="text-sm font-medium px-3.5 py-2 hover:underline"
                   >
                     Home
                   </Link>
@@ -64,8 +68,29 @@ export function Navbar() {
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
+                    href="/reels"
+                    className="text-sm font-medium px-3.5 py-2 hover:underline flex items-center gap-1.5"
+                  >
+                    <span>Reels</span>
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/tv"
+                    className="text-sm font-medium px-3.5 py-2 hover:underline flex items-center gap-1.5"
+                  >
+                    <span>Live TV</span>
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse inline-block" />
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
                     href="/trending"
-                    className="text-sm font-medium px-4 py-2 hover:underline flex items-center gap-1.5"
+                    className="text-sm font-medium px-3.5 py-2 hover:underline flex items-center gap-1.5"
                   >
                     Trending
                   </Link>

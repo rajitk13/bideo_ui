@@ -26,3 +26,12 @@ for (const key of webGlobals) {
     }
   }
 }
+
+// Mock IntersectionObserver for components that use it (e.g. ReelsContainer)
+if (typeof window !== "undefined" && !window.IntersectionObserver) {
+  (window as any).IntersectionObserver = class {
+    observe = jest.fn();
+    unobserve = jest.fn();
+    disconnect = jest.fn();
+  };
+}

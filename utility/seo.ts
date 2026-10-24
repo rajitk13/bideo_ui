@@ -1,4 +1,5 @@
 import { VideoDTO, UserDTO } from "@/types/video";
+import { LiveChannel } from "@/constants/liveChannels";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://buzzclips.app";
@@ -326,3 +327,67 @@ export function generateProfilePageSchema(
     },
   };
 }
+
+/**
+ * Generates Google-compliant Schema.org BroadcastEvent and BroadcastService
+ * for Indian Live TV streaming, enabling the red "🔴 LIVE" badge on Google SERP.
+ */
+export function generateLiveTvSchema(
+  channel: LiveChannel,
+  siteUrl: string = SITE_URL
+) {
+  const channelUrl = `${siteUrl}/tv?channel=${channel.id}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BroadcastService",
+        "@id": `${channelUrl}#broadcast-service`,
+        name: `${channel.name} (${channel.hindiName}) Live TV`,
+        alternateName: [channel.hindiName, `${channel.name} Live Stream`, `${channel.name} Free TV`],
+        broadcaster: {
+          "@type": "Organization",
+          name: channel.broadcaster,
+        },
+        areaServed: {
+          "@type": "Country",
+          name: "India",
+        },
+        inLanguage: channel.language,
+        isLiveBroadcast: true,
+        broadcastDisplayName: channel.name,
+        description: channel.description,
+        videoFormat: "HD",
+      },
+      {
+        "@type": "BroadcastEvent",
+        "@id": `${channelUrl}#broadcast-event`,
+        name: `${channel.name} - 24x7 Live Stream Online | BuzzClips India`,
+        isLiveBroadcast: true,
+        startDate: "2026-01-01T00:00:00+05:30",
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+        location: {
+          "@type": "VirtualLocation",
+          url: channelUrl,
+        },
+        video: {
+          "@type": "VideoObject",
+          name: `${channel.name} Live Stream Free Online`,
+          description: channel.description,
+          thumbnailUrl: [channel.logo, `${siteUrl}/icon-512.png`],
+          uploadDate: "2026-01-01T00:00:00+05:30",
+          contentUrl: channel.streamUrl,
+          embedUrl: channelUrl,
+          publication: {
+            "@type": "BroadcastEvent",
+            isLiveBroadcast: true,
+            startDate: "2026-01-01T00:00:00+05:30",
+          },
+        },
+      },
+    ],
+  };
+}
+

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, Flame, User } from "lucide-react";
+import { Home, PlusCircle, Film, Tv, User } from "lucide-react";
 import { useAuth } from "@/store/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
@@ -19,10 +19,10 @@ export function MobileNav() {
       isActive: pathname === "/",
     },
     {
-      label: "Trending",
-      href: "/trending",
-      icon: Flame,
-      isActive: pathname === "/trending",
+      label: "Reels",
+      href: "/reels",
+      icon: Film,
+      isActive: pathname.startsWith("/reels"),
     },
     {
       label: "Upload",
@@ -30,6 +30,13 @@ export function MobileNav() {
       icon: PlusCircle,
       isPrimary: true,
       isActive: pathname === "/video/upload",
+    },
+    {
+      label: "Live TV",
+      href: "/tv",
+      icon: Tv,
+      isLive: true,
+      isActive: pathname.startsWith("/tv"),
     },
     {
       label: isAuthenticated ? (user?.fullName || user?.user_name || "You") : "Sign In",
@@ -110,14 +117,19 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={clsx(
-                "flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-colors min-w-[56px]",
+                "flex flex-col items-center justify-center py-1 px-2 rounded-lg transition-colors min-w-[56px] relative",
                 item.isActive
                   ? "text-primary font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               )}
               aria-label={item.label}
             >
-              <Icon className="w-5 h-5" />
+              <div className="relative">
+                <Icon className="w-5 h-5" />
+                {item.isLive && (
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                )}
+              </div>
               <span className="text-[10px] mt-0.5 truncate max-w-[54px]">
                 {item.label}
               </span>

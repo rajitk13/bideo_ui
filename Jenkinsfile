@@ -100,7 +100,7 @@ pipeline {
                     # 1. Update bideo_ui repository on host
                     if [ -d "/home/rajit/Bideo_proj/bideo_ui" ]; then
                         cd /home/rajit/Bideo_proj/bideo_ui
-                        git remote set-url origin https://github.com/bideo-org/bideo_ui.git 2>/dev/null || true
+                        git remote set-url origin https://github.com/buzzclips-org/buzzclips_ui.git 2>/dev/null || true
                         git fetch origin main
                         git reset --hard origin/main
                     fi
