@@ -40,6 +40,8 @@ export interface VideoDTO {
   video_duration?: string;
   iso_duration?: string;
   thumbnail_url?: string;
+  storyboard_url?: string;
+  vtt_url?: string;
   videoStatus?: VideoStatus;
   video_uploader?: UserDTO;
   seo?: SeoMetadataDTO;
@@ -89,3 +91,70 @@ export interface ProgressDTO {
   durationSeconds: number;
   completed: boolean;
 }
+
+export interface SubscriptionStatusDTO {
+  channelUserId: string;
+  subscriberCount: number;
+  isSubscribed?: boolean;
+  subscribed?: boolean;
+}
+
+export interface WatchProgressDTO {
+  videoId: number;
+  videoTitle: string;
+  slug?: string;
+  thumbnailUrl?: string;
+  channelName?: string;
+  channelHandle?: string;
+  channelAvatar?: string;
+  progressSeconds: number;
+  durationSeconds?: number;
+  completed: boolean;
+  lastWatchedAt?: string;
+}
+
+export interface PlaylistDTO {
+  playlistId: number;
+  title: string;
+  description?: string;
+  userId: string;
+  visibility: string;
+  isSystem?: boolean;
+  system?: boolean;
+  videoCount: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface PlaylistDetailDTO extends PlaylistDTO {
+  videos: VideoDTO[];
+}
+
+export interface PresignedUploadRequestDTO {
+  fileName: string;
+  contentType: string;
+}
+
+export interface PresignedUploadResponseDTO {
+  uploadUrl: string;
+  s3Key: string;
+  publicS3Url?: string;
+  expiresInSeconds?: number;
+}
+
+export interface CompletePresignedUploadDTO {
+  s3Key: string;
+  videoTitle: string;
+  description?: string;
+  tags?: string[];
+  category?: VideoCategory;
+  visibility?: VideoVisibility;
+}
+
+export interface TranscodeProgress {
+  videoId: number;
+  stage: string;
+  percent: number;
+  status: string;
+}
+

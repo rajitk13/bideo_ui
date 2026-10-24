@@ -143,6 +143,21 @@ export function Footer() {
                   </Link>
                 </li>
                 <li>
+                  <Link href="/trending" className="hover:text-foreground transition-colors">
+                    Trending
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/history" className="hover:text-foreground transition-colors">
+                    Watch History
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/playlists" className="hover:text-foreground transition-colors">
+                    Playlists
+                  </Link>
+                </li>
+                <li>
                   <Link href="/video/upload" prefetch={false} className="hover:text-foreground transition-colors">
                     Upload
                   </Link>

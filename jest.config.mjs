@@ -30,6 +30,7 @@ const config = {
     "components/video/**/*.{ts,tsx}",
     "!components/video/UploadPage.tsx",
     "!components/video/ViewVideo.tsx",
+    "!components/video/SaveToPlaylistModal.tsx",
     "components/partials/**/*.{ts,tsx}",
     "components/user/ViewProfile.tsx",
     "components/CodeBlock.tsx",

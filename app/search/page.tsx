@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { VideoDTO, VideoCategory } from "@/types/video";
-import { searchVideos, searchUsers } from "@/utility/requests";
+import { searchVideos, searchUsers, fetchSearchSuggestions } from "@/utility/requests";
 import { CategoryFilterBar } from "@/components/search/CategoryFilterBar";
 import VideoCard from "@/components/video/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +36,24 @@ function SearchContent() {
   const [videos, setVideos] = useState<VideoDTO[]>([]);
   const [matchingCreators, setMatchingCreators] = useState<UserDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Debounced search suggestions
+  useEffect(() => {
+    if (!inputVal || inputVal.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetchSearchSuggestions(inputVal.trim(), 6).then((res) => {
+        setSuggestions(res || []);
+      });
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [inputVal]);
 
   // Sync state if URL changes externally
   useEffect(() => {
@@ -137,7 +155,12 @@ function SearchContent() {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
+            onChange={(e) => {
+              setInputVal(e.target.value);
+              setShowSuggestions(true);
+            }}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             placeholder="Search videos, topics, creators..."
             className="pl-10 pr-20 h-11 rounded-full bg-card/80 border-border/50 shadow-xs focus-visible:ring-primary text-sm"
           />
@@ -161,6 +184,27 @@ function SearchContent() {
           >
             Search
           </Button>
+
+          {/* Autocomplete Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1.5 p-2 rounded-2xl bg-card/95 border border-border/60 shadow-2xl backdrop-blur-md z-50 space-y-0.5">
+              {suggestions.map((sug) => (
+                <button
+                  key={sug}
+                  type="button"
+                  onMouseDown={() => {
+                    setInputVal(sug);
+                    setQuery(sug);
+                    setShowSuggestions(false);
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium text-foreground hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer"
+                >
+                  <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span>{sug}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </form>
 
         {(query || selectedCategories.length > 0 || selectedTags.length > 0) && (

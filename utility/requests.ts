@@ -6,7 +6,16 @@ import {
   VideoMetadataUpdateRequest,
   PaginatedVideoResponse,
   VideoCategory,
+  VideoVisibility,
   PageResponse,
+  SubscriptionStatusDTO,
+  WatchProgressDTO,
+  PlaylistDTO,
+  PlaylistDetailDTO,
+  PresignedUploadRequestDTO,
+  PresignedUploadResponseDTO,
+  CompletePresignedUploadDTO,
+  TranscodeProgress,
 } from "@/types/video";
 
 export * from "@/types/video";
@@ -523,3 +532,336 @@ export const recordVideoView = async (
     return false;
   }
 };
+
+// ==========================================
+// Phase 2 & 3: Discovery, Related & Trending
+// ==========================================
+
+export const fetchRelatedVideos = async (
+  videoId: number | string,
+  page = 0,
+  size = 10
+): Promise<PageResponse<VideoDTO>> => {
+  const res = await fetch(
+    `${api_instance}/vid/${videoId}/related?page=${page}&size=${size}`,
+    {
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch related videos: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const fetchTrendingVideos = async (
+  page = 0,
+  size = 20
+): Promise<PageResponse<VideoDTO>> => {
+  const res = await fetch(
+    `${api_instance}/vid/trending?page=${page}&size=${size}`,
+    {
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch trending videos: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const fetchSearchSuggestions = async (
+  query: string,
+  limit = 8
+): Promise<string[]> => {
+  if (!query || !query.trim()) return [];
+  try {
+    const res = await fetch(
+      `${api_instance}/vid/search/suggest?q=${encodeURIComponent(query.trim())}&limit=${limit}`
+    );
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+};
+
+// ==========================================
+// Phase 2: Channel Subscriptions
+// ==========================================
+
+export const getSubscriptionStatus = async (
+  channelId: string,
+  token?: string
+): Promise<SubscriptionStatusDTO> => {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const res = await fetch(
+    `${api_instance}/channel/${encodeURIComponent(channelId)}/status`,
+    {
+      headers,
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    return { channelUserId: channelId, subscriberCount: 0, isSubscribed: false, subscribed: false };
+  }
+  return res.json();
+};
+
+export const toggleSubscribe = async (
+  channelId: string,
+  token: string
+): Promise<SubscriptionStatusDTO> => {
+  const res = await fetch(
+    `${api_instance}/channel/${encodeURIComponent(channelId)}/subscribe`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Toggle subscribe failed: ${res.status} - ${text}`);
+  }
+  return res.json();
+};
+
+export const getSubscriberCount = async (
+  channelId: string
+): Promise<{ channelId: string; subscriberCount: number }> => {
+  const res = await fetch(
+    `${api_instance}/channel/${encodeURIComponent(channelId)}/subscribers`,
+    { cache: "no-store" }
+  );
+  if (!res.ok) {
+    return { channelId, subscriberCount: 0 };
+  }
+  return res.json();
+};
+
+// ==========================================
+// Phase 1: Watch History Feed
+// ==========================================
+
+export const fetchUserWatchHistory = async (
+  page = 0,
+  size = 20,
+  token: string
+): Promise<PageResponse<WatchProgressDTO>> => {
+  const res = await fetch(
+    `${api_instance}/user/history?page=${page}&size=${size}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch watch history: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const deleteWatchHistoryItem = async (
+  videoId: number,
+  token: string
+): Promise<void> => {
+  const res = await fetch(`${api_instance}/user/history/${videoId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to remove item from history: ${res.status}`);
+  }
+};
+
+export const clearAllWatchHistory = async (token: string): Promise<void> => {
+  const res = await fetch(`${api_instance}/user/history`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to clear watch history: ${res.status}`);
+  }
+};
+
+// ==========================================
+// Phase 2: Playlists & Watch Later
+// ==========================================
+
+export const fetchMyPlaylists = async (token: string): Promise<PlaylistDTO[]> => {
+  const res = await fetch(`${api_instance}/playlists/my`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch playlists: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const fetchPlaylistDetails = async (
+  playlistId: number | string,
+  token?: string
+): Promise<PlaylistDetailDTO> => {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  const res = await fetch(`${api_instance}/playlists/${playlistId}`, {
+    headers,
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch playlist details: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const createPlaylist = async (
+  payload: { title: string; description?: string; visibility?: string },
+  token: string
+): Promise<PlaylistDTO> => {
+  const res = await fetch(`${api_instance}/playlists`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to create playlist: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const addVideoToPlaylist = async (
+  playlistId: number,
+  videoId: number,
+  token: string
+): Promise<PlaylistDetailDTO> => {
+  const res = await fetch(
+    `${api_instance}/playlists/${playlistId}/videos/${videoId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to add video to playlist: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const removeVideoFromPlaylist = async (
+  playlistId: number,
+  videoId: number,
+  token: string
+): Promise<PlaylistDetailDTO> => {
+  const res = await fetch(
+    `${api_instance}/playlists/${playlistId}/videos/${videoId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to remove video from playlist: ${res.status}`);
+  }
+  return res.json();
+};
+
+export const deletePlaylist = async (
+  playlistId: number,
+  token: string
+): Promise<void> => {
+  const res = await fetch(`${api_instance}/playlists/${playlistId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to delete playlist: ${res.status}`);
+  }
+};
+
+export const toggleWatchLater = async (
+  videoId: number,
+  token: string
+): Promise<PlaylistDetailDTO> => {
+  const res = await fetch(
+    `${api_instance}/playlists/watch-later/${videoId}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to toggle watch later: ${res.status}`);
+  }
+  return res.json();
+};
+
+// ==========================================
+// Phase 4: Direct S3 Presigned Upload
+// ==========================================
+
+export const requestPresignedUpload = async (
+  fileName: string,
+  contentType: string,
+  token: string
+): Promise<PresignedUploadResponseDTO> => {
+  const res = await fetch(`${api_instance}/vid/upload/presigned`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ fileName, contentType }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Presigned upload request failed: ${res.status} - ${text}`);
+  }
+  return res.json();
+};
+
+export const completePresignedUpload = async (
+  payload: CompletePresignedUploadDTO,
+  token: string
+): Promise<{ videoId: number; message: string }> => {
+  const res = await fetch(`${api_instance}/vid/upload/complete-presigned`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Complete presigned upload failed: ${res.status} - ${text}`);
+  }
+  return res.json();
+};
+

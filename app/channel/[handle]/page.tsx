@@ -16,6 +16,7 @@ import {
   AtSign,
 } from "lucide-react";
 import { VideoDTO } from "@/types/video";
+import { SubscribeButton } from "@/components/channel/SubscribeButton";
 
 export const revalidate = 60;
 
@@ -197,7 +198,7 @@ export default async function ChannelPage({
                     )}
                   </div>
 
-                  {/* Channel Stats */}
+                  {/* Channel Stats & Subscribe */}
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs">
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
                       <VideoIcon className="w-3.5 h-3.5 text-primary" />
@@ -207,6 +208,10 @@ export default async function ChannelPage({
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-foreground font-semibold">
                       <Eye className="w-3.5 h-3.5 text-blue-500" />
                       <span>{formattedTotalViews} Total Views</span>
+                    </div>
+
+                    <div className="sm:ml-auto">
+                      <SubscribeButton channelId={user.userId} size="sm" />
                     </div>
                   </div>
                 </div>

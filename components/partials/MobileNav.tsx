@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, PlusCircle, Video, User } from "lucide-react";
+import { Home, Compass, PlusCircle, Flame, User } from "lucide-react";
 import { useAuth } from "@/store/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
@@ -19,10 +19,10 @@ export function MobileNav() {
       isActive: pathname === "/",
     },
     {
-      label: "Explore",
-      href: "/search",
-      icon: Compass,
-      isActive: pathname.startsWith("/search") || pathname.startsWith("/category"),
+      label: "Trending",
+      href: "/trending",
+      icon: Flame,
+      isActive: pathname === "/trending",
     },
     {
       label: "Upload",
@@ -32,17 +32,17 @@ export function MobileNav() {
       isActive: pathname === "/video/upload",
     },
     {
-      label: "My Clips",
-      href: isAuthenticated ? "/my-videos" : "/auth/login",
-      icon: Video,
-      isActive: pathname === "/my-videos",
+      label: "Explore",
+      href: "/search",
+      icon: Compass,
+      isActive: pathname.startsWith("/search") || pathname.startsWith("/category"),
     },
     {
       label: isAuthenticated ? (user?.fullName || user?.user_name || "You") : "Sign In",
       href: isAuthenticated ? "/profile" : "/auth/login",
       icon: User,
       isProfile: true,
-      isActive: pathname.startsWith("/profile") || pathname.startsWith("/channel"),
+      isActive: pathname.startsWith("/profile") || pathname.startsWith("/channel") || pathname.startsWith("/history") || pathname.startsWith("/playlists"),
     },
   ];
 

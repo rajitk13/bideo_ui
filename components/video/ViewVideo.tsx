@@ -5,12 +5,15 @@ import {
   getVideoById,
   getVideoBySlug,
   fetchVideos,
+  fetchRelatedVideos,
   recordVideoView,
   VideoDTO,
 } from "@/utility/requests";
 import { VideoSeoHead } from "./VideoSeoHead";
 import EngagementButtons from "./EngagementButtons";
 import CommentsSection from "./CommentsSection";
+import { SubscribeButton } from "@/components/channel/SubscribeButton";
+import { SaveToPlaylistModal } from "./SaveToPlaylistModal";
 import useResumePlayback from "@/utility/useResumePlayback";
 import { useAuth } from "@/store/auth-context";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -33,6 +36,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Tag,
+  BookmarkPlus,
 } from "lucide-react";
 
 interface ViewVideoProps {
@@ -46,6 +50,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
   const playerRef = useRef<any>(null);
   const [video, setVideo] = useState<VideoDTO | null>(initialVideo || null);
   const [error, setError] = useState<string | null>(null);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
 
   const { onTimeUpdate } = useResumePlayback({
     videoId: video?.videoId,
@@ -113,13 +118,26 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
     return () => clearTimeout(timer);
   }, [video?.videoId]);
 
-  // Fetch recommended videos for sidebar
+  // Fetch smart recommended / related videos for sidebar
   const { data: recsData, isLoading: recsLoading } = useQuery<{
     content: VideoDTO[];
   }>({
-    queryKey: ["recommendedVideos"],
-    queryFn: () => fetchVideos(0),
+    queryKey: ["relatedVideos", video?.videoId],
+    queryFn: async () => {
+      if (video?.videoId) {
+        try {
+          const related = await fetchRelatedVideos(video.videoId, 0, 10);
+          if (related?.content && related.content.length > 0) {
+            return related;
+          }
+        } catch {
+          // Fallback to latest videos
+        }
+      }
+      return fetchVideos(0);
+    },
     staleTime: 60 * 1000,
+    enabled: Boolean(video?.videoId),
   });
 
   const recommendations = useMemo(() => {
@@ -193,6 +211,9 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
               <VideoPlayer
                 ref={playerRef}
                 src={video.m3u8Url}
+                poster={video.thumbnail_url}
+                vttUrl={video.vtt_url}
+                storyboardUrl={video.storyboard_url}
                 onTimeUpdate={onTimeUpdate}
               />
             ) : (
@@ -211,66 +232,75 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
 
               {/* Creator & Action Bar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/40">
-                {/* Creator Profile */}
-                <div className="flex items-center gap-3">
-                  {(() => {
-                    const uploader = video.video_uploader;
-                    const displayName =
-                      uploader?.fullName ||
-                      uploader?.full_name ||
-                      uploader?.user_name ||
-                      "Creator";
-                    const handle = uploader?.username
-                      ? `@${uploader.username}`
-                      : uploader?.user_name
-                      ? `@${uploader.user_name}`
-                      : "";
-                    const channelHref = uploader?.username
-                      ? `/channel/@${uploader.username}`
-                      : uploader?.userId
-                      ? `/channel/${uploader.userId}`
-                      : "#";
+                {/* Creator Profile & Subscribe */}
+                <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    {(() => {
+                      const uploader = video.video_uploader;
+                      const displayName =
+                        uploader?.fullName ||
+                        uploader?.full_name ||
+                        uploader?.user_name ||
+                        "Creator";
+                      const handle = uploader?.username
+                        ? `@${uploader.username}`
+                        : uploader?.user_name
+                        ? `@${uploader.user_name}`
+                        : "";
+                      const channelHref = uploader?.username
+                        ? `/channel/@${uploader.username}`
+                        : uploader?.userId
+                        ? `/channel/${uploader.userId}`
+                        : "#";
 
-                    return (
-                      <>
-                        <Link href={channelHref}>
-                          <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
-                            <AvatarImage
-                              src={uploader?.avatar_url || ""}
-                              alt={displayName}
-                            />
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                              {displayName.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        </Link>
-
-                        <div>
-                          <Link
-                            href={channelHref}
-                            className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block leading-tight"
-                          >
-                            {displayName}
+                      return (
+                        <>
+                          <Link href={channelHref}>
+                            <Avatar className="h-11 w-11 ring-2 ring-primary/20 hover:ring-primary/50 transition-all cursor-pointer">
+                              <AvatarImage
+                                src={uploader?.avatar_url || ""}
+                                alt={displayName}
+                              />
+                              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                                {displayName.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
                           </Link>
-                          {handle ? (
+
+                          <div>
                             <Link
                               href={channelHref}
-                              className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+                              className="font-semibold text-sm sm:text-base text-foreground hover:text-primary transition-colors block leading-tight"
                             >
-                              {handle}
+                              {displayName}
                             </Link>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              Creator
-                            </span>
-                          )}
-                        </div>
-                      </>
-                    );
-                  })()}
+                            {handle ? (
+                              <Link
+                                href={channelHref}
+                                className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors"
+                              >
+                                {handle}
+                              </Link>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">
+                                Creator
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  {video.video_uploader?.userId && (
+                    <SubscribeButton
+                      channelId={video.video_uploader.userId}
+                      size="sm"
+                    />
+                  )}
                 </div>
 
-                {/* Right Actions: Views, Date, Engagement */}
+                {/* Right Actions: Views, Date, Engagement, Save */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground">
                     <Eye className="w-3.5 h-3.5 text-muted-foreground" />
@@ -283,6 +313,17 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                   </div>
 
                   <EngagementButtons videoId={video.videoId} />
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSaveModalOpen(true)}
+                    className="h-8 gap-1.5 rounded-full text-xs font-semibold bg-muted/40 hover:bg-muted/80 border-border/40"
+                    title="Save to playlist or watch later"
+                  >
+                    <BookmarkPlus className="w-3.5 h-3.5 text-primary" />
+                    <span>Save</span>
+                  </Button>
                 </div>
               </div>
 
@@ -486,6 +527,15 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
           </div>
         </div>
       </div>
+
+      {video && (
+        <SaveToPlaylistModal
+          videoId={video.videoId}
+          videoTitle={video.video_title}
+          isOpen={saveModalOpen}
+          onClose={() => setSaveModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

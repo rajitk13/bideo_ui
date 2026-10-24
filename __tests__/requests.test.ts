@@ -729,5 +729,185 @@ describe("Video Requests Utility", () => {
       expect(await recordVideoView(42)).toBe(false);
     });
   });
+
+  describe("Discovery, Related & Trending Requests", () => {
+    it("fetchRelatedVideos calls /vid/{videoId}/related and returns data", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [{ videoId: 99 }] }),
+      });
+      const { fetchRelatedVideos } = await import("@/utility/requests");
+      const res = await fetchRelatedVideos(42, 0, 10);
+      expect(res.content[0].videoId).toBe(99);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/42/related?page=0&size=10`,
+        expect.any(Object)
+      );
+    });
+
+    it("fetchTrendingVideos calls /vid/trending and returns data", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [{ videoId: 101 }] }),
+      });
+      const { fetchTrendingVideos } = await import("@/utility/requests");
+      const res = await fetchTrendingVideos(0, 20);
+      expect(res.content[0].videoId).toBe(101);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/vid/trending?page=0&size=20`,
+        expect.any(Object)
+      );
+    });
+
+    it("fetchSearchSuggestions returns suggestions array and handles errors gracefully", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ["spring", "springboot"],
+      });
+      const { fetchSearchSuggestions } = await import("@/utility/requests");
+      const res = await fetchSearchSuggestions("spr", 5);
+      expect(res).toEqual(["spring", "springboot"]);
+
+      // Empty query returns empty array
+      expect(await fetchSearchSuggestions("")).toEqual([]);
+
+      // Failure returns empty array
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      expect(await fetchSearchSuggestions("error")).toEqual([]);
+    });
+  });
+
+  describe("Channel Subscription Requests", () => {
+    it("getSubscriptionStatus returns status and handles unauthenticated state", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ channelUserId: "c1", subscriberCount: 50, isSubscribed: true }),
+      });
+      const { getSubscriptionStatus } = await import("@/utility/requests");
+      const res = await getSubscriptionStatus("c1", "token123");
+      expect(res.subscriberCount).toBe(50);
+      expect(res.isSubscribed).toBe(true);
+
+      // Failure returns fallback object
+      global.fetch = jest.fn().mockResolvedValue({ ok: false });
+      const fallback = await getSubscriptionStatus("c2");
+      expect(fallback.subscriberCount).toBe(0);
+      expect(fallback.isSubscribed).toBe(false);
+    });
+
+    it("toggleSubscribe sends POST to /channel/{id}/subscribe", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ channelUserId: "c1", subscriberCount: 51, isSubscribed: true }),
+      });
+      const { toggleSubscribe } = await import("@/utility/requests");
+      const res = await toggleSubscribe("c1", "token123");
+      expect(res.subscriberCount).toBe(51);
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/channel/c1/subscribe`,
+        expect.objectContaining({ method: "POST" })
+      );
+    });
+
+    it("getSubscriberCount returns count", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ channelId: "c1", subscriberCount: 100 }),
+      });
+      const { getSubscriberCount } = await import("@/utility/requests");
+      const res = await getSubscriberCount("c1");
+      expect(res.subscriberCount).toBe(100);
+    });
+  });
+
+  describe("Watch History Requests", () => {
+    it("fetchUserWatchHistory, deleteWatchHistoryItem, clearAllWatchHistory work as expected", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ content: [{ videoId: 10 }] }),
+      });
+      const {
+        fetchUserWatchHistory,
+        deleteWatchHistoryItem,
+        clearAllWatchHistory,
+      } = await import("@/utility/requests");
+
+      const res = await fetchUserWatchHistory(0, 20, "token123");
+      expect(res.content.length).toBe(1);
+
+      global.fetch = jest.fn().mockResolvedValue({ ok: true });
+      await deleteWatchHistoryItem(10, "token123");
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/user/history/10`,
+        expect.objectContaining({ method: "DELETE" })
+      );
+
+      await clearAllWatchHistory("token123");
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${api_instance}/user/history`,
+        expect.objectContaining({ method: "DELETE" })
+      );
+    });
+  });
+
+  describe("Playlists & Watch Later Requests", () => {
+    it("manages playlists, items, and watch later", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => [{ playlistId: 1, title: "Favorites" }],
+      });
+      const {
+        fetchMyPlaylists,
+        fetchPlaylistDetails,
+        createPlaylist,
+        addVideoToPlaylist,
+        removeVideoFromPlaylist,
+        deletePlaylist,
+        toggleWatchLater,
+      } = await import("@/utility/requests");
+
+      const myPlaylists = await fetchMyPlaylists("token123");
+      expect(myPlaylists.length).toBe(1);
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ playlistId: 1, title: "Favorites", videos: [] }),
+      });
+      const details = await fetchPlaylistDetails(1);
+      expect(details.playlistId).toBe(1);
+
+      const created = await createPlaylist({ title: "New List" }, "token123");
+      expect(created.title).toBe("Favorites");
+
+      await addVideoToPlaylist(1, 42, "token123");
+      await removeVideoFromPlaylist(1, 42, "token123");
+      await deletePlaylist(1, "token123");
+      await toggleWatchLater(42, "token123");
+    });
+  });
+
+  describe("Presigned Upload Requests", () => {
+    it("requests and completes presigned upload", async () => {
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ uploadUrl: "https://s3.amazonaws.com/test", s3Key: "uploads/test.mp4" }),
+      });
+      const { requestPresignedUpload, completePresignedUpload } = await import("@/utility/requests");
+
+      const presigned = await requestPresignedUpload("test.mp4", "video/mp4", "token123");
+      expect(presigned.uploadUrl).toContain("s3.amazonaws.com");
+
+      global.fetch = jest.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ videoId: 777, message: "Queued" }),
+      });
+
+      const complete = await completePresignedUpload(
+        { s3Key: "uploads/test.mp4", videoTitle: "Test Title" },
+        "token123"
+      );
+      expect(complete.videoId).toBe(777);
+    });
+  });
 });
 

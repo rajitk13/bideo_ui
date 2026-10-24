@@ -60,6 +60,16 @@ export function Navbar() {
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink asChild>
+                <Link
+                  href="/trending"
+                  className="text-sm font-medium px-4 py-2 hover:underline flex items-center gap-1.5"
+                >
+                  Trending
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
             {isAuthenticated && (
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
@@ -104,10 +114,16 @@ export function Navbar() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">Profile</Link>
+                  <Link href="/history">Watch History</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/playlists">Playlists & Saved</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/my-videos">My Videos</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={logout} className="text-red-500">
                   Log Out

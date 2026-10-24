@@ -45,9 +45,17 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/store/auth-context";
 import { MESSAGES } from "@/constants/messages";
-import { VideoCategory, VideoVisibility } from "@/types/video";
+import {
+  VideoCategory,
+  VideoVisibility,
+  TranscodeProgress,
+} from "@/types/video";
+import {
+  requestPresignedUpload,
+  completePresignedUpload,
+} from "@/utility/requests";
 
-const MAX_FILE_SIZE_MB = 50;
+const MAX_FILE_SIZE_MB = 1000; // 1GB direct S3 upload
 
 const CATEGORIES: VideoCategory[] = [
   "OTHER",
@@ -91,6 +99,46 @@ export default function UploadPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isUploaded, setIsUploaded] = useState(false);
+  const [createdVideoId, setCreatedVideoId] = useState<number | null>(null);
+  const [transcodeProgress, setTranscodeProgress] = useState<TranscodeProgress | null>(null);
+
+  // Subscribe to live Server-Sent Events (SSE) for transcoding updates
+  useEffect(() => {
+    if (!createdVideoId) return;
+
+    let eventSource: EventSource | null = null;
+    try {
+      eventSource = new EventSource(
+        `${api_instance}/vid/${createdVideoId}/transcode-progress`
+      );
+
+      eventSource.addEventListener("progress", (event) => {
+        try {
+          const data: TranscodeProgress = JSON.parse(event.data);
+          setTranscodeProgress(data);
+          if (data.status === "COMPLETED") {
+            toast.success("Multi-rendition HLS transcoding completed! Video is live 🎬");
+            eventSource?.close();
+          } else if (data.status === "FAILED") {
+            toast.error("Transcoding failed. Please check video format.");
+            eventSource?.close();
+          }
+        } catch (e) {
+          console.error("SSE parse error", e);
+        }
+      });
+
+      eventSource.onerror = () => {
+        eventSource?.close();
+      };
+    } catch (e) {
+      console.error("Failed to connect to SSE", e);
+    }
+
+    return () => {
+      eventSource?.close();
+    };
+  }, [createdVideoId]);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -174,7 +222,56 @@ export default function UploadPage() {
     }
   };
 
-  const uploadVideo = async (
+  // Direct S3 Presigned Upload (Bypasses server proxy, handles multi-GB files)
+  const uploadVideoDirect = async (
+    data: z.infer<typeof formSchema>,
+    token: string,
+    onProgress: (percent: number) => void
+  ) => {
+    const file: File = data.file;
+
+    // 1. Request presigned upload URL
+    const presigned = await requestPresignedUpload(
+      file.name,
+      file.type || "video/mp4",
+      token
+    );
+
+    // 2. Direct PUT to S3
+    await axios.put(presigned.uploadUrl, file, {
+      headers: {
+        "Content-Type": file.type || "video/mp4",
+      },
+      onUploadProgress: (event) => {
+        if (event.total) {
+          const percent = Math.round((event.loaded * 100) / event.total);
+          onProgress(percent);
+        }
+      },
+    });
+
+    // 3. Complete upload & queue for transcoding
+    const tagsList = data.tags
+      ? data.tags.split(",").map((t) => t.trim()).filter(Boolean)
+      : [];
+
+    const completeResult = await completePresignedUpload(
+      {
+        s3Key: presigned.s3Key,
+        videoTitle: data.videoTitle,
+        description: data.description,
+        tags: tagsList,
+        category: data.category as VideoCategory,
+        visibility: data.visibility as VideoVisibility,
+      },
+      token
+    );
+
+    return completeResult;
+  };
+
+  // Legacy Multipart fallback
+  const uploadVideoLegacy = async (
     data: z.infer<typeof formSchema>,
     token: string,
     onProgress: (percent: number) => void
@@ -183,18 +280,10 @@ export default function UploadPage() {
     formData.append("videoTitle", data.videoTitle);
     formData.append("file", data.file);
     formData.append("userId", data.userId);
-    if (data.description) {
-      formData.append("description", data.description);
-    }
-    if (data.category) {
-      formData.append("category", data.category);
-    }
-    if (data.visibility) {
-      formData.append("visibility", data.visibility);
-    }
-    if (data.tags) {
-      formData.append("tags", data.tags);
-    }
+    if (data.description) formData.append("description", data.description);
+    if (data.category) formData.append("category", data.category);
+    if (data.visibility) formData.append("visibility", data.visibility);
+    if (data.tags) formData.append("tags", data.tags);
 
     return axios.post(`${api_instance}/vid/upload`, formData, {
       headers: {
@@ -217,10 +306,14 @@ export default function UploadPage() {
     }
 
     setUploadProgress(0);
+    setTranscodeProgress(null);
 
     try {
-      await uploadVideo(values, token, setUploadProgress);
-      toast.success(MESSAGES.FILE_UPLOADED);
+      const result = await uploadVideoDirect(values, token, setUploadProgress);
+      if (result?.videoId) {
+        setCreatedVideoId(result.videoId);
+      }
+      toast.success("Video uploaded directly to S3! Transcoding queued 🚀");
       setIsUploaded(true);
       reset({
         videoTitle: "",
@@ -235,8 +328,15 @@ export default function UploadPage() {
         fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error(error);
-      toast.error(MESSAGES.FILE_UPLOAD_FAILED);
+      console.warn("Direct presigned upload failed, falling back to multipart", error);
+      try {
+        await uploadVideoLegacy(values, token, setUploadProgress);
+        toast.success(MESSAGES.FILE_UPLOADED);
+        setIsUploaded(true);
+      } catch (fallbackErr) {
+        console.error(fallbackErr);
+        toast.error(MESSAGES.FILE_UPLOAD_FAILED);
+      }
     } finally {
       setTimeout(() => setUploadProgress(0), 1000);
     }
@@ -265,8 +365,12 @@ export default function UploadPage() {
     );
   }
 
-  // Upload success screen
+  // Upload success screen with live SSE transcode tracker
   if (isUploaded) {
+    const stage = transcodeProgress?.stage || "QUEUED";
+    const percent = transcodeProgress?.percent ?? 15;
+    const isCompleted = transcodeProgress?.status === "COMPLETED";
+
     return (
       <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl overflow-hidden text-center p-8 space-y-6">
         <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 ring-8 ring-emerald-500/5">
@@ -275,29 +379,71 @@ export default function UploadPage() {
 
         <div className="space-y-2">
           <h2 className="text-2xl font-bold tracking-tight">
-            Upload Successful!
+            Direct S3 Upload Successful!
           </h2>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-            Your video has been uploaded and queued for HLS transcoding. It will
-            be available in your library shortly.
+            Your video file was delivered directly to AWS S3 and queued for multi-rendition ABR HLS encoding.
+          </p>
+        </div>
+
+        {/* Live SSE Transcoding Status */}
+        <div className="p-4 rounded-xl bg-muted/40 border border-border/50 max-w-md mx-auto space-y-3 text-left">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-semibold text-foreground flex items-center gap-1.5">
+              {!isCompleted && <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />}
+              {isCompleted ? "Transcoding Completed!" : `Stage: ${stage}`}
+            </span>
+            <span className="font-mono text-primary font-bold">
+              {percent}%
+            </span>
+          </div>
+
+          <div className="w-full bg-muted rounded-full h-2 overflow-hidden ring-1 ring-border/30">
+            <div
+              className={`h-2 rounded-full transition-all duration-500 ease-out ${
+                isCompleted
+                  ? "bg-emerald-500"
+                  : "bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600"
+              }`}
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+
+          <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-primary" />
+            Generating 1080p, 720p, 480p, 360p adaptive playlists & scrub storyboards.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Button
             variant="outline"
-            onClick={() => setIsUploaded(false)}
+            onClick={() => {
+              setIsUploaded(false);
+              setCreatedVideoId(null);
+              setTranscodeProgress(null);
+            }}
             className="h-10"
           >
             Upload Another Video
           </Button>
-          <Button
-            onClick={() => router.push("/my-videos")}
-            className="h-10 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-blue-500/20"
-          >
-            View My Videos
-            <ArrowRight className="w-4 h-4 ml-1.5" />
-          </Button>
+
+          {createdVideoId ? (
+            <Link href={`/watch/${createdVideoId}`}>
+              <Button className="h-10 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-blue-500/20">
+                Watch Video Now
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              onClick={() => router.push("/my-videos")}
+              className="h-10 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-blue-500/20"
+            >
+              View My Videos
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Button>
+          )}
         </div>
       </Card>
     );
