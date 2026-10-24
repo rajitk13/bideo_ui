@@ -118,5 +118,10 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-tap-highlight-color: transparent;
   }
+}
+
+.safe-bottom {
+  padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
 }

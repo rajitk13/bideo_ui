@@ -79,9 +79,9 @@ export default function PrivacyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">5. Your Privacy Rights</h2>
             <p>
-              You have the right to request access to your personal data, update your profile details, or delete your account and associated uploaded videos at any time. To exercise these rights, contact{" "}
-              <a href="mailto:privacy@rajit.cc" className="text-primary hover:underline">
-                privacy@rajit.cc
+              You have the right to request access to your personal data, update your profile details, or delete your account and associated uploaded videos at any time. BuzzClips is an open-source platform maintained by independent developers without a corporate legal department. To exercise your rights or request account/data removal, contact our maintainers at{" "}
+              <a href="mailto:privacy@buzzclips.app" className="text-primary hover:underline font-mono">
+                privacy@buzzclips.app
               </a>.
             </p>
           </section>

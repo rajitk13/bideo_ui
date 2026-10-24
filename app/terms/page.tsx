@@ -84,11 +84,11 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-foreground">6. Contact & Legal Inquiries</h2>
+            <h2 className="text-xl font-bold text-foreground">6. Contact & Inquiries</h2>
             <p>
-              For legal notices or questions regarding these terms, contact our team at{" "}
-              <a href="mailto:legal@rajit.cc" className="text-primary hover:underline">
-                legal@rajit.cc
+              BuzzClips is an open-source, community-driven platform built by independent developers. We do not claim registered trademarks or operate a corporate legal department. If you have questions or inquiries regarding these terms or the service, reach out directly to our team at{" "}
+              <a href="mailto:contact@buzzclips.app" className="text-primary hover:underline font-mono">
+                contact@buzzclips.app
               </a>.
             </p>
           </section>

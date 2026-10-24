@@ -61,14 +61,16 @@ export default function DmcaPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-bold text-foreground">3. Designated Copyright Agent</h2>
-            <div className="p-4 rounded-xl bg-muted/40 border border-border/50 text-sm space-y-1">
-              <p className="font-semibold text-foreground">BuzzClips Copyright Agent</p>
-              <p>Attn: Legal & Copyright Operations</p>
-              <p className="flex items-center gap-1.5 text-primary">
+            <h2 className="text-xl font-bold text-foreground">3. Designated DMCA Contact</h2>
+            <div className="p-4 rounded-xl bg-muted/40 border border-border/50 text-sm space-y-2">
+              <p className="font-semibold text-foreground">BuzzClips Maintainers (Open-Source Project)</p>
+              <p className="text-xs text-muted-foreground">
+                BuzzClips is an open-source platform maintained by independent developers without a corporate legal department. All notices of claimed infringement are handled directly and promptly by project maintainers.
+              </p>
+              <p className="flex items-center gap-1.5 text-primary pt-1">
                 <Mail className="w-4 h-4" />
-                <a href="mailto:dmca@rajit.cc" className="hover:underline">
-                  dmca@rajit.cc
+                <a href="mailto:dmca@buzzclips.app" className="hover:underline font-mono text-xs">
+                  dmca@buzzclips.app
                 </a>
               </p>
             </div>

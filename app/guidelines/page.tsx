@@ -76,9 +76,9 @@ export default function GuidelinesPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-bold text-foreground">4. Reporting Violations</h2>
             <p>
-              If you encounter content or comments that violate our community standards, report it directly or contact our moderation team at{" "}
-              <a href="mailto:safety@rajit.cc" className="text-primary hover:underline">
-                safety@rajit.cc
+              If you encounter content or comments that violate our community standards, report it directly or contact our community maintainers at{" "}
+              <a href="mailto:safety@buzzclips.app" className="text-primary hover:underline font-mono">
+                safety@buzzclips.app
               </a>.
             </p>
           </section>

@@ -7,7 +7,6 @@ const creators = [
     linkedin: "https://www.linkedin.com/in/ayushmaan9/",
     github: "https://github.com/Mist-AA",
   },
-
   {
     name: "Rajit Kuthiala",
     linkedin: "https://linkedin.com/in/rajitkuthiala",
@@ -37,163 +36,181 @@ export function Footer() {
       : "https://github.com/bideo-org/bideo_ui";
 
   return (
-    <footer className="w-full border-t mt-auto bg-background/80 backdrop-blur-sm text-muted-foreground">
-      <div className="container mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-start gap-6 text-sm">
-        {/* About / Brand Info */}
-        <div className="max-w-md">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            About | BuzzClips{" "}
-          </h3>
-          <p>
-            BuzzClips is a modern platform built to share, explore, and enjoy videos
-            from around the world. Crafted with passion by a small team of 2
-            developers who love tech.
-          </p>
-        </div>
+    <footer className="w-full border-t mt-auto bg-background/80 backdrop-blur-sm text-muted-foreground pb-16 sm:pb-0">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 text-sm">
+          {/* Brand & Creators Column */}
+          <div className="md:col-span-5 space-y-4">
+            <div>
+              <h3 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+                About | BuzzClips
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 leading-relaxed max-w-sm">
+                BuzzClips is a modern platform built to share, explore, and enjoy videos
+                from around the world. Crafted with passion by a small team of 2
+                developers who love tech.
+              </p>
+            </div>
 
-        {/* Creator Info */}
-        <div className="flex flex-col gap-4">
-          <h3 className="text-xl font-bold text-foreground mb-2">Creators</h3>
-          <div className="flex flex-col gap-3">
-            {creators.map((creator) => (
-              <div
-                key={creator.name}
-                className="flex items-center justify-between gap-4"
-              >
-                <span className="text-base font-medium text-foreground">
-                  {creator.name}
-                </span>
-                <div className="flex gap-3">
-                  <Link
-                    href={creator.linkedin}
-                    target="_blank"
-                    aria-label={`${creator.name} on LinkedIn`}
-                    className="text-muted-foreground hover:text-blue-600 transition-colors"
+            {/* Creators - Compact inline cards */}
+            <div className="space-y-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground/80">
+                Creators
+              </h4>
+              <div className="flex flex-wrap sm:flex-col gap-2">
+                {creators.map((creator) => (
+                  <div
+                    key={creator.name}
+                    className="inline-flex items-center gap-3 px-3 py-1.5 rounded-lg bg-muted/40 border border-border/40 text-xs"
                   >
-                    <Linkedin className="w-5 h-5" />
-                  </Link>
-                  <Link
-                    href={creator.github}
-                    target="_blank"
-                    aria-label={`${creator.name} on GitHub`}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <Github className="w-5 h-5" />
-                  </Link>
-                </div>
+                    <span className="font-medium text-foreground">
+                      {creator.name}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={creator.linkedin}
+                        target="_blank"
+                        aria-label={`${creator.name} on LinkedIn`}
+                        className="text-muted-foreground hover:text-blue-500 transition-colors"
+                      >
+                        <Linkedin className="w-3.5 h-3.5" />
+                      </Link>
+                      <Link
+                        href={creator.github}
+                        target="_blank"
+                        aria-label={`${creator.name} on GitHub`}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <Github className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          </div>
+
+          {/* Nav Links: 3 columns on desktop/tablet, compact 2/3 columns on mobile */}
+          <div className="md:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 text-xs sm:text-sm">
+            {/* Categories */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
+                Categories
+              </h4>
+              <ul className="space-y-1.5 text-xs">
+                <li>
+                  <Link href="/category/tech" className="hover:text-foreground transition-colors">
+                    Tech & Coding
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/gaming" className="hover:text-foreground transition-colors">
+                    Gaming Highlights
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/entertainment" className="hover:text-foreground transition-colors">
+                    Entertainment & Shorts
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/music" className="hover:text-foreground transition-colors">
+                    Music & Beats
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/education" className="hover:text-foreground transition-colors">
+                    Education & Tutorials
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/lifestyle" className="hover:text-foreground transition-colors">
+                    Lifestyle & Vlogs
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
+                Quick Links
+              </h4>
+              <ul className="space-y-1.5 text-xs">
+                <li>
+                  <Link href="/" className="hover:text-foreground transition-colors">
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/video/upload" prefetch={false} className="hover:text-foreground transition-colors">
+                    Upload
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contribute" className="hover:text-foreground transition-colors">
+                    Contribute
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/tech-stack" className="hover:text-foreground transition-colors">
+                    Tech Stack
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/status" className="hover:text-foreground transition-colors flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                    System Status
+                  </Link>
+                </li>
+                <li>
+                  <a href="mailto:request@buzzclips.app" className="hover:text-foreground transition-colors">
+                    Feature Requests
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal & Trust */}
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <h4 className="font-semibold text-foreground text-xs uppercase tracking-wider">
+                Legal & Trust
+              </h4>
+              <ul className="space-y-1.5 text-xs">
+                <li>
+                  <Link href="/terms" className="hover:text-foreground transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="hover:text-foreground transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/dmca" className="hover:text-foreground transition-colors">
+                    Copyright / DMCA
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/guidelines" className="hover:text-foreground transition-colors">
+                    Community Guidelines
+                  </Link>
+                </li>
+                <li>
+                  <a href="mailto:contact@buzzclips.app" className="hover:text-foreground transition-colors">
+                    Contact Us
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        {/* Categories Hub for Deep Internal SEO Linking */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Categories
-          </h3>
-          <ul className="space-y-1">
-            <li>
-              <Link href="/category/tech" className="hover:underline">
-                Tech & Coding
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/gaming" className="hover:underline">
-                Gaming Highlights
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/entertainment" className="hover:underline">
-                Entertainment & Shorts
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/music" className="hover:underline">
-                Music & Beats
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/education" className="hover:underline">
-                Education & Tutorials
-              </Link>
-            </li>
-            <li>
-              <Link href="/category/lifestyle" className="hover:underline">
-                Lifestyle & Vlogs
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {/* Bottom Sub-bar */}
+        <div className="border-t border-border/40 mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground text-center sm:text-left">
+          <p>© {new Date().getFullYear()} BuzzClips | MIT License</p>
 
-        {/* Quick Links */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Quick Links
-          </h3>
-          <ul className="space-y-1">
-            <li>
-              <Link href="/" className="hover:underline">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link href="/video/upload" prefetch={false} className="hover:underline">
-                Upload
-              </Link>
-            </li>
-            <li>
-              <Link href="/contribute" className="hover:underline">
-                Contribute
-              </Link>
-            </li>
-            <li>
-              <Link href="/tech-stack" className="hover:underline">
-                Tech Stack
-              </Link>
-            </li>
-            <li>
-              <Link href="/status" className="hover:underline flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                System Status
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Legal & Policies */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Legal & Trust
-          </h3>
-          <ul className="space-y-1">
-            <li>
-              <Link href="/terms" className="hover:underline">
-                Terms of Service
-              </Link>
-            </li>
-            <li>
-              <Link href="/privacy" className="hover:underline">
-                Privacy Policy
-              </Link>
-            </li>
-            <li>
-              <Link href="/dmca" className="hover:underline">
-                Copyright / DMCA
-              </Link>
-            </li>
-            <li>
-              <Link href="/guidelines" className="hover:underline">
-                Community Guidelines
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t py-4 text-xs text-muted-foreground">
-        <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-center">
-          <span>© {new Date().getFullYear()} BuzzClips | MIT License</span>
-          <span className="hidden sm:inline text-muted-foreground/30">•</span>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground border border-border/50 transition-colors">
             <span className="text-[11px] font-medium text-muted-foreground/80">
               build:

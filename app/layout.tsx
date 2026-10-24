@@ -1,12 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "../components/partials/Navbar";
 import { Footer } from "@/components/partials/Footer";
+import { MobileNav } from "@/components/partials/MobileNav";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthProvider } from "@/store/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import { ReactQueryProvider } from "@/components/providers/react-query-provider";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+};
 import {
   SITE_URL,
   generateWebSiteSchema,
@@ -187,6 +199,7 @@ export default function RootLayout({
               <Navbar />
               <main className="flex-1 flex flex-col">{children}</main>
               <Footer />
+              <MobileNav />
             </AuthProvider>
             <Toaster />
           </ReactQueryProvider>

@@ -66,11 +66,24 @@ export default function ContributeLandingPage() {
         </CardContent>
       </Card>
 
+      <Card className="mb-6 border-primary/20 bg-primary/5">
+        <CardContent className="p-6">
+          <h3 className="text-xl font-semibold mb-2">💡 Feature Requests & Feedback</h3>
+          <p className="text-muted-foreground mb-4">
+            Have a suggestion, improvement, or new feature idea for BuzzClips? We want to hear from you! Reach out directly to our developers.
+          </p>
+          <a href="mailto:request@buzzclips.app">
+            <Button variant="outline" className="gap-2 border-primary/40 hover:bg-primary/10">
+              ✉️ Send Feature Request (request@buzzclips.app)
+            </Button>
+          </a>
+        </CardContent>
+      </Card>
+
       <Separator className="my-6" />
 
       <p className="text-center text-muted-foreground mt-8">
-        🧠 Whether you re fixing a bug or building a feature — your contribution
-        matters.
+        🧠 Whether you are fixing a bug, suggesting a feature, or building UI — your contribution matters.
       </p>
     </div>
   );
