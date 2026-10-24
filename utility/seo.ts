@@ -409,8 +409,58 @@ export function generateChannelListSchema(
       position: index + 1,
       name: `${channel.name} (${channel.hindiName})`,
       url: `${siteUrl}/tv?channel=${channel.id}`,
+      description: channel.description,
+      image: channel.logo,
     })),
   };
 }
+
+/**
+ * Schema.org FAQPage structured data for BuzzClips TV.
+ * Optimizes ranking and triggers SERP question accordions for "buzzclips tv" queries.
+ */
+export function generateLiveTvFaqSchema(siteUrl: string = SITE_URL) {
+  const faqs = [
+    {
+      question: "What is BuzzClips TV?",
+      answer:
+        "BuzzClips TV is India's premier free live television streaming destination on BuzzClips, broadcasting official, authorized Free-To-Air (FTA) national, news, sports, and cultural channels in high-definition (HD) with zero lag and zero login required.",
+    },
+    {
+      question: "How can I watch Indian live TV online for free on BuzzClips TV?",
+      answer:
+        "Simply visit BuzzClips TV at https://buzzclips.app/tv on any mobile phone, tablet, smart TV, or desktop browser. Select any channel from the live Channel Guide or Quick Dial carousel to begin buffer-free HLS streaming immediately.",
+    },
+    {
+      question: "Which TV channels are available on BuzzClips TV?",
+      answer:
+        "BuzzClips TV features a curated lineup of official Indian channels including DD National, DD News, DD Sports, DD India, Sansad TV Lok Sabha, Sansad TV Rajya Sabha, Zee News, NDTV India, DD Kisan, DD Bharati, DD Retro, and DD Urdu.",
+    },
+    {
+      question: "Is BuzzClips TV legal and free to watch?",
+      answer:
+        "Yes, BuzzClips TV streams official public service Free-To-Air (FTA) broadcasts authorized by Prasar Bharati (Doordarshan), the Parliament of India, and recognized national broadcasters. It is completely legal, free, and does not require any paid subscription or account creation.",
+    },
+    {
+      question: "Does BuzzClips TV support HD and mobile streaming?",
+      answer:
+        "Yes, BuzzClips TV utilizes adaptive bitrate HLS (HTTP Live Streaming) technology, automatically delivering up to 1080p Full HD resolution on broadband and smoothly adjusting on 4G/5G mobile connections to eliminate buffering.",
+    },
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+}
+
 
 

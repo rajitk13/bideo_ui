@@ -184,6 +184,101 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
           </p>
         </div>
       </div>
+
+      {/* Semantic SEO & Discovery Guide for BuzzClips TV */}
+      <article
+        aria-labelledby="about-buzzclips-tv-title"
+        className="mt-10 pt-8 border-t border-border/40 space-y-6 text-foreground"
+      >
+        <div className="space-y-2">
+          <h2
+            id="about-buzzclips-tv-title"
+            className="text-lg sm:text-xl font-bold tracking-tight text-foreground"
+          >
+            About BuzzClips TV — Free Indian Live TV Streaming
+          </h2>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            BuzzClips TV is India&apos;s premier web-first live TV streaming portal, offering instant, unrestricted access to official Indian Free-To-Air (FTA) national broadcasts, public service television, breaking news, live parliamentary debates, and premier sports. Powered by ultra-low latency adaptive HLS, BuzzClips TV delivers crisp 1080p Full HD video playback with zero buffering and zero login requirements.
+          </p>
+        </div>
+
+        {/* Channel Directory Grid for SEO Indexing */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Official Indian Live TV Channels Lineup
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+            {INDIAN_LIVE_CHANNELS.map((ch) => (
+              <button
+                key={ch.id}
+                onClick={() => handleSelectChannel(ch)}
+                className="text-left p-2.5 rounded-xl border border-border/40 bg-card/40 hover:bg-card hover:border-primary/40 transition-all group"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] font-bold text-muted-foreground group-hover:text-primary">
+                    CH {ch.channelNumber}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-auto" />
+                </div>
+                <p className="text-xs font-bold text-foreground truncate mt-1">
+                  {ch.name}
+                </p>
+                <p className="text-[10px] text-muted-foreground truncate">
+                  {ch.hindiName}
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Frequently Asked Questions (FAQ Section) */}
+        <div className="space-y-3 pt-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Frequently Asked Questions about BuzzClips TV
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <details className="group p-3.5 rounded-xl border border-border/40 bg-card/30 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between cursor-pointer font-semibold text-xs text-foreground group-open:text-primary">
+                <span>What is BuzzClips TV?</span>
+                <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                BuzzClips TV is a free online streaming service by BuzzClips providing live Indian television channels, including DD National, DD Sports, DD News, Sansad TV, and regional public broadcasts, directly in your browser.
+              </p>
+            </details>
+
+            <details className="group p-3.5 rounded-xl border border-border/40 bg-card/30 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between cursor-pointer font-semibold text-xs text-foreground group-open:text-primary">
+                <span>Is BuzzClips TV free and legal to watch?</span>
+                <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                Yes, 100%. All channels featured on BuzzClips TV are official Free-To-Air (FTA) public broadcasts transmitted by Prasar Bharati and authorized news networks. No paid subscription, account registration, or payment is ever required.
+              </p>
+            </details>
+
+            <details className="group p-3.5 rounded-xl border border-border/40 bg-card/30 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between cursor-pointer font-semibold text-xs text-foreground group-open:text-primary">
+                <span>What channels can I watch on BuzzClips TV?</span>
+                <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                You can watch 12+ live television channels, including DD National (डीडी नेशनल), DD News, DD India, DD Sports, DD Bharati, Sansad TV Lok Sabha, Sansad TV Rajya Sabha, and major national news networks in HD.
+              </p>
+            </details>
+
+            <details className="group p-3.5 rounded-xl border border-border/40 bg-card/30 [&_summary::-webkit-details-marker]:hidden">
+              <summary className="flex items-center justify-between cursor-pointer font-semibold text-xs text-foreground group-open:text-primary">
+                <span>Does BuzzClips TV work on mobile devices?</span>
+                <span className="text-xs text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+              </summary>
+              <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                Yes! BuzzClips TV is fully responsive and optimized for mobile smartphones (iOS &amp; Android), tablets, laptops, and desktop screens with full-screen theater viewing and native touch controls.
+              </p>
+            </details>
+          </div>
+        </div>
+      </article>
     </div>
   );
 }

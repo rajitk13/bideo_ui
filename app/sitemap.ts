@@ -2,6 +2,7 @@ import { MetadataRoute } from "next";
 import { api_instance } from "@/global";
 import { PaginatedVideoResponse } from "@/types/video";
 import { SITE_URL } from "@/utility/seo";
+import { INDIAN_LIVE_CHANNELS } from "@/constants/liveChannels";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = SITE_URL;
@@ -14,11 +15,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     {
+      url: `${baseUrl}/tv`,
+      lastModified: new Date(),
+      changeFrequency: "always",
+      priority: 1.0,
+    },
+    {
+      url: `${baseUrl}/reels`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
       url: `${baseUrl}/trending`,
       lastModified: new Date(),
       changeFrequency: "hourly",
       priority: 0.9,
     },
+    ...INDIAN_LIVE_CHANNELS.map((channel) => ({
+      url: `${baseUrl}/tv?channel=${channel.id}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.85,
+    })),
     {
       url: `${baseUrl}/auth/login`,
       lastModified: new Date(),

@@ -96,13 +96,11 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
         <div className="w-full h-full flex items-center justify-center relative pointer-events-none">
           <ReactPlayer
             ref={playerRef}
-            url={videoSrc}
             src={videoSrc}
             playing={isPlaying && isActive}
             muted={isMuted}
             volume={1}
             loop={true}
-            playsinline={true}
             playsInline={true}
             width="100%"
             height="100%"

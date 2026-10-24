@@ -7,6 +7,7 @@ import {
   generateLiveTvSchema,
   generateBreadcrumbSchema,
   generateChannelListSchema,
+  generateLiveTvFaqSchema,
 } from "@/utility/seo";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -24,30 +25,52 @@ export async function generateMetadata({
     INDIAN_LIVE_CHANNELS.find((c) => c.id === channelId) ||
     INDIAN_LIVE_CHANNELS[0];
 
-  const title = `${channel.name} (${channel.hindiName}) Live TV Stream - Free Online | BuzzClips India`;
-  const description = `Watch ${channel.name} (${channel.hindiName}) live stream online free in HD. Official Indian Free-To-Air TV broadcasting Doordarshan national, news, sports, and culture with zero buffering.`;
-  const canonicalUrl = `${SITE_URL}/tv${channelId ? `?channel=${channelId}` : ""}`;
+  const isSpecificChannel = Boolean(channelId);
+  const title = isSpecificChannel
+    ? `${channel.name} (${channel.hindiName}) Live Stream - BuzzClips TV | Free HD Online`
+    : `BuzzClips TV - Free Indian Live TV Streaming | Watch 12+ Official HD Channels Online`;
+
+  const description = isSpecificChannel
+    ? `Watch ${channel.name} (${channel.hindiName}) live stream online free in HD on BuzzClips TV. Official Indian Free-To-Air TV broadcasting Doordarshan national, news, sports, and culture with zero buffering.`
+    : `Watch 12+ Indian Free-To-Air Live TV channels online free in HD on BuzzClips TV. Stream DD National, DD Sports, DD News, Sansad TV Lok Sabha & Rajya Sabha with zero login and zero lag.`;
+
+  const canonicalUrl = `${SITE_URL}/tv${isSpecificChannel ? `?channel=${channel.id}` : ""}`;
 
   return {
     title,
     description,
     keywords: [
+      // Primary BuzzClips TV Brand Queries
+      "buzzclips tv",
+      "buzzclips live tv",
+      "buzzclips tv streaming",
+      "watch buzzclips tv",
+      "buzzclips tv online",
+      "buzzclips free tv",
+      "buzzclips live channels",
+      // Channel-Specific Keywords
       `${channel.name} live`,
       `${channel.name} live stream`,
+      `${channel.name} online free`,
       `${channel.hindiName} लाइव`,
       "DD National live",
       "DD Sports live streaming",
       "DD News live online",
       "Sansad TV Lok Sabha live",
+      "Sansad TV Rajya Sabha live stream",
+      "DD India live",
+      "DD Bharati live stream",
+      // Generic High-Intent Queries
       "Indian free live TV channels",
       "watch Indian news live",
       "DD Free Dish online streaming",
       "free live TV India web",
       "Prasar Bharati live stream",
+      "official Indian TV stream",
       "डीडी नेशनल लाइव",
       "डीडी स्पोर्ट्स लाइव",
       "लाइव टीवी भारत",
-      "Made in India streaming",
+      "Made in India live tv streaming",
     ],
     alternates: {
       canonical: canonicalUrl,
@@ -58,13 +81,13 @@ export async function generateMetadata({
       url: canonicalUrl,
       type: "video.other",
       locale: "en_IN",
-      siteName: "BuzzClips India",
+      siteName: "BuzzClips TV",
       images: [
         {
           url: channel.logo || `${SITE_URL}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: `${channel.name} Live on BuzzClips`,
+          alt: `${channel.name} Live on BuzzClips TV`,
         },
       ],
     },
@@ -86,10 +109,11 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
   const liveTvSchema = generateLiveTvSchema(activeChannel, SITE_URL);
   const breadcrumbsSchema = generateBreadcrumbSchema([
     { name: "Home", url: SITE_URL },
-    { name: "Live TV India (लाइव टीवी)", url: `${SITE_URL}/tv` },
+    { name: "BuzzClips TV (लाइव टीवी)", url: `${SITE_URL}/tv` },
     { name: activeChannel.name, url: `${SITE_URL}/tv?channel=${activeChannel.id}` },
   ]);
   const channelListSchema = generateChannelListSchema(INDIAN_LIVE_CHANNELS, SITE_URL);
+  const faqSchema = generateLiveTvFaqSchema(SITE_URL);
 
   return (
     <>
@@ -112,6 +136,13 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(channelListSchema),
+        }}
+      />
+      <script
+        id="livetv-faq-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqSchema),
         }}
       />
 

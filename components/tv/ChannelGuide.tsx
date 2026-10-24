@@ -65,51 +65,51 @@ export function ChannelGuide({
   }, [channels]);
 
   return (
-    <section aria-labelledby="live-channel-guide-title" className="space-y-4">
-      {/* Header & Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+    <section aria-labelledby="live-channel-guide-title" className="space-y-3.5">
+      {/* 1. Header: Title + Live Badge (Clean full width row) */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
             <Tv className="w-4 h-4" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <h2
                 id="live-channel-guide-title"
-                className="text-base sm:text-lg font-bold text-foreground leading-tight"
+                className="text-base font-bold text-foreground leading-tight whitespace-nowrap"
               >
                 Channel Guide
               </h2>
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                {filteredChannels.length} Live
+              <span className="whitespace-nowrap shrink-0 inline-flex flex-row items-center gap-1.5 text-[10px] font-mono font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                <span>{filteredChannels.length} Live</span>
               </span>
             </div>
-            <p className="text-[11px] text-muted-foreground font-medium">
-              Free-To-Air Official Indian Broadcasts
+            <p className="text-[11px] text-muted-foreground font-medium truncate mt-0.5">
+              Official Indian Free-To-Air Broadcasts
             </p>
           </div>
         </div>
+      </div>
 
-        {/* Search Bar with Clear button */}
-        <div className="relative w-full sm:w-60">
-          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search channel name, number..."
-            className="pl-8 pr-7 h-8 text-xs bg-card/60 border-border/50 rounded-full focus-visible:ring-1"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+      {/* 2. Full-Width Search Bar */}
+      <div className="relative w-full">
+        <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Input
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search channels, numbers, languages..."
+          className="pl-8 pr-8 h-8 text-xs bg-card/60 border-border/50 rounded-xl focus-visible:ring-1 focus-visible:ring-primary w-full"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5"
+            aria-label="Clear search"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Category Filter Pills with counts */}

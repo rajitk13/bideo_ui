@@ -468,28 +468,30 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
               onClick={handleScrub}
               onMouseMove={handleScrubHover}
               onMouseLeave={() => setHoverTime(null)}
-              className="relative w-full h-1.5 hover:h-3 bg-white/20 rounded-full cursor-pointer transition-all duration-150 group/scrub"
+              className="relative w-full py-2 -my-2 cursor-pointer group/scrub"
             >
-              {/* Buffer Bar */}
-              <div
-                style={{ width: `${bufferedPercent}%` }}
-                className="absolute top-0 left-0 bottom-0 bg-white/30 rounded-full transition-all duration-200"
-              />
-              {/* Played Bar */}
-              <div
-                style={{ width: `${playedPercent}%` }}
-                className="absolute top-0 left-0 bottom-0 bg-primary rounded-full"
-              />
+              <div className="relative w-full h-1.5 group-hover/scrub:h-2.5 bg-white/25 rounded-full transition-all duration-150 overflow-hidden">
+                {/* Buffer Bar */}
+                <div
+                  style={{ width: `${bufferedPercent}%` }}
+                  className="absolute top-0 left-0 bottom-0 bg-white/40 rounded-full transition-all duration-200"
+                />
+                {/* Played Bar */}
+                <div
+                  style={{ width: `${playedPercent}%` }}
+                  className="absolute top-0 left-0 bottom-0 bg-red-600 rounded-full"
+                />
+              </div>
               {/* Scrubber Thumb */}
               <div
                 style={{ left: `${playedPercent}%` }}
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md scale-0 group-hover/scrub:scale-100 transition-transform"
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-white border-2 border-red-600 shadow-md scale-0 group-hover/scrub:scale-100 transition-transform pointer-events-none"
               />
               {/* Hover Time Tooltip */}
               {hoverTime !== null && (
                 <div
                   style={{ left: `${hoverPos}px` }}
-                  className="absolute -top-7 -translate-x-1/2 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-black/80 text-white border border-white/20 shadow-md pointer-events-none"
+                  className="absolute -top-7 -translate-x-1/2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/90 text-white border border-white/25 shadow-lg pointer-events-none"
                 >
                   {formatTime(hoverTime)}
                 </div>
@@ -498,14 +500,14 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           )}
 
           {/* Control Buttons Row */}
-          <div className="flex items-center justify-between text-white">
+          <div className="flex items-center justify-between text-white select-none">
             {/* Left Controls: Play/Pause, Seek, Volume, Time */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={togglePlay}
-                className="h-9 w-9 text-white hover:text-primary hover:bg-white/10 rounded-full"
+                className="h-9 w-9 text-white hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90"
                 title={isPlaying ? "Pause (k / space)" : "Play (k / space)"}
               >
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
@@ -517,7 +519,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     variant="ghost"
                     size="icon"
                     onClick={() => seekRelative(-10)}
-                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex"
+                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex"
                     title="Rewind 10s (j / left arrow)"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -526,7 +528,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     variant="ghost"
                     size="icon"
                     onClick={() => seekRelative(10)}
-                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex"
+                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex"
                     title="Forward 10s (l / right arrow)"
                   >
                     <RotateCw className="w-4 h-4" />
@@ -534,21 +536,22 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 </>
               )}
 
-              {/* Volume Slider Group */}
-              <div className="flex items-center gap-1 group/vol">
+              {/* Volume Slider Group - Always Nicely Visible */}
+              <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full border border-white/15">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={toggleMute}
-                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                  className="h-7 w-7 text-white/90 hover:text-white hover:bg-white/15 rounded-full p-0"
                   title={isMuted ? "Unmute (m)" : "Mute (m)"}
+                  aria-label={isMuted ? "Unmute" : "Mute"}
                 >
                   {isMuted || volume === 0 ? (
                     <VolumeX className="w-4 h-4 text-red-400" />
                   ) : volume < 0.5 ? (
-                    <Volume1 className="w-4 h-4" />
+                    <Volume1 className="w-4 h-4 text-white" />
                   ) : (
-                    <Volume2 className="w-4 h-4" />
+                    <Volume2 className="w-4 h-4 text-white" />
                   )}
                 </Button>
                 <input
@@ -558,20 +561,24 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                   step="0.05"
                   value={isMuted ? 0 : volume}
                   onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-                  className="w-0 group-hover/vol:w-16 sm:group-hover/vol:w-20 transition-all duration-200 h-1 bg-white/30 rounded-full accent-primary cursor-pointer"
-                  title="Volume (Up/Down arrow)"
+                  style={{
+                    background: `linear-gradient(to right, #ef4444 ${isMuted ? 0 : Math.round(volume * 100)}%, rgba(255,255,255,0.25) ${isMuted ? 0 : Math.round(volume * 100)}%)`,
+                  }}
+                  className="w-14 sm:w-20 hover:w-24 transition-all duration-200 h-1.5 rounded-full accent-red-500 cursor-pointer shadow-xs focus:outline-none"
+                  title={`Volume: ${isMuted ? 0 : Math.round(volume * 100)}% (Up/Down arrow)`}
+                  aria-label="Volume slider"
                 />
               </div>
 
               {/* Time Display */}
               <div className="text-xs font-mono text-white/90 pl-1 sm:pl-2">
                 {isLive ? (
-                  <span className="flex items-center gap-1.5 text-red-500 font-bold">
+                  <span className="flex items-center gap-1.5 text-red-500 font-bold bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
                     <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                     LIVE STREAM
                   </span>
                 ) : (
-                  <span>
+                  <span className="px-1.5 py-0.5 rounded bg-black/40">
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </span>
                 )}

@@ -83,4 +83,15 @@ describe("Indian Live TV Infrastructure & SEO", () => {
     expect(listSchema.itemListElement[0].position).toBe(1);
     expect(listSchema.itemListElement[0].url).toContain("/tv?channel=dd-national");
   });
+
+  it("generates Schema.org FAQPage for BuzzClips TV SEO", () => {
+    const { generateLiveTvFaqSchema } = require("@/utility/seo");
+    const faqSchema = generateLiveTvFaqSchema("https://buzzclips.app");
+
+    expect(faqSchema["@context"]).toBe("https://schema.org");
+    expect(faqSchema["@type"]).toBe("FAQPage");
+    expect(faqSchema.mainEntity.length).toBeGreaterThanOrEqual(4);
+    expect(faqSchema.mainEntity[0].name).toContain("BuzzClips TV");
+    expect(faqSchema.mainEntity[0].acceptedAnswer.text).toContain("BuzzClips TV");
+  });
 });
