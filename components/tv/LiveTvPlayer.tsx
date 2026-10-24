@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { VideoPlayer } from "@/components/player/VideoPlayer";
 import { LiveChannel } from "@/constants/liveChannels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Share2, Check } from "lucide-react";
+import { Share2, Check, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import clsx from "clsx";
 
 interface LiveTvPlayerProps {
   channel: LiveChannel;
@@ -15,6 +16,12 @@ interface LiveTvPlayerProps {
 export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
   const playerRef = useRef<any>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+
+  // Auto-collapse description when switching channels
+  useEffect(() => {
+    setIsDescExpanded(false);
+  }, [channel.id]);
 
   const handleShare = async () => {
     const url = `${window.location.origin}/tv?channel=${channel.id}`;
@@ -106,10 +113,33 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
           </span>
         </div>
 
-        {/* Row 3: Description */}
-        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 pt-0.5">
-          {channel.description}
-        </p>
+        {/* Row 3: Description with View More / Show Less */}
+        <div className="pt-0.5">
+          <p
+            className={clsx(
+              "text-xs text-muted-foreground leading-relaxed transition-all",
+              !isDescExpanded && "line-clamp-2"
+            )}
+          >
+            {channel.description}
+          </p>
+          {channel.description && channel.description.length > 80 && (
+            <button
+              onClick={() => setIsDescExpanded((prev) => !prev)}
+              className="text-[11px] font-semibold text-primary hover:text-primary/80 mt-1 inline-flex items-center gap-1 transition-colors cursor-pointer select-none"
+              aria-expanded={isDescExpanded}
+              aria-label={isDescExpanded ? "Show less description" : "View more description"}
+            >
+              <span>{isDescExpanded ? "Show less" : "View more"}</span>
+              <ChevronDown
+                className={clsx(
+                  "w-3 h-3 transition-transform duration-200",
+                  isDescExpanded && "rotate-180"
+                )}
+              />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

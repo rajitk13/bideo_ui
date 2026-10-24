@@ -37,7 +37,9 @@ import {
   ArrowLeft,
   Tag,
   BookmarkPlus,
+  ChevronDown,
 } from "lucide-react";
+import clsx from "clsx";
 
 interface ViewVideoProps {
   id?: string;
@@ -51,6 +53,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
   const [video, setVideo] = useState<VideoDTO | null>(initialVideo || null);
   const [error, setError] = useState<string | null>(null);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   const { onTimeUpdate } = useResumePlayback({
     videoId: video?.videoId,
@@ -372,10 +375,33 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                     )}
                   </div>
 
-                  {/* Video Description */}
+                  {/* Video Description with View More / Show Less */}
                   {video.description ? (
-                    <div className="text-sm text-foreground/90 whitespace-pre-line leading-relaxed pt-1 break-words [overflow-wrap:anywhere] min-w-0">
-                      {video.description}
+                    <div>
+                      <div
+                        className={clsx(
+                          "text-sm text-foreground/90 whitespace-pre-line leading-relaxed pt-1 break-words [overflow-wrap:anywhere] min-w-0 transition-all",
+                          !isDescExpanded && "line-clamp-3"
+                        )}
+                      >
+                        {video.description}
+                      </div>
+                      {video.description.length > 150 && (
+                        <button
+                          onClick={() => setIsDescExpanded((prev) => !prev)}
+                          className="text-xs font-semibold text-primary hover:text-primary/80 mt-2 inline-flex items-center gap-1 transition-colors cursor-pointer select-none"
+                          aria-expanded={isDescExpanded}
+                          aria-label={isDescExpanded ? "Show less description" : "View more description"}
+                        >
+                          <span>{isDescExpanded ? "Show less" : "View more"}</span>
+                          <ChevronDown
+                            className={clsx(
+                              "w-3.5 h-3.5 transition-transform duration-200",
+                              isDescExpanded && "rotate-180"
+                            )}
+                          />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground italic">
