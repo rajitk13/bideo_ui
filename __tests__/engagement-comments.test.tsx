@@ -176,6 +176,216 @@ describe("EngagementButtons & CommentsSection", () => {
         );
       });
     });
+
+    it("allows author to edit a comment and updates content", async () => {
+      const mockComments = {
+        content: [
+          {
+            commentId: 101,
+            videoId: 42,
+            content: "Original text before edit",
+            createdAt: new Date().toISOString(),
+            user: { userId: "u1", user_name: "TestUser" },
+          },
+        ],
+      };
+
+      global.fetch = jest.fn().mockImplementation((url, opts) => {
+        if (opts?.method === "PUT") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              commentId: 101,
+              content: "Edited text after update",
+              updatedAt: new Date().toISOString(),
+            }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockComments,
+        });
+      });
+
+      render(<CommentsSection videoId={42} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Original text before edit")).toBeInTheDocument();
+      });
+
+      // Click Edit action button
+      const editBtn = screen.getByTitle("Edit comment");
+      fireEvent.click(editBtn);
+
+      // Edit textarea should now appear
+      const textarea = screen.getByPlaceholderText(/Edit your comment/i);
+      fireEvent.change(textarea, { target: { value: "Edited text after update" } });
+
+      // Save edit
+      const saveBtn = screen.getByRole("button", { name: /Save/i });
+      fireEvent.click(saveBtn);
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining("/comments/101"),
+          expect.objectContaining({ method: "PUT" })
+        );
+        expect(screen.getByText("Edited text after update")).toBeInTheDocument();
+      });
+    });
+
+    it("allows deleting a comment through the confirmation dialog", async () => {
+      const mockComments = {
+        content: [
+          {
+            commentId: 102,
+            videoId: 42,
+            content: "Comment to be removed",
+            createdAt: new Date().toISOString(),
+            user: { userId: "u1", user_name: "TestUser" },
+          },
+        ],
+      };
+
+      global.fetch = jest.fn().mockImplementation((url, opts) => {
+        if (opts?.method === "DELETE") {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ message: "Comment deleted successfully", commentId: "102" }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockComments,
+        });
+      });
+
+      render(<CommentsSection videoId={42} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Comment to be removed")).toBeInTheDocument();
+      });
+
+      // Click Delete action button
+      const deleteBtn = screen.getByTitle("Delete comment");
+      fireEvent.click(deleteBtn);
+
+      // Inline confirmation appears
+      expect(screen.getByText("Delete?")).toBeInTheDocument();
+
+      // Click Confirm button
+      const confirmDeleteBtn = screen.getByRole("button", { name: /Confirm/i });
+      fireEvent.click(confirmDeleteBtn);
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining("/comments/102"),
+          expect.objectContaining({ method: "DELETE" })
+        );
+        expect(screen.queryByText("Comment to be removed")).not.toBeInTheDocument();
+      });
+    });
+
+    it("allows video owner to pin and unpin a comment", async () => {
+      const mockComments = {
+        content: [
+          {
+            commentId: 103,
+            videoId: 42,
+            content: "Owner can pin this",
+            createdAt: new Date().toISOString(),
+            isPinned: false,
+            user: { userId: "u2", user_name: "OtherUser" },
+          },
+        ],
+      };
+
+      global.fetch = jest.fn().mockImplementation((url, opts) => {
+        if (opts?.method === "POST" && String(url).includes("/pin")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ commentId: 103, isPinned: true }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockComments,
+        });
+      });
+
+      // Current user is "u1", pass videoUploaderId="u1"
+      render(<CommentsSection videoId={42} videoUploaderId="u1" />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Owner can pin this")).toBeInTheDocument();
+      });
+
+      // Click Pin action button
+      const pinBtn = screen.getByTitle("Pin comment");
+      fireEvent.click(pinBtn);
+
+      await waitFor(() => {
+        expect(global.fetch).toHaveBeenCalledWith(
+          expect.stringContaining("/comments/103/pin"),
+          expect.objectContaining({ method: "POST" })
+        );
+      });
+    });
+
+    it("allows replying to a comment", async () => {
+      const mockComments = {
+        content: [
+          {
+            commentId: 104,
+            videoId: 42,
+            content: "Parent comment for reply",
+            createdAt: new Date().toISOString(),
+            user: { userId: "u2", user_name: "OtherUser" },
+          },
+        ],
+      };
+
+      global.fetch = jest.fn().mockImplementation((url, opts) => {
+        if (opts?.method === "POST" && String(url).includes("/replies")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({
+              commentId: 201,
+              content: "This is a child reply",
+              createdAt: new Date().toISOString(),
+              parentCommentId: 104,
+              user: { userId: "u1", user_name: "TestUser" },
+            }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => mockComments,
+        });
+      });
+
+      render(<CommentsSection videoId={42} />);
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent comment for reply")).toBeInTheDocument();
+      });
+
+      // Click Reply button
+      const replyBtn = screen.getByText("Reply");
+      fireEvent.click(replyBtn);
+
+      // Fill in reply input
+      const replyInput = screen.getByPlaceholderText(/Reply to OtherUser/i);
+      fireEvent.change(replyInput, { target: { value: "This is a child reply" } });
+
+      // Click submit reply button
+      const sendReplyBtn = screen.getAllByRole("button", { name: /Reply/i })[1];
+      fireEvent.click(sendReplyBtn);
+
+      await waitFor(() => {
+        expect(screen.getByText("This is a child reply")).toBeInTheDocument();
+      });
+    });
   });
 
   describe("useResumePlayback", () => {

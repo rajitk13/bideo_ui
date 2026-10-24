@@ -14,6 +14,18 @@ interface ChannelCardProps {
 }
 
 export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
+  const [hasImgError, setHasImgError] = React.useState(false);
+
+  // Generate channel color scheme based on id
+  const getBadgeGradient = (id: string) => {
+    if (id.includes("news")) return "from-red-600 to-rose-700";
+    if (id.includes("sports")) return "from-emerald-600 to-teal-700";
+    if (id.includes("sansad")) return "from-amber-600 to-orange-700";
+    if (id.includes("kisan")) return "from-green-600 to-emerald-700";
+    if (id.includes("bharati")) return "from-purple-600 to-indigo-700";
+    return "from-blue-600 to-indigo-700";
+  };
+
   return (
     <button
       onClick={() => onSelect(channel)}
@@ -25,14 +37,27 @@ export function ChannelCard({ channel, isActive, onSelect }: ChannelCardProps) {
       )}
     >
       {/* Channel Logo / Thumbnail */}
-      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-black/40 border border-border/40 shrink-0">
-        <Image
-          src={channel.logo}
-          alt={channel.name}
-          fill
-          sizes="56px"
-          className="object-cover group-hover:scale-105 transition-transform duration-300"
-        />
+      <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-black/40 border border-border/40 shrink-0 flex items-center justify-center">
+        {!hasImgError && channel.logo ? (
+          <Image
+            src={channel.logo}
+            alt={channel.name}
+            fill
+            unoptimized
+            onError={() => setHasImgError(true)}
+            sizes="56px"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className={clsx("w-full h-full bg-gradient-to-br flex flex-col items-center justify-center text-white font-bold p-1 text-center select-none", getBadgeGradient(channel.id))}>
+            <span className="text-[11px] font-black tracking-wider leading-none">
+              {channel.name.split(" ")[0]}
+            </span>
+            <span className="text-[9px] opacity-80 font-medium">
+              {channel.name.split(" ").slice(1).join(" ") || "TV"}
+            </span>
+          </div>
+        )}
         {isActive && (
           <div className="absolute inset-0 bg-primary/20 backdrop-blur-xs flex items-center justify-center">
             <div className="w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md animate-pulse">

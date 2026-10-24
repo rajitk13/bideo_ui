@@ -80,9 +80,12 @@ export interface CommentDTO {
   videoId: number;
   content: string;
   createdAt: string;
+  updatedAt?: string;
   timestampInSeconds?: number;
   isPinned?: boolean;
   user?: UserDTO;
+  parentCommentId?: number;
+  repliesCount?: number;
 }
 
 export interface ProgressDTO {

@@ -414,6 +414,7 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
               {/* Interactive Comments Section with Timestamp Seeking */}
               <CommentsSection
                 videoId={video.videoId}
+                videoUploaderId={video.video_uploader?.userId || (video.video_uploader as any)?.id}
                 onSeekTo={handleSeekTo}
               />
             </div>

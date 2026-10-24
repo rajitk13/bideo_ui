@@ -124,14 +124,14 @@ export function MobileNav() {
               )}
               aria-label={item.label}
             >
-              <div className="relative">
+              <div>
                 <Icon className="w-5 h-5" />
-                {item.isLive && (
-                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                )}
               </div>
-              <span className="text-[10px] mt-0.5 truncate max-w-[54px]">
-                {item.label}
+              <span className="text-[10px] mt-0.5 max-w-[64px] inline-flex items-center gap-1">
+                <span>{item.label}</span>
+                {item.isLive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                )}
               </span>
             </Link>
           );
