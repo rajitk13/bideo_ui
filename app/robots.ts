@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: [
           "Googlebot",
+          "Googlebot-Image",
           "Googlebot-Video",
           "Bingbot",
           "Slurp",
@@ -30,7 +31,7 @@ export default function robots(): MetadataRoute.Robots {
           "LinkedInBot",
           "Discordbot",
         ],
-        allow: ["/", "/watch/*", "/profile/*"],
+        allow: ["/", "/watch/*", "/profile/*", "/favicon.ico", "/icon*"],
         disallow: ["/my-videos", "/video/upload", "/proxy"],
       },
     ],
