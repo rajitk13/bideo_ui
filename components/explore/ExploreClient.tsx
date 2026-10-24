@@ -200,8 +200,8 @@ export default function ExploreClient({
   };
 
   return (
-    <div className="w-full flex justify-center py-6">
-      <div className="w-full lg:max-w-[85%] sm:max-w-full px-4 space-y-6">
+    <div className="w-full max-w-full overflow-x-hidden flex justify-center py-6">
+      <div className="w-full lg:max-w-[85%] sm:max-w-full px-4 space-y-6 min-w-0 max-w-full">
         {/* === Header & Search Bar Section === */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
           <div className="space-y-1">
@@ -220,7 +220,7 @@ export default function ExploreClient({
           {/* Search Bar */}
           <form
             onSubmit={handleSearchSubmit}
-            className="relative w-full md:w-96"
+            className="relative w-full max-w-full md:w-96"
           >
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
             <Input
@@ -253,7 +253,7 @@ export default function ExploreClient({
         </div>
 
         {/* === Category Filter Pills === */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none">
+        <div className="w-full max-w-full min-w-0 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none select-none">
           {CATEGORIES.map((cat) => {
             const isSelected = activeCategory === cat.value;
             return (
@@ -276,7 +276,7 @@ export default function ExploreClient({
 
         {/* Active Filter Chips Bar */}
         {isFiltered && (
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t border-border/40">
+          <div className="w-full max-w-full min-w-0 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t border-border/40">
             <div className="flex flex-wrap items-center gap-2">
               <span>Showing results for:</span>
               {activeQuery && (

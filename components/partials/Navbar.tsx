@@ -88,54 +88,56 @@ export function Navbar() {
         </div>
 
         {/* === Right: Auth, Theme === */}
-        <div className="flex items-center gap-4">
-          {/* Auth Section */}
-          {!isAuthenticated ? (
-            <Link href="/auth/login">
-              <Button variant="outline">Sign In</Button>
-            </Link>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="cursor-pointer">
-                  <AvatarImage
-                    src={user?.avatar_url || ""}
-                    alt={user?.fullName || user?.user_name || "User"}
-                  />
-                  <AvatarFallback>
-                    {(user?.fullName || user?.user_name)
-                      ?.charAt(0)
-                      ?.toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {user?.username && (
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Auth Section (Desktop only - Mobile uses MobileNav avatar profile tab) */}
+          <div className="hidden md:flex items-center">
+            {!isAuthenticated ? (
+              <Link href="/auth/login">
+                <Button variant="outline">Sign In</Button>
+              </Link>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Avatar className="cursor-pointer">
+                    <AvatarImage
+                      src={user?.avatar_url || ""}
+                      alt={user?.fullName || user?.user_name || "User"}
+                    />
+                    <AvatarFallback>
+                      {(user?.fullName || user?.user_name)
+                        ?.charAt(0)
+                        ?.toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {user?.username && (
+                    <DropdownMenuItem asChild>
+                      <Link href={`/channel/@${user.username}`}>Your Channel</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
-                    <Link href={`/channel/@${user.username}`}>Your Channel</Link>
+                    <Link href="/video/upload">Upload Video</Link>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                  <Link href="/video/upload">Upload Video</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/history">Watch History</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/playlists">Playlists & Saved</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/my-videos">My Videos</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/profile">Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={logout} className="text-red-500">
-                  Log Out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+                  <DropdownMenuItem asChild>
+                    <Link href="/history">Watch History</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/playlists">Playlists & Saved</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/my-videos">My Videos</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout} className="text-red-500">
+                    Log Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
 
           {/* Theme Toggle */}
           <DropdownMenu>

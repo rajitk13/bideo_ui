@@ -15,7 +15,7 @@ import { useAuth } from "@/store/auth-context";
 import Link from "next/link";
 
 export default function ViewProfile() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <Card className="border border-border/50 shadow-xl dark:shadow-2xl dark:shadow-primary/5 bg-card/85 backdrop-blur-md rounded-2xl">
@@ -83,6 +83,37 @@ export default function ViewProfile() {
               </Link>
             )}
           </div>
+
+          {/* Quick Hub Navigation */}
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border/40 text-center text-xs">
+            <Link
+              href="/history"
+              className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border/40 text-foreground font-medium transition-colors"
+            >
+              Watch History
+            </Link>
+            <Link
+              href="/playlists"
+              className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border/40 text-foreground font-medium transition-colors"
+            >
+              Playlists
+            </Link>
+            <Link
+              href="/my-videos"
+              className="p-2.5 rounded-xl bg-muted/40 hover:bg-muted border border-border/40 text-foreground font-medium transition-colors"
+            >
+              My Clips
+            </Link>
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={logout}
+            className="w-full text-red-500 hover:text-red-600 hover:bg-red-500/10 font-medium cursor-pointer"
+          >
+            Log Out
+          </Button>
         </form>
       </CardContent>
     </Card>

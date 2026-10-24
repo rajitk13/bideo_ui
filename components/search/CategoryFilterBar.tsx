@@ -44,7 +44,7 @@ export const CategoryFilterBar: React.FC<Props> = ({
 
   return (
     <div
-      className={`flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar scroll-smooth ${className}`}
+      className={`w-full max-w-full min-w-0 flex items-center gap-2 overflow-x-auto py-2.5 no-scrollbar scroll-smooth ${className}`}
       role="region"
       aria-label="Category Filters"
     >

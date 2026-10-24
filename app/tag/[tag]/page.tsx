@@ -142,8 +142,8 @@ export default async function TagPage({ params }: TagPageProps) {
 
       <Suspense
         fallback={
-          <div className="w-full flex justify-center py-6">
-            <div className="w-full lg:max-w-[85%] px-4 space-y-6">
+          <div className="w-full max-w-full overflow-x-hidden flex justify-center py-6">
+            <div className="w-full max-w-full lg:max-w-[85%] px-4 space-y-6 min-w-0">
               <Skeleton className="h-10 w-48" />
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-4">
                 {Array.from({ length: 8 }).map((_, i) => (

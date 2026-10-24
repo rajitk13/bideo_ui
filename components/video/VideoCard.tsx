@@ -77,7 +77,7 @@ export default function VideoCard({ video, rank }: VideoCardProps) {
 
   return (
     <div
-      className="group w-full max-w-sm flex flex-col transition-transform duration-200"
+      className="group w-full max-w-full sm:max-w-sm flex flex-col transition-transform duration-200"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

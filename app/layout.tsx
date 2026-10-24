@@ -184,7 +184,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col relative`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col relative w-full max-w-full overflow-x-hidden`}
       >
         <ThemeProvider>
           <ReactQueryProvider>
@@ -197,7 +197,7 @@ export default function RootLayout({
               </div>
 
               <Navbar />
-              <main className="flex-1 flex flex-col">{children}</main>
+              <main className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">{children}</main>
               <Footer />
               <MobileNav />
             </AuthProvider>
