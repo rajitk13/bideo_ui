@@ -228,6 +228,17 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       }
     }, []);
 
+    // Sync fullscreen state with Esc key or native exit
+    useEffect(() => {
+      const handleFullscreenChange = () => {
+        setIsFullscreen(!!document.fullscreenElement);
+      };
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
+      return () => {
+        document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      };
+    }, []);
+
     // PiP Toggle
     const togglePip = useCallback(async () => {
       const video = videoRef.current;
@@ -585,7 +596,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                       </span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-36 bg-zinc-900/95 border-zinc-800 text-white text-xs">
+                  <DropdownMenuContent
+                    container={containerRef.current}
+                    align="end"
+                    className="w-36 bg-zinc-900/95 border-zinc-800 text-white text-xs z-[9999]"
+                  >
                     <DropdownMenuLabel className="text-[11px] text-zinc-400">Stream Quality</DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-zinc-800" />
                     <DropdownMenuItem
@@ -623,7 +638,11 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                       <span className="hidden sm:inline">{playbackRate}x</span>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-32 bg-zinc-900/95 border-zinc-800 text-white text-xs">
+                  <DropdownMenuContent
+                    container={containerRef.current}
+                    align="end"
+                    className="w-32 bg-zinc-900/95 border-zinc-800 text-white text-xs z-[9999]"
+                  >
                     <DropdownMenuLabel className="text-[11px] text-zinc-400">Playback Speed</DropdownMenuLabel>
                     <DropdownMenuSeparator className="bg-zinc-800" />
                     {PLAYBACK_RATES.map((rate) => (

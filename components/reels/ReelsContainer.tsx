@@ -14,7 +14,23 @@ interface ReelsContainerProps {
 export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
   const [videos] = useState<VideoDTO[]>(initialVideos);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("buzzclips_reels_muted");
+      return saved !== null ? saved === "true" : true;
+    }
+    return true;
+  });
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("buzzclips_reels_muted", String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -70,13 +86,13 @@ export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
         scrollToIndex(activeIndex - 1);
       } else if (e.key === "m") {
         e.preventDefault();
-        setIsMuted((prev) => !prev);
+        toggleMute();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [activeIndex, scrollToIndex]);
+  }, [activeIndex, scrollToIndex, toggleMute]);
 
   if (!videos || videos.length === 0) {
     return (
@@ -119,7 +135,7 @@ export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
                 video={video}
                 isActive={activeIndex === idx}
                 isMuted={isMuted}
-                onToggleMute={() => setIsMuted(!isMuted)}
+                onToggleMute={toggleMute}
               />
             </div>
           ))}

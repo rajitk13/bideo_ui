@@ -7,7 +7,8 @@ import { ReelActionRail } from "./ReelActionRail";
 import { ReelBottomOverlay } from "./ReelBottomOverlay";
 import { ReelCommentsDrawer } from "./ReelCommentsDrawer";
 import { SaveToPlaylistModal } from "@/components/video/SaveToPlaylistModal";
-import { Play, Pause, Heart } from "lucide-react";
+import { Play, Pause, Heart, Volume2, VolumeX } from "lucide-react";
+import clsx from "clsx";
 
 interface ReelItemProps {
   video: VideoDTO;
@@ -22,11 +23,24 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
   const [progressPercent, setProgressPercent] = useState(0);
   const [showPlayIcon, setShowPlayIcon] = useState(false);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
+  const [showMuteFeedback, setShowMuteFeedback] = useState(false);
   const [lastTap, setLastTap] = useState(0);
+  const prevMutedRef = useRef(isMuted);
 
   // Modals state
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [saveModalOpen, setSaveModalOpen] = useState(false);
+
+  // Flash mute indicator whenever user toggles sound while active
+  useEffect(() => {
+    if (prevMutedRef.current !== isMuted && isActive) {
+      setShowMuteFeedback(true);
+      const timer = setTimeout(() => setShowMuteFeedback(false), 900);
+      prevMutedRef.current = isMuted;
+      return () => clearTimeout(timer);
+    }
+    prevMutedRef.current = isMuted;
+  }, [isMuted, isActive]);
 
   // Sync play/pause with isActive
   useEffect(() => {
@@ -77,15 +91,18 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
       onClick={handleTap}
       className="relative w-full h-full bg-black select-none flex items-center justify-center overflow-hidden cursor-pointer"
     >
-      {/* 9:16 Video Player */}
+      {/* 9:16 Video Player with Audio */}
       {videoSrc ? (
         <div className="w-full h-full flex items-center justify-center relative pointer-events-none">
           <ReactPlayer
             ref={playerRef}
+            url={videoSrc}
             src={videoSrc}
             playing={isPlaying && isActive}
             muted={isMuted}
+            volume={1}
             loop={true}
+            playsinline={true}
             playsInline={true}
             width="100%"
             height="100%"
@@ -101,6 +118,52 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-zinc-900 text-zinc-500 text-xs">
           Loading clip...
+        </div>
+      )}
+
+      {/* Floating Audio Toggle Button (Top Right) */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleMute();
+        }}
+        className={clsx(
+          "absolute top-4 right-4 z-40 px-3 py-1.5 rounded-full backdrop-blur-md border text-white flex items-center gap-1.5 shadow-lg active:scale-95 transition-all select-none focus:outline-none",
+          isMuted
+            ? "bg-red-500/85 hover:bg-red-500 border-red-400 text-white animate-pulse"
+            : "bg-black/60 hover:bg-black/80 border-white/20 text-white"
+        )}
+        aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+      >
+        {isMuted ? (
+          <>
+            <VolumeX className="w-4 h-4 text-white" />
+            <span className="text-xs font-bold tracking-tight">Tap for Audio</span>
+          </>
+        ) : (
+          <>
+            <Volume2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-semibold">Sound On</span>
+          </>
+        )}
+      </button>
+
+      {/* Center Sound Notification Feedback */}
+      {showMuteFeedback && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30">
+          <div className="px-4 py-2 rounded-2xl bg-black/75 backdrop-blur-md text-white border border-white/20 flex items-center gap-2 shadow-2xl animate-out fade-out duration-300">
+            {isMuted ? (
+              <>
+                <VolumeX className="w-5 h-5 text-red-400" />
+                <span className="text-sm font-bold">Audio Muted</span>
+              </>
+            ) : (
+              <>
+                <Volume2 className="w-5 h-5 text-emerald-400" />
+                <span className="text-sm font-bold">Audio Playing</span>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -165,3 +228,4 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
     </div>
   );
 }
+export default ReelItem;
