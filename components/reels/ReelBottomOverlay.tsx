@@ -25,8 +25,8 @@ export function ReelBottomOverlay({ video, progressPercent }: ReelBottomOverlayP
     : "#";
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 p-4 pb-6 z-20 text-white bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
-      <div className="space-y-2.5 max-w-[85%] pointer-events-auto">
+    <div className="absolute bottom-0 left-0 right-0 p-4 pb-4 sm:pb-6 z-20 text-white bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none">
+      <div className="space-y-2 max-w-[82%] sm:max-w-[85%] pointer-events-auto">
         {/* Creator Name & Handle */}
         <div className="flex items-center gap-2 flex-wrap">
           <Link

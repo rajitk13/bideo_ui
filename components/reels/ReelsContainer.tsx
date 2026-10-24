@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { VideoDTO } from "@/types/video";
 import { ReelItem } from "./ReelItem";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, Film } from "lucide-react";
+import { ChevronUp, ChevronDown, Film, Play } from "lucide-react";
 import Link from "next/link";
 
 interface ReelsContainerProps {
@@ -34,6 +34,15 @@ export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Lock body scrolling while on Reels page to prevent window bouncing
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   // IntersectionObserver to auto-detect centered active reel
   useEffect(() => {
@@ -116,8 +125,19 @@ export function ReelsContainer({ initialVideos }: ReelsContainerProps) {
   }
 
   return (
-    <div className="relative w-full flex justify-center items-center h-[calc(100dvh-4rem)] md:h-[calc(100vh-5rem)] overflow-hidden">
-      {/* Desktop Frame Shell */}
+    <div className="relative w-full flex justify-center items-center h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] md:h-[calc(100vh-5rem)] overflow-hidden">
+      {/* Mobile Floating Brand Header (Top Left) */}
+      <div className="md:hidden absolute top-3.5 left-4 z-40 flex items-center gap-2 pointer-events-none select-none">
+        <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20">
+          <Play className="w-3 h-3 text-white fill-white ml-0.5" />
+        </div>
+        <span className="text-base font-black tracking-tight text-white drop-shadow-md font-logo">buzzclips</span>
+        <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 backdrop-blur-md px-1.5 py-0.5 rounded-full text-white/90">
+          Reels
+        </span>
+      </div>
+
+      {/* Desktop Frame Shell / Mobile Full Frame */}
       <div className="relative w-full h-full md:max-w-[420px] md:aspect-[9/16] md:max-h-[85vh] md:rounded-3xl overflow-hidden md:border md:border-border/60 md:shadow-2xl md:shadow-black/50 bg-black">
         {/* Snap-Scrolling Vertical Window */}
         <div

@@ -188,7 +188,7 @@ export function ReelItem({ video, isActive, isMuted, onToggleMute }: ReelItemPro
       {/* Right Side Action Rail */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="absolute right-3 sm:right-4 bottom-20 z-30"
+        className="absolute right-3 sm:right-4 bottom-14 sm:bottom-20 z-30"
       >
         <ReelActionRail
           video={video}

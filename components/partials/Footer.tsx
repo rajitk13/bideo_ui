@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Github, Linkedin, GitCommit } from "lucide-react";
 
 const creators = [
@@ -23,6 +26,11 @@ try {
 }
 
 export function Footer() {
+  const pathname = usePathname();
+
+  if (pathname === "/reels" || pathname?.startsWith("/reels/")) {
+    return null;
+  }
   const envSha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA;
   const commitSha = envSha ?? fallbackBuildInfo.commitSha ?? "dev";
   const buildNumber =
