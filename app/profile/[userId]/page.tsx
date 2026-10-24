@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPublicUser, getPublicUserVideos } from "@/utility/requests";
-import { SITE_URL } from "@/utility/seo";
+import { SITE_URL, generateProfilePageSchema } from "@/utility/seo";
 import VideoCard from "@/components/video/VideoCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -119,9 +119,20 @@ export default async function ProfilePage({
       ? `${(totalViews / 1000).toFixed(1)}K`
       : totalViews.toLocaleString();
 
+  const canonicalUrl = `${SITE_URL}/profile/${userId}`;
+  const profileSchema = generateProfilePageSchema(user, canonicalUrl);
+
   return (
-    <div className="w-full flex justify-center py-6">
-      <div className="w-full lg:max-w-[85%] sm:max-w-full px-4 space-y-8">
+    <>
+      <script
+        id="profile-schema-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(profileSchema),
+        }}
+      />
+      <div className="w-full flex justify-center py-6">
+        <div className="w-full lg:max-w-[85%] sm:max-w-full px-4 space-y-8">
         {/* Navigation Breadcrumb */}
         <div>
           <Link
@@ -235,5 +246,6 @@ export default async function ProfilePage({
         </div>
       </div>
     </div>
+    </>
   );
 }

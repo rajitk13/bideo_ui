@@ -34,11 +34,11 @@ export async function generateMetadata({
         description,
         alternates: {
           canonical: canonicalUrl,
-        },
-        other: {
-          "alternate-oembed": `${baseUrl}/api/oembed?url=${encodeURIComponent(
-            canonicalUrl
-          )}&format=json`,
+          types: {
+            "application/json+oembed": `${baseUrl}/api/oembed?url=${encodeURIComponent(
+              canonicalUrl
+            )}&format=json`,
+          },
         },
         openGraph: {
           type: "video.other",
@@ -81,6 +81,11 @@ export async function generateMetadata({
     title: "Watch Video | BuzzClips",
     alternates: {
       canonical: canonicalUrl,
+      types: {
+        "application/json+oembed": `${baseUrl}/api/oembed?url=${encodeURIComponent(
+          canonicalUrl
+        )}&format=json`,
+      },
     },
   };
 }

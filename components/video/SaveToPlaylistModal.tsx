@@ -133,13 +133,13 @@ export function SaveToPlaylistModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-md border-border/50 overflow-hidden">
+      <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur-md border-border/50 max-h-[85vh] overflow-y-auto w-full p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg min-w-0">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg min-w-0 pr-6">
             <ListPlus className="w-5 h-5 text-primary shrink-0" />
-            <span className="truncate">Save video to...</span>
+            <span className="break-words [overflow-wrap:anywhere]">Save video to playlist</span>
           </DialogTitle>
-          <DialogDescription className="truncate text-xs text-muted-foreground">
+          <DialogDescription className="break-words [overflow-wrap:anywhere] text-xs text-muted-foreground line-clamp-2">
             {videoTitle || `Video #${videoId}`}
           </DialogDescription>
         </DialogHeader>
@@ -156,12 +156,12 @@ export function SaveToPlaylistModal({
         ) : (
           <div className="space-y-4 py-2">
             {/* Quick Watch Later button */}
-            <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-muted/40 border border-border/40 hover:bg-muted/60 transition-colors">
+            <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-muted/40 border border-border/40 hover:bg-muted/60 transition-colors">
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <Clock className="w-4 h-4 text-primary shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">Watch Later</p>
-                  <p className="text-xs text-muted-foreground truncate">Quick private queue</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground break-words [overflow-wrap:anywhere]">Watch Later</p>
+                  <p className="text-xs text-muted-foreground break-words [overflow-wrap:anywhere]">Quick private queue</p>
                 </div>
               </div>
               <Button
@@ -169,7 +169,7 @@ export function SaveToPlaylistModal({
                 variant={isWatchLaterAdded ? "secondary" : "outline"}
                 disabled={watchLaterLoading}
                 onClick={handleToggleWatchLater}
-                className="gap-1.5"
+                className="gap-1.5 shrink-0"
               >
                 {watchLaterLoading ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -206,19 +206,19 @@ export function SaveToPlaylistModal({
                   return (
                     <div
                       key={pl.playlistId}
-                      className="flex items-center justify-between gap-2 p-2.5 rounded-lg bg-card border border-border/30 hover:border-border/60 transition-colors"
+                      className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-card border border-border/30 hover:border-border/60 transition-colors"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-foreground truncate">
+                        <p className="text-sm font-medium text-foreground break-words [overflow-wrap:anywhere] leading-snug">
                           {pl.title}
                         </p>
-                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 flex-wrap mt-0.5">
                           {pl.visibility === "PRIVATE" ? (
                             <Lock className="w-3 h-3 shrink-0" />
                           ) : (
                             <Globe className="w-3 h-3 shrink-0" />
                           )}
-                          <span className="truncate">{pl.videoCount ?? 0} videos</span>
+                          <span>{pl.videoCount ?? 0} videos</span>
                         </p>
                       </div>
                       <Button
@@ -226,7 +226,7 @@ export function SaveToPlaylistModal({
                         variant={isAdded ? "secondary" : "ghost"}
                         onClick={() => handleAddToPlaylist(pl.playlistId)}
                         disabled={isAdded}
-                        className="text-xs h-7 px-2.5"
+                        className="text-xs h-7 px-2.5 shrink-0"
                       >
                         {isAdded ? (
                           <>
@@ -275,23 +275,23 @@ export function SaveToPlaylistModal({
                   maxLength={300}
                   className="text-xs bg-background resize-none"
                 />
-                <div className="flex items-center justify-between gap-2 flex-wrap">
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
                   <select
                     value={newVisibility}
                     onChange={(e) => setNewVisibility(e.target.value as "PUBLIC" | "PRIVATE")}
-                    className="text-xs bg-background border border-border/50 rounded-md px-2 py-1 text-foreground"
+                    className="text-xs bg-background border border-border/50 rounded-md px-2 py-1.5 text-foreground shrink-0"
                   >
                     <option value="PUBLIC">Public</option>
                     <option value="PRIVATE">Private</option>
                   </select>
 
-                  <div className="flex gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
                       onClick={() => setIsCreating(false)}
-                      className="text-xs h-7"
+                      className="text-xs h-7 px-2.5"
                     >
                       Cancel
                     </Button>
@@ -299,7 +299,7 @@ export function SaveToPlaylistModal({
                       type="submit"
                       size="sm"
                       disabled={createLoading || !newTitle.trim()}
-                      className="text-xs h-7"
+                      className="text-xs h-7 px-3"
                     >
                       {createLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : "Create & Save"}
                     </Button>

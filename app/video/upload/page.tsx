@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
 import UploadPage from "@/components/video/UploadPage";
+
+export const metadata: Metadata = {
+  title: "Upload Video | BuzzClips",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function Page() {
   return (

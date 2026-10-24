@@ -1,4 +1,4 @@
-import { VideoDTO } from "@/types/video";
+import { VideoDTO, UserDTO } from "@/types/video";
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/+$/, "") || "https://buzzclips.app";
@@ -91,9 +91,9 @@ export function generateOrganizationSchema(siteUrl: string = SITE_URL) {
     url: siteUrl,
     logo: {
       "@type": "ImageObject",
-      url: `${siteUrl}/favicon.ico`,
-      width: 64,
-      height: 64,
+      url: `${siteUrl}/icon-512.png`,
+      width: 512,
+      height: 512,
     },
     sameAs: [
       "https://github.com/bideo-org/bideo_ui",
@@ -265,10 +265,15 @@ export function generateVideoJsonLd(
       name: "BuzzClips",
       logo: {
         "@type": "ImageObject",
-        url: `${siteUrl}/favicon.ico`,
-        width: 64,
-        height: 64,
+        url: `${siteUrl}/icon-512.png`,
+        width: 512,
+        height: 512,
       },
+    },
+    potentialAction: {
+      "@type": "SeekToAction",
+      target: `${watchUrl}?t={seek_to_second_number}`,
+      "startOffset-input": "required name=seek_to_second_number",
     },
     ...(durationIso ? { duration: durationIso } : {}),
     interactionStatistic: {
@@ -286,5 +291,38 @@ export function generateVideoJsonLd(
     ...(video.tags && video.tags.length > 0
       ? { keywords: video.tags.join(", ") }
       : {}),
+  };
+}
+
+/**
+ * Schema.org ProfilePage & Person structured data for creator channel & profile pages.
+ */
+export function generateProfilePageSchema(
+  user: UserDTO,
+  canonicalUrl: string,
+  siteUrl: string = SITE_URL
+) {
+  const displayName = user.fullName || user.user_name || "Creator";
+  const handle = user.username
+    ? `@${user.username}`
+    : user.user_name
+    ? `@${user.user_name}`
+    : undefined;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "@id": `${canonicalUrl}#webpage`,
+    url: canonicalUrl,
+    name: `${displayName} on BuzzClips`,
+    mainEntity: {
+      "@type": "Person",
+      "@id": `${canonicalUrl}#person`,
+      name: displayName,
+      ...(handle ? { alternateName: handle } : {}),
+      url: canonicalUrl,
+      ...(user.avatar_url ? { image: user.avatar_url } : {}),
+      description: `Watch videos and creator content from ${displayName} on BuzzClips.`,
+    },
   };
 }

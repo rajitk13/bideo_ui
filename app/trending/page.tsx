@@ -6,7 +6,7 @@ import VideoCard from "@/components/video/VideoCard";
 import { Flame, TrendingUp, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { SITE_URL } from "@/utility/seo";
+import { SITE_URL, generateBreadcrumbSchema } from "@/utility/seo";
 
 export const revalidate = 60;
 
@@ -39,9 +39,22 @@ export default async function TrendingPage() {
     }
   }
 
+  const breadcrumbSchema = generateBreadcrumbSchema([
+    { name: "Home", url: SITE_URL },
+    { name: "Trending Videos", url: `${SITE_URL}/trending` },
+  ]);
+
   return (
-    <div className="w-full flex justify-center py-6 sm:py-10 px-4">
-      <div className="w-full lg:max-w-[85%] sm:max-w-full space-y-8">
+    <>
+      <script
+        id="trending-breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+      <div className="w-full flex justify-center py-6 sm:py-10 px-4">
+        <div className="w-full lg:max-w-[85%] sm:max-w-full space-y-8">
         {/* Navigation & Header */}
         <div className="space-y-4">
           <Link
@@ -112,5 +125,6 @@ export default async function TrendingPage() {
         )}
       </div>
     </div>
+    </>
   );
 }
