@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { renderHook } from "@testing-library/react";
 import EngagementButtons from "@/components/video/EngagementButtons";
 import CommentsSection from "@/components/video/CommentsSection";
@@ -81,10 +81,14 @@ describe("EngagementButtons & CommentsSection", () => {
       expect(screen.getByText("15")).toBeInTheDocument();
 
       const likeBtn = screen.getByLabelText("Like video");
-      fireEvent.click(likeBtn);
+      await act(async () => {
+        fireEvent.click(likeBtn);
+      });
 
       // Verify optimistic update
-      expect(screen.getByText("16")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText("16")).toBeInTheDocument();
+      });
     });
 
     it("requires sign in when clicking like without token", () => {

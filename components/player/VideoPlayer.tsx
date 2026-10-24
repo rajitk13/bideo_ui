@@ -245,21 +245,23 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
     }, []);
 
     // Volume Change
-    const handleVolumeChange = (newVol: number) => {
+    const handleVolumeChange = useCallback((newVol: number) => {
       const video = videoRef.current;
       if (!video) return;
       video.volume = newVol;
       setVolume(newVol);
       setIsMuted(newVol === 0);
-    };
+    }, []);
 
-    const toggleMute = () => {
+    const toggleMute = useCallback(() => {
       const video = videoRef.current;
       if (!video) return;
-      const nextMuted = !isMuted;
-      video.muted = nextMuted;
-      setIsMuted(nextMuted);
-    };
+      setIsMuted((prev) => {
+        const nextMuted = !prev;
+        video.muted = nextMuted;
+        return nextMuted;
+      });
+    }, []);
 
     // Quality selection
     const handleQualityChange = (levelIndex: number) => {
@@ -320,11 +322,21 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
             break;
           case "arrowup":
             e.preventDefault();
-            handleVolumeChange(Math.min(1, volume + 0.1));
+            setVolume((prevVol) => {
+              const newVol = Math.min(1, Number((prevVol + 0.1).toFixed(2)));
+              if (videoRef.current) videoRef.current.volume = newVol;
+              setIsMuted(newVol === 0);
+              return newVol;
+            });
             break;
           case "arrowdown":
             e.preventDefault();
-            handleVolumeChange(Math.max(0, volume - 0.1));
+            setVolume((prevVol) => {
+              const newVol = Math.max(0, Number((prevVol - 0.1).toFixed(2)));
+              if (videoRef.current) videoRef.current.volume = newVol;
+              setIsMuted(newVol === 0);
+              return newVol;
+            });
             break;
           case "m":
             e.preventDefault();
@@ -339,7 +351,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
 
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [togglePlay, seekRelative, volume, toggleFullscreen, toggleMute]);
+    }, [togglePlay, seekRelative, toggleFullscreen, toggleMute]);
 
     // Sync HTML5 Video Events
     const handleTimeUpdate = () => {
