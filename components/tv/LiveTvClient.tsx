@@ -6,7 +6,8 @@ import { LiveChannel, INDIAN_LIVE_CHANNELS } from "@/constants/liveChannels";
 import { LiveTvPlayer } from "./LiveTvPlayer";
 import { ChannelGuide } from "./ChannelGuide";
 import { Card, CardContent } from "@/components/ui/card";
-import { Radio, ShieldCheck, Zap, Sparkles } from "lucide-react";
+import { Radio, ShieldCheck, Zap, Sparkles, Tv } from "lucide-react";
+import clsx from "clsx";
 
 interface LiveTvClientProps {
   initialChannelId?: string;
@@ -81,6 +82,60 @@ export function LiveTvClient({ initialChannelId }: LiveTvClientProps) {
         {/* Left Column: Active Player (Col 7 on desktop) */}
         <div className="lg:col-span-7 space-y-4">
           <LiveTvPlayer channel={activeChannel} />
+
+          {/* Mobile Quick-Dial Carousel (Visible only on mobile/tablet) */}
+          <div className="block lg:hidden space-y-2 pt-1">
+            <div className="flex items-center justify-between text-xs font-semibold px-0.5">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <Tv className="w-3.5 h-3.5 text-primary" />
+                Quick Dial Channels
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                Swipe ➔
+              </span>
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none -mx-1 px-1">
+              {INDIAN_LIVE_CHANNELS.map((ch) => {
+                const isCur = activeChannel.id === ch.id;
+                return (
+                  <button
+                    key={ch.id}
+                    onClick={() => handleSelectChannel(ch)}
+                    className={clsx(
+                      "flex items-center gap-2 px-3 py-2 rounded-xl border shrink-0 text-left transition-all active:scale-95",
+                      isCur
+                        ? "bg-primary text-primary-foreground border-primary shadow-xs font-semibold ring-1 ring-primary/40"
+                        : "bg-card/80 hover:bg-card text-foreground border-border/50"
+                    )}
+                  >
+                    <span
+                      className={clsx(
+                        "w-6 h-6 rounded-md flex items-center justify-center font-mono text-xs font-black shrink-0",
+                        isCur
+                          ? "bg-primary-foreground text-primary"
+                          : "bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {ch.channelNumber}
+                    </span>
+                    <div className="truncate max-w-[110px]">
+                      <p className="text-xs truncate leading-tight font-bold">
+                        {ch.name}
+                      </p>
+                      <p
+                        className={clsx(
+                          "text-[10px] truncate leading-tight",
+                          isCur ? "opacity-80" : "text-muted-foreground"
+                        )}
+                      >
+                        {ch.hindiName}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Interactive Channel Guide (Col 5 on desktop) */}

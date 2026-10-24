@@ -72,15 +72,15 @@ export function Navbar() {
                 </NavigationMenuLink>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link
-                    href="/tv"
-                    className="text-sm font-medium px-3.5 py-2 hover:underline inline-flex items-center gap-1.5 whitespace-nowrap"
-                  >
-                    <span>Live TV</span>
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-                  </Link>
-                </NavigationMenuLink>
+                <Link
+                  href="/tv"
+                  className="text-sm font-medium px-3.5 py-2 hover:underline !inline-flex !flex-row items-center gap-1.5 whitespace-nowrap"
+                >
+                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                    Live TV
+                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0 ring-2 ring-red-500/20" />
+                  </span>
+                </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>

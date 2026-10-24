@@ -6,6 +6,7 @@ import {
   SITE_URL,
   generateLiveTvSchema,
   generateBreadcrumbSchema,
+  generateChannelListSchema,
 } from "@/utility/seo";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -88,6 +89,7 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
     { name: "Live TV India (लाइव टीवी)", url: `${SITE_URL}/tv` },
     { name: activeChannel.name, url: `${SITE_URL}/tv?channel=${activeChannel.id}` },
   ]);
+  const channelListSchema = generateChannelListSchema(INDIAN_LIVE_CHANNELS, SITE_URL);
 
   return (
     <>
@@ -103,6 +105,13 @@ export default async function LiveTvPage({ searchParams }: LiveTvPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbsSchema),
+        }}
+      />
+      <script
+        id="livetv-channellist-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(channelListSchema),
         }}
       />
 

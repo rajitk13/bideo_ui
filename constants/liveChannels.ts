@@ -8,6 +8,7 @@ export type ChannelCategory =
 
 export interface LiveChannel {
   id: string;
+  channelNumber: string;
   name: string;
   hindiName: string;
   category: ChannelCategory;
@@ -19,6 +20,7 @@ export interface LiveChannel {
   isFeatured?: boolean;
   currentProgram?: string;
   badgeText?: string;
+  resolution?: string;
 }
 
 export const CHANNEL_CATEGORIES: { id: ChannelCategory; label: string; hindiLabel: string }[] = [
@@ -38,6 +40,7 @@ export const CHANNEL_CATEGORIES: { id: ChannelCategory; label: string; hindiLabe
 export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
   {
     id: "dd-national",
+    channelNumber: "01",
     name: "DD National",
     hindiName: "डीडी नेशनल",
     category: "NATIONAL",
@@ -49,9 +52,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     isFeatured: true,
     currentProgram: "National Highlights & Special Broadcast",
     badgeText: "Prasar Bharati",
+    resolution: "1080p HD",
   },
   {
     id: "dd-news",
+    channelNumber: "02",
     name: "DD News",
     hindiName: "डीडी न्यूज़",
     category: "NEWS",
@@ -63,9 +68,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     isFeatured: true,
     currentProgram: "Live Prime News & National Analysis",
     badgeText: "24x7 News",
+    resolution: "1080p HD",
   },
   {
     id: "dd-sports",
+    channelNumber: "03",
     name: "DD Sports",
     hindiName: "डीडी स्पोर्ट्स",
     category: "SPORTS",
@@ -77,9 +84,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     isFeatured: true,
     currentProgram: "Live National Sports Arena",
     badgeText: "Live Sports",
+    resolution: "1080p HD",
   },
   {
     id: "dd-india",
+    channelNumber: "04",
     name: "DD India",
     hindiName: "डीडी इंडिया",
     category: "NATIONAL",
@@ -91,9 +100,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     isFeatured: true,
     currentProgram: "Global India: World Perspectives",
     badgeText: "International",
+    resolution: "1080p HD",
   },
   {
     id: "sansad-tv-loksabha",
+    channelNumber: "05",
     name: "Sansad TV - Lok Sabha",
     hindiName: "संसद टीवी (लोक सभा)",
     category: "NATIONAL",
@@ -104,9 +115,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Parliamentary Proceedings & Policy Review",
     badgeText: "Parliament",
+    resolution: "1080p HD",
   },
   {
     id: "sansad-tv-rajyasabha",
+    channelNumber: "06",
     name: "Sansad TV - Rajya Sabha",
     hindiName: "संसद टीवी (राज्य सभा)",
     category: "NATIONAL",
@@ -117,9 +130,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Council of States: Legislative Sessions",
     badgeText: "Parliament",
+    resolution: "1080p HD",
   },
   {
     id: "zee-news",
+    channelNumber: "07",
     name: "Zee News Live",
     hindiName: "ज़ी न्यूज़",
     category: "NEWS",
@@ -131,9 +146,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     isFeatured: true,
     currentProgram: "Rashtriya Khabrein & Prime News",
     badgeText: "National News",
+    resolution: "720p HD",
   },
   {
     id: "ndtv-india",
+    channelNumber: "08",
     name: "NDTV India",
     hindiName: "एनडीटीवी इंडिया",
     category: "NEWS",
@@ -144,9 +161,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Prime Time Hindi Bulletin",
     badgeText: "Hindi News",
+    resolution: "720p HD",
   },
   {
     id: "dd-kisan",
+    channelNumber: "09",
     name: "DD Kisan",
     hindiName: "डीडी किसान",
     category: "CULTURE",
@@ -157,9 +176,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Krishi Darshan & Smart Farming",
     badgeText: "Agriculture",
+    resolution: "1080p HD",
   },
   {
     id: "dd-bharati",
+    channelNumber: "10",
     name: "DD Bharati",
     hindiName: "डीडी भारती",
     category: "CULTURE",
@@ -170,9 +191,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Classical Heritage & Sangeet Utsav",
     badgeText: "Arts & Culture",
+    resolution: "1080p HD",
   },
   {
     id: "dd-retro",
+    channelNumber: "11",
     name: "DD Retro",
     hindiName: "डीडी रेट्रो",
     category: "REGIONAL",
@@ -183,9 +206,11 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Golden Era Classics & Epics",
     badgeText: "Classics",
+    resolution: "1080p HD",
   },
   {
     id: "dd-urdu",
+    channelNumber: "12",
     name: "DD Urdu",
     hindiName: "डीडी उर्दू",
     category: "REGIONAL",
@@ -196,5 +221,6 @@ export const INDIAN_LIVE_CHANNELS: LiveChannel[] = [
     logo: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=200&auto=format&fit=crop&q=80",
     currentProgram: "Urdu Mushaira & Cultural Heritage",
     badgeText: "Regional",
+    resolution: "1080p HD",
   },
 ];

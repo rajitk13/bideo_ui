@@ -8,7 +8,7 @@ import {
 } from "@/constants/liveChannels";
 import { ChannelCard } from "./ChannelCard";
 import { Input } from "@/components/ui/input";
-import { Search, Tv } from "lucide-react";
+import { Search, Tv, X, Radio } from "lucide-react";
 import clsx from "clsx";
 
 interface ChannelGuideProps {
@@ -36,86 +36,150 @@ export function ChannelGuide({
         const query = searchQuery.toLowerCase().trim();
         const matchesName = channel.name.toLowerCase().includes(query);
         const matchesHindi = channel.hindiName.includes(query);
+        const matchesNumber = channel.channelNumber.includes(query);
         const matchesDesc = channel.description.toLowerCase().includes(query);
         const matchesBroadcaster = channel.broadcaster.toLowerCase().includes(query);
         const matchesLang = channel.language.some((l) =>
           l.toLowerCase().includes(query)
         );
-        return matchesName || matchesHindi || matchesDesc || matchesBroadcaster || matchesLang;
+        return (
+          matchesName ||
+          matchesHindi ||
+          matchesNumber ||
+          matchesDesc ||
+          matchesBroadcaster ||
+          matchesLang
+        );
       }
       return true;
     });
   }, [channels, selectedCategory, searchQuery]);
 
+  // Compute category counts
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: channels.length };
+    channels.forEach((ch) => {
+      counts[ch.category] = (counts[ch.category] || 0) + 1;
+    });
+    return counts;
+  }, [channels]);
+
   return (
-    <div className="space-y-4">
-      {/* Search & Header */}
+    <section aria-labelledby="live-channel-guide-title" className="space-y-4">
+      {/* Header & Search */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Tv className="w-5 h-5 text-primary" />
-          <h2 className="text-base sm:text-lg font-bold text-foreground">
-            Live Channel Guide
-          </h2>
-          <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-0.5 rounded-full">
-            {filteredChannels.length} Live
-          </span>
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <Tv className="w-4 h-4" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2
+                id="live-channel-guide-title"
+                className="text-base sm:text-lg font-bold text-foreground leading-tight"
+              >
+                Channel Guide
+              </h2>
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-red-500 bg-red-500/10 border border-red-500/20 px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                {filteredChannels.length} Live
+              </span>
+            </div>
+            <p className="text-[11px] text-muted-foreground font-medium">
+              Free-To-Air Official Indian Broadcasts
+            </p>
+          </div>
         </div>
 
-        {/* Channel Search Input */}
-        <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Search Bar with Clear button */}
+        <div className="relative w-full sm:w-60">
+          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search channels, languages..."
-            className="pl-9 h-9 text-xs bg-card/60 border-border/50 rounded-full"
+            placeholder="Search channel name, number..."
+            className="pl-8 pr-7 h-8 text-xs bg-card/60 border-border/50 rounded-full focus-visible:ring-1"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Category Pills Bar */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+      {/* Category Filter Pills with counts */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
         {CHANNEL_CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
+          const count = categoryCounts[cat.id] || 0;
           return (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={clsx(
-                "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border",
+                "px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 border flex items-center gap-1.5",
                 isSelected
                   ? "bg-primary text-primary-foreground border-primary shadow-xs"
                   : "bg-card/70 hover:bg-card text-muted-foreground hover:text-foreground border-border/40"
               )}
             >
               <span>{cat.label}</span>
-              <span className="ml-1 text-[10px] opacity-70">({cat.hindiLabel})</span>
+              <span
+                className={clsx(
+                  "text-[10px] px-1.5 py-0.2 rounded-full font-mono",
+                  isSelected
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                {count}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Channels List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-1">
+      {/* Vertical Channels List */}
+      <div
+        role="list"
+        aria-label="Indian Live TV Channels List"
+        className="space-y-2.5 max-h-[560px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-border/50"
+      >
         {filteredChannels.length > 0 ? (
           filteredChannels.map((channel) => (
-            <ChannelCard
-              key={channel.id}
-              channel={channel}
-              isActive={activeChannel.id === channel.id}
-              onSelect={onSelectChannel}
-            />
+            <div key={channel.id} role="listitem">
+              <ChannelCard
+                channel={channel}
+                isActive={activeChannel.id === channel.id}
+                onSelect={onSelectChannel}
+              />
+            </div>
           ))
         ) : (
-          <div className="col-span-full py-12 text-center space-y-2 rounded-xl bg-card/40 border border-border/40">
-            <Tv className="w-8 h-8 text-muted-foreground/60 mx-auto" />
-            <p className="text-sm font-semibold text-foreground">No channels found</p>
-            <p className="text-xs text-muted-foreground">
-              Try adjusting your search query or category filter.
+          <div className="py-12 text-center space-y-2 rounded-xl bg-card/40 border border-border/40">
+            <Radio className="w-8 h-8 text-muted-foreground/60 mx-auto animate-pulse" />
+            <p className="text-sm font-semibold text-foreground">No channels match your filter</p>
+            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+              Try searching for &quot;DD&quot;, &quot;News&quot;, or select &quot;All Channels&quot;.
             </p>
+            <button
+              onClick={() => {
+                setSelectedCategory("ALL");
+                setSearchQuery("");
+              }}
+              className="text-xs text-primary font-semibold hover:underline mt-2 inline-block"
+            >
+              Reset Filters
+            </button>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
+export default ChannelGuide;

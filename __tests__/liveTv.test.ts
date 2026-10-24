@@ -10,6 +10,7 @@ describe("Indian Live TV Infrastructure & SEO", () => {
 
     INDIAN_LIVE_CHANNELS.forEach((channel) => {
       expect(channel.id).toBeDefined();
+      expect(channel.channelNumber).toMatch(/^\d{2}$/);
       expect(channel.name.trim().length).toBeGreaterThan(0);
       expect(channel.hindiName.trim().length).toBeGreaterThan(0);
       expect(channel.category).toBeDefined();
@@ -67,5 +68,19 @@ describe("Indian Live TV Infrastructure & SEO", () => {
     expect(broadcastEvent?.isLiveBroadcast).toBe(true);
     expect(broadcastEvent?.video["@type"]).toBe("VideoObject");
     expect(broadcastEvent?.video.contentUrl).toBe(ddNational.streamUrl);
+  });
+
+  it("generates Schema.org ItemList directory for Channel Guide", () => {
+    const { generateChannelListSchema } = require("@/utility/seo");
+    const listSchema = generateChannelListSchema(
+      INDIAN_LIVE_CHANNELS,
+      "https://buzzclips.app"
+    );
+
+    expect(listSchema["@context"]).toBe("https://schema.org");
+    expect(listSchema["@type"]).toBe("ItemList");
+    expect(listSchema.numberOfItems).toBe(INDIAN_LIVE_CHANNELS.length);
+    expect(listSchema.itemListElement[0].position).toBe(1);
+    expect(listSchema.itemListElement[0].url).toContain("/tv?channel=dd-national");
   });
 });

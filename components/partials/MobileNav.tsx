@@ -127,10 +127,10 @@ export function MobileNav() {
               <div>
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="text-[10px] mt-0.5 max-w-[64px] inline-flex items-center gap-1">
+              <span className="text-[10px] mt-0.5 whitespace-nowrap inline-flex items-center gap-1">
                 <span>{item.label}</span>
                 {item.isLive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0 ring-1 ring-red-500/30" />
                 )}
               </span>
             </Link>

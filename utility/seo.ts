@@ -391,3 +391,26 @@ export function generateLiveTvSchema(
   };
 }
 
+/**
+ * Schema.org ItemList structured data for the Indian Live Channel Guide directory.
+ */
+export function generateChannelListSchema(
+  channels: LiveChannel[],
+  siteUrl: string = SITE_URL
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Indian Free-To-Air Live TV Channels Directory",
+    description: "Official legal Indian Free-To-Air TV broadcast channels streaming online in HD.",
+    numberOfItems: channels.length,
+    itemListElement: channels.map((channel, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: `${channel.name} (${channel.hindiName})`,
+      url: `${siteUrl}/tv?channel=${channel.id}`,
+    })),
+  };
+}
+
+
