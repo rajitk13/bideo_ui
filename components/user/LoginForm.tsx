@@ -70,31 +70,24 @@ export function LoginForm() {
     let loggedIn = false;
     try {
       const identifier = data.email.trim();
-      await loginUser({
+      const res = await loginUser({
         identifier,
         email: identifier,
         password: data.password,
-      })
-        .then((res) => {
-          if (!res || !res.idToken) {
-            throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
-          }
-          return res.idToken;
-        })
-        .then(async (token) => {
-          await verifyToken(token)
-            .then((uid) => {
-              if (!uid || !uid.id) {
-                throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
-              }
-              return uid;
-            })
-            .then((uid) => {
-              login(token, uid.id);
-              toast.success(MESSAGES.LOGIN_SUCCESS);
-              loggedIn = true;
-            });
-        });
+      });
+
+      if (!res || !res.idToken) {
+        throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
+      }
+
+      const uid = await verifyToken(res.idToken);
+      if (!uid || !uid.id) {
+        throw new Error(MESSAGES.LOGIN_FAILED_GENERIC);
+      }
+
+      await login(res.idToken, uid.id);
+      toast.success(MESSAGES.LOGIN_SUCCESS);
+      loggedIn = true;
     } catch (err) {
       console.error("Login failed", err);
       toast.error(MESSAGES.LOGIN_FAILED);
@@ -103,7 +96,7 @@ export function LoginForm() {
     }
 
     if (loggedIn) {
-        window.location.replace("/");
+      window.location.replace("/");
     }
   };
 

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass, PlusCircle, Flame, User } from "lucide-react";
+import { Home, PlusCircle, Flame, User } from "lucide-react";
 import { useAuth } from "@/store/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import clsx from "clsx";
@@ -26,16 +26,10 @@ export function MobileNav() {
     },
     {
       label: "Upload",
-      href: isAuthenticated ? "/video/upload" : "/auth/login",
+      href: "/video/upload",
       icon: PlusCircle,
       isPrimary: true,
       isActive: pathname === "/video/upload",
-    },
-    {
-      label: "Explore",
-      href: "/search",
-      icon: Compass,
-      isActive: pathname.startsWith("/search") || pathname.startsWith("/category"),
     },
     {
       label: isAuthenticated ? (user?.fullName || user?.user_name || "You") : "Sign In",

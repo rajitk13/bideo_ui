@@ -48,7 +48,7 @@ describe("Navbar Component", () => {
     expect(screen.getByText("Sign In")).toBeInTheDocument();
   });
 
-  it("shows Upload button and user avatar when authenticated", () => {
+  it("shows user avatar and hides Sign In button when authenticated", () => {
     (useAuth as jest.Mock).mockReturnValue({
       isAuthenticated: true,
       logout: jest.fn(),
@@ -62,7 +62,7 @@ describe("Navbar Component", () => {
 
     render(<Navbar />);
 
-    expect(screen.getByText("Upload Video")).toBeInTheDocument();
+    expect(screen.getByText("T")).toBeInTheDocument();
     expect(screen.queryByText("Sign In")).not.toBeInTheDocument();
   });
 

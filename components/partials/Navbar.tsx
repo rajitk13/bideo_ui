@@ -71,18 +71,6 @@ export function Navbar() {
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-              {isAuthenticated && (
-                <NavigationMenuItem>
-                  <NavigationMenuLink asChild>
-                    <Link
-                      href="/video/upload"
-                      className="text-sm font-medium px-4 py-2 hover:underline"
-                    >
-                      Upload Video
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              )}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

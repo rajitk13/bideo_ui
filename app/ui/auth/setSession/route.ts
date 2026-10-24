@@ -8,9 +8,14 @@ export async function POST(req: Request) {
     headers: { "Content-Type": "application/json" },
   });
 
+  const isSecure =
+    process.env.NODE_ENV === "production" &&
+    (req.headers.get("x-forwarded-proto") === "https" ||
+      req.url.startsWith("https"));
+
   response.cookies.set("token", token, {
     httpOnly: true,
-    secure: true,
+    secure: isSecure,
     path: "/",
     maxAge: 60 * 60,
     sameSite: "lax",
@@ -18,7 +23,7 @@ export async function POST(req: Request) {
 
   response.cookies.set("uid", uid, {
     httpOnly: true,
-    secure: true,
+    secure: isSecure,
     path: "/",
     maxAge: 60 * 60,
     sameSite: "lax",
