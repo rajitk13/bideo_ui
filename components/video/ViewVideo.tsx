@@ -301,24 +301,26 @@ export default function ViewVideo({ id, slug, initialVideo }: ViewVideoProps) {
                 </div>
 
                 {/* Right Actions: Views, Date, Engagement, Save */}
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground">
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none w-full sm:w-auto -mx-1 px-1 sm:mx-0 sm:px-0 sm:flex-wrap">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-muted/60 border border-border/40 text-foreground shrink-0">
                     <Eye className="w-3.5 h-3.5 text-muted-foreground" />
                     <span>{formattedViews} views</span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground bg-muted/40 border border-border/30">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-muted-foreground bg-muted/40 border border-border/30 shrink-0">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{timeAgo}</span>
                   </div>
 
-                  <EngagementButtons videoId={video.videoId} />
+                  <div className="shrink-0">
+                    <EngagementButtons videoId={video.videoId} />
+                  </div>
 
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setSaveModalOpen(true)}
-                    className="h-8 gap-1.5 rounded-full text-xs font-semibold bg-muted/40 hover:bg-muted/80 border-border/40"
+                    className="h-8 gap-1.5 rounded-full text-xs font-semibold bg-muted/40 hover:bg-muted/80 border-border/40 shrink-0"
                     title="Save to playlist or watch later"
                   >
                     <BookmarkPlus className="w-3.5 h-3.5 text-primary" />

@@ -53,38 +53,26 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
         />
       </div>
 
-      {/* Channel Metadata Row */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-card/75 border border-border/40 backdrop-blur-sm shadow-sm">
-        <div className="space-y-1.5 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-              {channel.name}
-            </h1>
-            <span className="text-sm font-semibold text-primary font-mono">
-              ({channel.hindiName})
-            </span>
-            <Badge variant="outline" className="text-[11px] font-medium uppercase tracking-wide bg-primary/10 text-primary border-primary/20">
-              {channel.category}
-            </Badge>
-            <Badge variant="secondary" className="text-[11px]">
-              {channel.broadcaster}
-            </Badge>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
-              Live 24x7
-            </span>
+      {/* Channel Metadata Card */}
+      <div className="p-3.5 sm:p-4 rounded-xl bg-card/75 border border-border/40 backdrop-blur-sm shadow-sm space-y-2 sm:space-y-2.5">
+        {/* Row 1: Channel Title, Hindi Name, and Share Action on same row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-base sm:text-xl font-bold text-foreground leading-tight">
+                {channel.name}
+              </h1>
+              <span className="text-xs sm:text-sm font-semibold text-primary font-mono shrink-0">
+                ({channel.hindiName})
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {channel.description}
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2 shrink-0">
           <Button
             size="sm"
             variant="outline"
             onClick={handleShare}
-            className="gap-1.5 text-xs h-8 rounded-full bg-muted/40 hover:bg-muted border-border/50"
+            className="gap-1.5 text-xs h-7 sm:h-8 px-2.5 sm:px-3 rounded-full bg-muted/40 hover:bg-muted border-border/50 shrink-0"
             title="Share Live TV Channel"
           >
             {isCopied ? (
@@ -100,6 +88,28 @@ export function LiveTvPlayer({ channel }: LiveTvPlayerProps) {
             )}
           </Button>
         </div>
+
+        {/* Row 2: Badges row in a clean horizontal strip */}
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap text-xs">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-500/10 text-red-500 border border-red-500/20 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block" />
+            Live 24x7
+          </span>
+          <Badge variant="outline" className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wide bg-primary/10 text-primary border-primary/20 shrink-0">
+            {channel.category}
+          </Badge>
+          <Badge variant="secondary" className="text-[10px] sm:text-[11px] shrink-0">
+            {channel.broadcaster}
+          </Badge>
+          <span className="text-[11px] text-muted-foreground font-mono hidden sm:inline">
+            CH {channel.channelNumber}
+          </span>
+        </div>
+
+        {/* Row 3: Description */}
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 pt-0.5">
+          {channel.description}
+        </p>
       </div>
     </div>
   );

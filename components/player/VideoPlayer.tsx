@@ -214,28 +214,89 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
       seekRippleTimeoutRef.current = setTimeout(() => setSeekRipple(null), 600);
     }, []);
 
-    // Fullscreen Toggle
+    // Fullscreen Toggle (Standard + WebKit / iOS Safari Mobile)
     const toggleFullscreen = useCallback(() => {
-      const container = containerRef.current;
-      if (!container) return;
+      const container = containerRef.current as any;
+      const video = videoRef.current as any;
+      const doc = document as any;
 
-      if (!document.fullscreenElement) {
-        container.requestFullscreen().catch(() => {});
-        setIsFullscreen(true);
+      const isFs = !!(
+        doc.fullscreenElement ||
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement ||
+        doc.msFullscreenElement ||
+        (video && video.webkitDisplayingFullscreen)
+      );
+
+      if (!isFs) {
+        if (container?.requestFullscreen) {
+          container.requestFullscreen().catch(() => {
+            if (video?.webkitEnterFullscreen) {
+              video.webkitEnterFullscreen();
+            }
+          });
+          setIsFullscreen(true);
+        } else if (container?.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+          setIsFullscreen(true);
+        } else if (video?.webkitEnterFullscreen) {
+          // iOS Safari iPhone fallback
+          video.webkitEnterFullscreen();
+          setIsFullscreen(true);
+        } else if (video?.requestFullscreen) {
+          video.requestFullscreen().catch(() => {});
+          setIsFullscreen(true);
+        }
       } else {
-        document.exitFullscreen().catch(() => {});
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        } else if (video?.webkitExitFullscreen) {
+          video.webkitExitFullscreen();
+        }
         setIsFullscreen(false);
       }
     }, []);
 
-    // Sync fullscreen state with Esc key or native exit
+    // Sync fullscreen state with Esc key or native exit (including iOS Safari events)
     useEffect(() => {
       const handleFullscreenChange = () => {
-        setIsFullscreen(!!document.fullscreenElement);
+        const doc = document as any;
+        const video = videoRef.current as any;
+        const fsActive = !!(
+          doc.fullscreenElement ||
+          doc.webkitFullscreenElement ||
+          doc.mozFullScreenElement ||
+          doc.msFullscreenElement ||
+          (video && video.webkitDisplayingFullscreen)
+        );
+        setIsFullscreen(fsActive);
       };
+
       document.addEventListener("fullscreenchange", handleFullscreenChange);
+      document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+      const video = videoRef.current as any;
+      const onWebkitBegin = () => setIsFullscreen(true);
+      const onWebkitEnd = () => setIsFullscreen(false);
+
+      if (video) {
+        video.addEventListener("webkitbeginfullscreen", onWebkitBegin);
+        video.addEventListener("webkitendfullscreen", onWebkitEnd);
+      }
+
       return () => {
         document.removeEventListener("fullscreenchange", handleFullscreenChange);
+        document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+        document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+        document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+        if (video) {
+          video.removeEventListener("webkitbeginfullscreen", onWebkitBegin);
+          video.removeEventListener("webkitendfullscreen", onWebkitEnd);
+        }
       };
     }, []);
 
@@ -500,17 +561,17 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
           )}
 
           {/* Control Buttons Row */}
-          <div className="flex items-center justify-between text-white select-none">
+          <div className="flex items-center justify-between text-white select-none gap-1 sm:gap-2 overflow-x-hidden">
             {/* Left Controls: Play/Pause, Seek, Volume, Time */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={togglePlay}
-                className="h-9 w-9 text-white hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90"
+                className="h-8 w-8 sm:h-9 sm:w-9 text-white hover:text-white hover:bg-white/15 rounded-full transition-transform active:scale-90 shrink-0"
                 title={isPlaying ? "Pause (k / space)" : "Play (k / space)"}
               >
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                {isPlaying ? <Pause className="w-4 h-4 sm:w-5 sm:h-5 fill-current" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current ml-0.5" />}
               </Button>
 
               {!isLive && (
@@ -519,7 +580,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     variant="ghost"
                     size="icon"
                     onClick={() => seekRelative(-10)}
-                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex"
+                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex shrink-0"
                     title="Rewind 10s (j / left arrow)"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -528,7 +589,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     variant="ghost"
                     size="icon"
                     onClick={() => seekRelative(10)}
-                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex"
+                    className="h-8 w-8 text-white/90 hover:text-white hover:bg-white/15 rounded-full hidden sm:inline-flex shrink-0"
                     title="Forward 10s (l / right arrow)"
                   >
                     <RotateCw className="w-4 h-4" />
@@ -536,8 +597,8 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 </>
               )}
 
-              {/* Volume Slider Group - Always Nicely Visible */}
-              <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full border border-white/15">
+              {/* Volume Slider Group - Icon only on mobile, sleek slider on desktop */}
+              <div className="flex items-center gap-1 sm:gap-1.5 bg-black/40 backdrop-blur-xs px-1.5 sm:px-2 py-1 rounded-full border border-white/15 shrink-0">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -564,21 +625,22 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                   style={{
                     background: `linear-gradient(to right, #ef4444 ${isMuted ? 0 : Math.round(volume * 100)}%, rgba(255,255,255,0.25) ${isMuted ? 0 : Math.round(volume * 100)}%)`,
                   }}
-                  className="w-14 sm:w-20 hover:w-24 transition-all duration-200 h-1.5 rounded-full accent-red-500 cursor-pointer shadow-xs focus:outline-none"
+                  className="hidden sm:inline-block w-14 sm:w-20 hover:w-24 transition-all duration-200 h-1.5 rounded-full accent-red-500 cursor-pointer shadow-xs focus:outline-none"
                   title={`Volume: ${isMuted ? 0 : Math.round(volume * 100)}% (Up/Down arrow)`}
                   aria-label="Volume slider"
                 />
               </div>
 
               {/* Time Display */}
-              <div className="text-xs font-mono text-white/90 pl-1 sm:pl-2">
+              <div className="text-[11px] sm:text-xs font-mono text-white/90 shrink-0">
                 {isLive ? (
-                  <span className="flex items-center gap-1.5 text-red-500 font-bold bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                    LIVE STREAM
+                  <span className="flex items-center gap-1 sm:gap-1.5 text-red-500 font-bold bg-red-500/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full border border-red-500/20 whitespace-nowrap">
+                    <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+                    <span>LIVE</span>
+                    <span className="hidden sm:inline"> STREAM</span>
                   </span>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded bg-black/40">
+                  <span className="px-1.5 py-0.5 rounded bg-black/40 whitespace-nowrap">
                     {formatTime(currentTime)} / {formatTime(duration)}
                   </span>
                 )}
@@ -586,7 +648,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
             </div>
 
             {/* Right Controls: Quality, Speed, PiP, Fullscreen */}
-            <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 shrink-0">
               {/* Quality Selector Menu */}
               {qualityLevels.length > 0 && (
                 <DropdownMenu>
@@ -594,7 +656,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1"
+                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0"
                       title="Quality"
                     >
                       <Sliders className="w-3.5 h-3.5" />
@@ -638,7 +700,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1"
+                      className="h-8 px-1.5 sm:px-2 text-xs font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-full gap-1 shrink-0"
                       title="Playback Speed"
                     >
                       <Settings className="w-3.5 h-3.5" />
@@ -671,7 +733,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 variant="ghost"
                 size="icon"
                 onClick={togglePip}
-                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex"
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full hidden sm:inline-flex shrink-0"
                 title="Picture in Picture"
               >
                 <PictureInPicture2 className="w-4 h-4" />
@@ -682,7 +744,7 @@ export const VideoPlayer = forwardRef<any, VideoPlayerProps>(
                 variant="ghost"
                 size="icon"
                 onClick={toggleFullscreen}
-                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full"
+                className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/10 rounded-full shrink-0 flex items-center justify-center p-0"
                 title={isFullscreen ? "Exit Fullscreen (f)" : "Fullscreen (f)"}
               >
                 {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
