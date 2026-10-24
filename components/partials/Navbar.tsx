@@ -47,43 +47,45 @@ export function Navbar() {
           </Link>
         </motion.div>
 
-        {/* === Center: Navigation === */}
-        <NavigationMenu className="hidden md:block">
-          <NavigationMenuList className="gap-2">
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  href="/"
-                  className="text-sm font-medium px-4 py-2 hover:underline"
-                >
-                  Home
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  href="/trending"
-                  className="text-sm font-medium px-4 py-2 hover:underline flex items-center gap-1.5"
-                >
-                  Trending
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            {isAuthenticated && (
+        {/* === Center: Navigation (Desktop only) === */}
+        <div className="hidden md:flex items-center">
+          <NavigationMenu>
+            <NavigationMenuList className="gap-2">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link
-                    href="/video/upload"
+                    href="/"
                     className="text-sm font-medium px-4 py-2 hover:underline"
                   >
-                    Upload Video
+                    Home
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
-            )}
-          </NavigationMenuList>
-        </NavigationMenu>
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link
+                    href="/trending"
+                    className="text-sm font-medium px-4 py-2 hover:underline flex items-center gap-1.5"
+                  >
+                    Trending
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              {isAuthenticated && (
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href="/video/upload"
+                      className="text-sm font-medium px-4 py-2 hover:underline"
+                    >
+                      Upload Video
+                    </Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              )}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </div>
 
         {/* === Right: Auth, Theme === */}
         <div className="flex items-center gap-4">
@@ -113,6 +115,9 @@ export function Navbar() {
                     <Link href={`/channel/@${user.username}`}>Your Channel</Link>
                   </DropdownMenuItem>
                 )}
+                <DropdownMenuItem asChild>
+                  <Link href="/video/upload">Upload Video</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/history">Watch History</Link>
                 </DropdownMenuItem>

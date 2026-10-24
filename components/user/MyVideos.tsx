@@ -186,7 +186,7 @@ export default function MyVideos() {
             </p>
           </div>
 
-          <Link href="/video/upload" className="shrink-0">
+          <Link href="/video/upload" className="shrink-0 hidden sm:inline-block">
             <Button className="h-10 px-4 font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md shadow-blue-500/20 transition-all duration-300">
               <Plus className="w-4 h-4 mr-1.5" />
               Upload Video

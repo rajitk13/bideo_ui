@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Share2, Play, Eye, Clock } from "lucide-react";
+import { Share2, Play, Eye, Clock, Flame } from "lucide-react";
 import { toast } from "sonner";
 import { useRef } from "react";
 
@@ -11,9 +11,10 @@ import { VideoDTO } from "@/types/video";
 
 type VideoCardProps = {
   video: VideoDTO;
+  rank?: number;
 };
 
-export default function VideoCard({ video }: VideoCardProps) {
+export default function VideoCard({ video, rank }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const videoHref = video.slug
@@ -95,12 +96,21 @@ export default function VideoCard({ video }: VideoCardProps) {
             loop
           />
 
-          {/* Category Badge (Top-Left) */}
-          {video.category && (
-            <div className="absolute top-2.5 left-2.5 z-10">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-black/70 backdrop-blur-md text-white border border-white/15 shadow-xs">
-                {video.category}
-              </span>
+          {/* Top-Left Badges: Rank & Category (sitting side-by-side without overlapping) */}
+          {(typeof rank === "number" || video.category) && (
+            <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1.5 flex-wrap max-w-[85%]">
+              {typeof rank === "number" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-black tracking-tight shadow-md backdrop-blur-md border border-red-500/40 text-white bg-red-600/90 transition-colors">
+                  <Flame className="w-3 h-3 fill-white" />
+                  <span>#{rank}</span>
+                </span>
+              )}
+
+              {video.category && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-black/70 backdrop-blur-md text-white border border-white/15 shadow-xs">
+                  {video.category}
+                </span>
+              )}
             </div>
           )}
 

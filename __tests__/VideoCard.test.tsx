@@ -124,4 +124,10 @@ describe("VideoCard Component", () => {
     fireEvent.mouseEnter(card);
     fireEvent.mouseLeave(card);
   });
+
+  it("renders trending rank badge alongside category without overlapping", () => {
+    render(<VideoCard video={{ ...baseVideo, category: "TECH" }} rank={1} />);
+    expect(screen.getByText("#1")).toBeInTheDocument();
+    expect(screen.getByText("TECH")).toBeInTheDocument();
+  });
 });

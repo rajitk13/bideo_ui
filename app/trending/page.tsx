@@ -83,14 +83,11 @@ export default async function TrendingPage() {
         {trendingVideos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {trendingVideos.map((video, idx) => (
-              <div key={video.videoId} className="relative group">
-                {/* Trending Rank Badge */}
-                <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black shadow-lg backdrop-blur-md border border-white/20 text-white bg-black/60 group-hover:bg-red-600 transition-colors">
-                  <Flame className="w-3.5 h-3.5 fill-current" />
-                  <span>#{idx + 1}</span>
-                </div>
-                <VideoCard video={video} />
-              </div>
+              <VideoCard
+                key={video.videoId}
+                video={video}
+                rank={idx + 1}
+              />
             ))}
           </div>
         ) : (
